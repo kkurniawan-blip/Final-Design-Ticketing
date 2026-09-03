@@ -1,0 +1,2910 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mobichat Support — Indonesia | Tickets-First</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1e64dc; --blue-dark:#1e4faf;
+  --text:#1f2937; --text-weak:#6b7280; --text-muted:#9ca3af; --text-strong:#151c24;
+  --border:#e5e7eb; --surface:#ffffff; --grey-100:#f3f4f6;
+  /* Mobichat side-navigation design tokens (side-navigation.share.css) — the rail below
+     is repainted with these so it matches the real app's nav component. */
+  --sn-font: "Plus Jakarta Sans", "Inter", sans-serif;
+  --sn-border: #e5e7eb; --sn-text-muted: #6b7280; --sn-hover: #f3f4f6;
+  --sn-accent: #2563eb; --sn-badge: #dc2626;
+  --error:#dc2626; --success:#16a34a; --warning:#d97706;
+  --sky-bg:#eff8ff; --sky-border:#bfe2fe;
+  --violet:#6d28d9;
+  --r-sm:6px; --r-md:8px; --r-lg:10px; --r-xl:12px; --r-2xl:16px; --r-pill:999px;
+  --shadow: 0 1px 3px rgb(23 23 23 / .08);
+  --shadow-lg: 0 10px 15px -3px rgb(23 23 23 / .10);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  color:var(--text); background:var(--grey-100); font-size:14px; -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit; cursor:pointer;}
+input,textarea{font-family:inherit;}
+::-webkit-scrollbar{width:8px; height:8px;}
+::-webkit-scrollbar-thumb{background:#d1d5db; border-radius:999px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+/* ---------- App shell: icon rail + flyout menu panel (side-navigation.share.css /
+   side-navigation.structure.json) ---------- */
+.app{display:flex; height:100vh; overflow:hidden;}
+.sn-rail{
+  width:76px; flex:0 0 76px; background:var(--surface); border-right:1px solid var(--sn-border);
+  display:flex; flex-direction:column; align-items:center; min-height:0; font-family:var(--sn-font);
+  padding:10px 6px;
+}
+.sn-rail-logo{
+  width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  color:var(--sn-accent); margin-bottom:8px; flex:0 0 auto;
+}
+.sn-rail-logo svg{width:22px; height:22px;}
+.sn-rail-scroll{display:flex; flex-direction:column; gap:6px; flex:1 1 auto; min-height:0; overflow-y:auto; width:100%;}
+.sn-rail-footer{display:flex; flex-direction:column; align-items:center; gap:8px; padding-top:8px; flex:0 0 auto; width:100%;}
+.sn-rail-btn{
+  position:relative; width:64px; min-height:52px; margin-inline:auto; box-sizing:border-box; border:none;
+  background:transparent; border-radius:10px; color:var(--sn-text-muted); display:flex; align-items:center;
+  justify-content:center; flex-direction:column; gap:2px; padding:4px; font-size:10px; font-weight:500;
+  line-height:1.3; text-align:center; transition:background-color .15s ease-out, color .15s ease-out;
+}
+.sn-rail-btn svg{width:20px; height:20px; flex:0 0 20px; display:block;}
+.sn-rail-btn:not(.is-active):hover{background:var(--sn-hover); color:var(--sn-accent);}
+.sn-rail-btn.is-active{background:var(--sn-active-bg); color:var(--sn-accent);}
+.sn-rail-btn:focus-visible{outline:0; box-shadow:0 0 0 2px rgba(37,99,235,.25);}
+.sn-rail-icon-wrap{position:relative; display:flex; align-items:center; justify-content:center; width:20px; height:20px; flex:0 0 20px;}
+.sn-rail-util{
+  border:none; background:transparent; width:36px; height:36px; border-radius:8px; display:flex;
+  align-items:center; justify-content:center; color:var(--sn-text-muted); position:relative;
+}
+.sn-rail-util:hover{background:var(--sn-hover); color:var(--sn-accent);}
+.sn-rail-util svg{width:19px; height:19px;}
+.sn-avatar-btn{
+  width:36px; height:36px; border-radius:999px; border:none; background:var(--sn-accent); color:#fff;
+  font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; position:relative;
+}
+.sn-avatar-dot{
+  position:absolute; bottom:-1px; right:-1px; width:10px; height:10px; border-radius:999px; background:#22c55e;
+  border:2px solid var(--surface);
+}
+.sn-badge{
+  position:absolute; top:-6px; right:-8px; background:var(--sn-badge); color:#fff; font-size:10px; font-weight:700;
+  border-radius:999px; padding:0 5px; min-width:17px; height:17px; line-height:17px; text-align:center;
+}
+.sn-flyout{
+  width:236px; flex:0 0 236px; border-right:1px solid var(--sn-border); background:var(--surface);
+  padding:18px 14px; overflow-y:auto; font-family:var(--sn-font);
+}
+.sn-flyout-title{margin:0 0 14px; padding:0 6px; font-size:19px; font-weight:700; color:var(--text-strong);}
+.sn-menu-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px;}
+.sn-menu-row{
+  width:100%; border:0; border-left:3px solid transparent; background:transparent; border-radius:8px;
+  min-height:38px; padding:8px 10px; font-size:13px; font-weight:600; display:flex; align-items:center;
+  gap:9px; text-align:left; color:var(--text); cursor:pointer;
+}
+.sn-menu-row svg{width:18px; height:18px; flex:0 0 18px; color:var(--sn-text-muted);}
+.sn-menu-row:hover{background:var(--sn-hover);}
+.sn-menu-row.is-active{background:var(--sn-active-bg); color:var(--sn-accent); border-left-color:var(--sn-accent);}
+.sn-menu-row.is-active svg{color:var(--sn-accent);}
+.sn-badge-inline{
+  margin-left:auto; background:var(--sn-badge); color:#fff; font-size:10.5px; font-weight:700;
+  border-radius:999px; padding:1px 7px; flex:0 0 auto;
+}
+
+.view-area{flex:1; min-width:0; display:flex; overflow:hidden;}
+.view{flex:1; min-width:0; display:flex; overflow:hidden;}
+.view[hidden]{display:none;}
+
+/* ---------- Conversation list (Inbox) ---------- */
+.convlist{
+  width:320px; flex:0 0 320px; background:var(--surface); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; min-height:0;
+}
+.convlist-top{padding:14px 14px 10px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:10px;}
+.convlist-title{font-size:16px; font-weight:700; color:var(--text-strong); display:flex; align-items:center; justify-content:space-between;}
+.conv-tabs{display:flex; gap:2px; padding:0 10px; border-bottom:1px solid var(--border); overflow-x:auto;}
+.conv-tab{
+  border:none; border-bottom:2px solid transparent; background:transparent; padding:8px 10px; font-size:12.5px;
+  font-weight:500; color:var(--text-weak); white-space:nowrap; border-radius:var(--r-sm) var(--r-sm) 0 0;
+  transition:background-color .12s ease-out;
+}
+.conv-tab:hover{background:var(--grey-100);}
+.conv-tab.active{color:var(--blue); border-bottom-color:var(--blue); background:var(--sky-bg); font-weight:600;}
+.new-banner{
+  margin:8px 10px 0; background:var(--sky-bg); border:1px solid var(--sky-border); color:var(--blue-dark);
+  border-radius:var(--r-md); padding:8px 10px; font-size:12.5px; font-weight:600; display:flex; align-items:center;
+  justify-content:space-between; gap:8px; cursor:pointer;
+}
+.conv-scroll{flex:1; min-height:0; overflow-y:auto;}
+/* Card layout matches the real Mobichat InboxView: an overlaid left status stripe
+   (2px default, 8px selected), avatar + name/time, read-receipt + snippet, and a
+   bottom row of a phone chip (left) and status chips (right). */
+.conv-row{
+  position:relative; display:flex; width:100%; overflow:hidden; cursor:pointer;
+  border-bottom:1px solid #efefef; text-align:left; transition:background-color .12s ease-out;
+}
+.conv-row:hover{background:#f9fafb;}
+.conv-row.served-bg{background:var(--grey-100);}
+.conv-row.served-bg:hover{background:#e5e7eb;}
+.conv-row.selected{box-shadow:var(--shadow-lg);}
+.conv-stripe{position:absolute; inset:0 auto 0 0; z-index:0;}
+.conv-row-inner{position:relative; z-index:1; display:flex; min-width:0; flex:1; gap:12px; padding:12px 16px;}
+.conv-body{flex:1; min-width:0; display:flex; flex-direction:column; gap:4px;}
+.conv-row-top{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+.conv-name{font-weight:600; font-size:13px; color:var(--text-strong); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.conv-time{font-size:10px; font-weight:500; color:var(--text-weak); flex:0 0 auto;}
+.conv-preview-row{display:flex; align-items:flex-start; gap:4px;}
+.conv-readreceipt{width:15px; height:15px; flex:0 0 15px; margin-top:1px;}
+.conv-preview{
+  font-size:12px; color:var(--text-weak); min-width:0; flex:1;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.conv-bottom-row{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;}
+.conv-phone-chip{
+  border:1px solid var(--border); background:var(--surface); border-radius:var(--r-sm); padding:2px 8px;
+  font-size:11px; font-weight:500; color:var(--text); box-shadow:var(--shadow); white-space:nowrap;
+}
+.conv-chips{display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end;}
+.conv-chip{border-radius:var(--r-sm); font-size:11px; font-weight:500; padding:2px 8px; border:1px solid; box-shadow:var(--shadow); white-space:nowrap;}
+.conv-chip-neutral{border-color:var(--border); background:var(--surface); color:var(--text);}
+.conv-chip-success{border-color:#4ade80; background:#dcfce7; color:#15803d;}
+.conv-chip-warning{border-color:#fbbf24; background:#fffbeb; color:#b45309;}
+.conv-chip-brand{border-color:#60b5fa; background:var(--sky-bg); color:var(--blue-dark);}
+.lock-ico{font-size:11px;}
+.unread-dot{
+  background:var(--blue); color:#fff; font-size:10px; font-weight:700; border-radius:999px; min-width:16px;
+  height:16px; display:flex; align-items:center; justify-content:center; padding:0 4px;
+}
+
+/* ---------- Shared bits (search box, simulate button, new-ticket banner, pills, avatar) ---------- */
+.search-box{
+  display:flex; align-items:center; gap:6px; background:var(--grey-100); border:1px solid var(--border);
+  border-radius:var(--r-md); padding:7px 10px;
+}
+.search-box input{border:none; background:transparent; outline:none; font-size:13px; width:100%; color:var(--text);}
+.btn-simulate{
+  border:1px dashed var(--blue); background:#f3f7ff; color:var(--blue); border-radius:var(--r-md);
+  padding:8px 14px; font-size:12.5px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.btn-simulate:hover{background:#e7f0ff;}
+.sev-icon{
+  display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px;
+  border-radius:var(--r-sm); margin-right:6px; vertical-align:middle; flex:0 0 20px;
+}
+.avatar{
+  width:36px; height:36px; border-radius:999px; flex:0 0 36px; display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:700; font-size:13px;
+}
+.pill{border-radius:var(--r-pill); font-size:10px; font-weight:700; padding:2px 7px; letter-spacing:.02em;}
+.pill-new{background:var(--blue); color:#fff;}
+.pill-ai{background:#f3e8ff; color:var(--violet);}
+.pill-you{background:#dbeafe; color:var(--blue-dark);}
+.pill-mate{background:var(--grey-100); color:var(--text-weak); border:1px solid var(--border);}
+
+/* ---------- Chat panel ---------- */
+.chatpanel{flex:1; min-width:0; display:flex; flex-direction:column; background:#fafbfc; min-height:0;}
+.chat-empty{flex:1; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:14px; flex-direction:column; gap:8px;}
+.chat-back-bar{flex:0 0 auto; background:var(--grey-100); border-bottom:1px solid var(--border); padding:8px 18px;}
+.chat-back-btn{border:none; background:transparent; color:var(--blue); font-size:12.5px; font-weight:700; padding:2px 0; cursor:pointer;}
+.chat-back-btn:hover{color:var(--blue-dark); text-decoration:underline;}
+.chat-header{
+  background:var(--surface); border-bottom:1px solid var(--border); padding:12px 18px; display:flex;
+  align-items:center; justify-content:space-between; gap:10px; flex:0 0 auto;
+}
+.chat-header-left{display:flex; align-items:center; gap:10px; min-width:0;}
+.chat-header-name{font-weight:700; font-size:14.5px; color:var(--text-strong);}
+.chat-header-sub{font-size:11.5px; color:var(--text-weak); display:flex; gap:8px; align-items:center; margin-top:2px; flex-wrap:wrap;}
+.chat-header-right{display:flex; align-items:center; gap:8px; flex:0 0 auto;}
+.badge-sentiment{border-radius:var(--r-pill); padding:3px 9px; font-size:11px; font-weight:700;}
+.sent-Angry{background:#fee2e2; color:var(--error);}
+.sent-Negative{background:#fff1e0; color:var(--warning);}
+.sent-Neutral{background:var(--grey-100); color:var(--text-weak);}
+.sent-Positive{background:#dcfce7; color:var(--success);}
+.btn{
+  border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:var(--r-md);
+  padding:7px 12px; font-size:12.5px; font-weight:600; display:inline-flex; align-items:center; gap:6px;
+}
+.btn:hover{background:var(--grey-100);}
+.btn-primary{background:var(--blue); border-color:var(--blue); color:#fff;}
+.btn-primary:hover{background:var(--blue-dark);}
+.btn-violet{background:#f3e8ff; border-color:#e3d0fd; color:var(--violet);}
+.btn-violet:hover{background:#ecdbfe;}
+.btn-quick-send{background:#f0fdf4; border-color:#bbf7d0; color:var(--success);}
+.btn-quick-send:hover{background:#dcfce7;}
+.btn-sm{padding:5px 9px; font-size:11.5px;}
+.chat-banner{
+  padding:9px 18px; font-size:12px; font-weight:600; display:flex; align-items:center; gap:8px; flex:0 0 auto;
+  border-bottom:1px solid var(--border);
+}
+.banner-bot{background:var(--sky-bg); color:var(--blue-dark); border-bottom-color:var(--sky-border);}
+.banner-lock-you{background:#f0fdf4; color:var(--success);}
+.banner-lock-mate{background:#fff7ed; color:var(--warning);}
+
+.thread{flex:1; min-height:0; overflow-y:auto; padding:16px 18px; display:flex; flex-direction:column; gap:10px;}
+.day-divider{align-self:center; font-size:11px; color:var(--text-muted); background:var(--grey-100); padding:3px 10px; border-radius:999px; margin:6px 0;}
+.msg-row{display:flex; flex-direction:column; max-width:66%;}
+.msg-row.in{align-self:flex-start; align-items:flex-start;}
+.msg-row.out{align-self:flex-end; align-items:flex-end;}
+.msg-row.sys{align-self:center; max-width:80%; align-items:center;}
+.bubble{border-radius:var(--r-lg); padding:9px 12px; font-size:13.5px; line-height:1.45; white-space:pre-line;}
+.msg-row.in .bubble{background:var(--surface); border:1px solid var(--border); color:var(--text); border-bottom-left-radius:3px;}
+.msg-row.out .bubble{background:var(--blue); color:#fff; border-bottom-right-radius:3px;}
+.msg-row.out .bubble.ai{background:var(--sky-bg); color:var(--text-strong); border:1px solid var(--sky-border);}
+.msg-row.sys .bubble{background:var(--grey-100); color:var(--text-weak); font-size:12px; text-align:center;}
+.msg-translate{
+  margin-top:4px; font-size:11.5px; color:var(--text-muted); background:var(--grey-100); border-radius:var(--r-sm);
+  padding:5px 8px; display:flex; gap:5px; max-width:100%;
+}
+.msg-row.out .msg-translate{background:#eef4ff; color:var(--blue-dark);}
+.msg-meta{font-size:10.5px; color:var(--text-muted); margin-top:3px; display:flex; gap:6px; align-items:center;}
+.msg-label-ai{color:var(--violet); font-weight:700;}
+.csat-stars{font-size:15px; letter-spacing:2px;}
+.csat-survey-card{background:var(--sky-bg); border:1px solid var(--sky-border); border-radius:var(--r-lg); padding:12px 14px; max-width:260px;}
+.csat-survey-title{font-weight:700; font-size:13px; color:var(--text-strong); margin-bottom:3px;}
+.csat-survey-sub{font-size:11.5px; color:var(--text-weak); line-height:1.4; margin-bottom:8px;}
+.csat-survey-stars{font-size:18px; letter-spacing:6px; color:var(--warning);}
+
+.composer-wrap{flex:0 0 auto; border-top:1px solid var(--border); background:var(--surface); position:relative;}
+.ai-popup{
+  margin:10px 14px 0; background:linear-gradient(180deg,#f7fbff,#ffffff); border:1px solid var(--sky-border);
+  border-radius:var(--r-xl); box-shadow:var(--shadow-lg); padding:12px 14px;
+}
+.ai-popup-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;}
+.ai-popup-title{font-size:12.5px; font-weight:800; color:var(--blue-dark); display:flex; align-items:center; gap:6px;}
+.ai-popup-close{border:none; background:transparent; color:var(--text-muted); font-size:14px; padding:2px 6px; border-radius:6px;}
+.ai-popup-close:hover{background:var(--grey-100);}
+.ai-meta-row{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:8px;}
+.chip{border-radius:var(--r-pill); font-size:10.5px; font-weight:700; padding:3px 8px; display:inline-flex; align-items:center; gap:4px;}
+.chip-conf-hi{background:#dcfce7; color:var(--success);}
+.chip-conf-lo{background:#fef2f2; color:var(--error);}
+.chip-lang{background:var(--sky-bg); color:var(--blue-dark); border:1px solid var(--sky-border);}
+.chip-flag{background:#fff7ed; color:var(--warning);}
+.chip-kb{background:#f3e8ff; color:var(--violet); border:1px solid #e3d0fd;}
+.ai-suggestion-text{font-size:13.5px; line-height:1.5; color:var(--text-strong); background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md); padding:10px 12px; white-space:pre-line;}
+.ai-popup-actions{display:flex; gap:8px; margin-top:10px;}
+.composer{padding:12px 14px; display:flex; flex-direction:column; gap:8px;}
+.composer-box{border:1px solid var(--border); border-radius:var(--r-lg); padding:8px 10px; display:flex; flex-direction:column; gap:6px;}
+.composer-box textarea{border:none; outline:none; resize:none; font-size:13.5px; min-height:40px; max-height:100px; color:var(--text);}
+.composer-toolbar{display:flex; align-items:center; justify-content:space-between;}
+.composer-icons{display:flex; gap:10px; color:var(--text-muted); font-size:15px;}
+.char-count{font-size:11px; color:var(--text-muted);}
+.composer-actions{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+.resolved-note{padding:14px; text-align:center; font-size:12.5px; color:var(--text-weak); background:var(--grey-100); margin:0 14px 14px; border-radius:var(--r-md);}
+.hint-row{font-size:11px; color:var(--text-muted); padding:0 2px;}
+
+/* ---------- Info panel ---------- */
+.infopanel{width:340px; flex:0 0 340px; background:var(--surface); border-left:1px solid var(--border); display:flex; flex-direction:column; min-height:0;}
+.info-tabs{display:flex; border-bottom:1px solid var(--border); flex:0 0 auto;}
+.info-tab{flex:1; border:none; background:transparent; padding:11px 0; font-size:12.5px; font-weight:700; color:var(--text-weak); border-bottom:2px solid transparent;}
+.info-tab.active{color:var(--blue); border-color:var(--blue);}
+.info-body{flex:1; min-height:0; overflow-y:auto; padding:14px;}
+.info-card{border:1px solid var(--border); border-radius:var(--r-lg); padding:12px; margin-bottom:12px;}
+.info-card-title{font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px;}
+.kv-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px 10px;}
+.kv-item{display:flex; flex-direction:column; gap:1px;}
+.kv-label{font-size:10.5px; color:var(--text-muted);}
+.kv-value{font-size:12.5px; font-weight:600; color:var(--text-strong);}
+.agent-row{display:flex; align-items:center; gap:8px;}
+.agent-row .agent-name{font-size:12.5px; font-weight:700; color:var(--text-strong);}
+.agent-row .agent-role{font-size:10.5px; color:var(--text-muted);}
+.reassign-row{margin-top:10px;}
+.reassign-select{
+  width:100%; border:1px solid var(--border); background:var(--surface); border-radius:var(--r-md);
+  padding:7px 8px; font-size:12px; font-weight:600; color:var(--text); outline:none;
+}
+.reassign-select:focus{outline:2px solid var(--sky-border);}
+.tag-row{display:flex; flex-wrap:wrap; gap:6px;}
+.integration-row{display:flex; gap:8px;}
+.integration-badge{flex:1; border:1px solid var(--border); border-radius:var(--r-md); padding:8px 6px; text-align:center; font-size:10.5px; font-weight:700; color:var(--text-weak);}
+.integration-badge .dot{width:6px; height:6px; border-radius:999px; background:var(--success); display:inline-block; margin-right:4px;}
+.media-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;}
+.media-box{aspect-ratio:1; background:var(--grey-100); border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:16px;}
+.notes-area{width:100%; border:1px solid var(--border); border-radius:var(--r-md); padding:8px; font-size:12.5px; resize:vertical; min-height:60px; outline:none;}
+.empty-note{font-size:12px; color:var(--text-muted); text-align:center; padding:14px 4px;}
+.log-item{display:flex; gap:8px; font-size:12px; color:var(--text-weak); padding:6px 0; border-bottom:1px solid var(--border);}
+.log-item:last-child{border-bottom:none;}
+.log-time{color:var(--text-muted); font-size:10.5px; flex:0 0 44px;}
+.task-mini{border:1px solid var(--border); border-radius:var(--r-md); padding:10px; font-size:12px;}
+.task-mini .tm-id{font-weight:800; color:var(--blue-dark); font-size:11.5px;}
+
+/* ---------- Setup guide (customer-facing onboarding checklist) ---------- */
+.setup-banner{
+  background:linear-gradient(135deg,#eff8ff,#f3e8ff); border:1px solid var(--sky-border); border-radius:var(--r-xl);
+  padding:18px 20px; margin-bottom:18px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+}
+.setup-banner-title{font-size:15px; font-weight:700; color:var(--text-strong); margin-bottom:3px;}
+.setup-banner-sub{font-size:12.5px; color:var(--text-weak); max-width:520px; line-height:1.5;}
+.setup-progress-wrap{flex:0 0 220px; min-width:180px;}
+.setup-progress-label{font-size:11px; font-weight:700; color:var(--text-weak); margin-bottom:6px; display:flex; justify-content:space-between;}
+.setup-progress-track{background:#ffffffaa; border:1px solid var(--sky-border); border-radius:var(--r-pill); height:10px; overflow:hidden;}
+.setup-progress-fill{background:var(--blue); height:100%; border-radius:var(--r-pill); transition:width .25s ease-out;}
+.setup-live-banner{
+  background:#f0fdf4; border:1px solid #bbf7d0; color:var(--success); border-radius:var(--r-xl); padding:14px 18px;
+  margin:18px 0; font-size:13px; font-weight:600; display:flex; align-items:center; gap:10px;
+}
+.setup-locked-note{
+  background:var(--grey-100); border:1px solid var(--border); color:var(--text-weak); border-radius:var(--r-xl); padding:12px 18px;
+  margin:18px 0; font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:10px;
+}
+.setup-section-label{
+  font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em;
+  margin:0 0 10px; display:flex; align-items:center; gap:8px;
+}
+.setup-section-count{
+  background:var(--grey-100); color:var(--text-weak); border-radius:var(--r-pill); padding:1px 8px; font-size:10.5px;
+  text-transform:none; letter-spacing:0;
+}
+.setup-steps{display:flex; flex-direction:column; margin-bottom:22px;}
+.setup-steps:last-of-type{margin-bottom:0;}
+.setup-step{display:flex; gap:14px; position:relative; padding-bottom:22px;}
+.setup-step:last-child{padding-bottom:0;}
+.setup-step-rail{display:flex; flex-direction:column; align-items:center; flex:0 0 auto;}
+.setup-step-line{width:2px; flex:1; background:var(--border); margin-top:2px;}
+.setup-step.done .setup-step-line{background:var(--success);}
+.setup-checkbox{
+  width:26px; height:26px; border-radius:999px; border:2px solid var(--border); background:var(--surface);
+  display:flex; align-items:center; justify-content:center; flex:0 0 26px; cursor:pointer; font-size:13px;
+  font-weight:800; color:transparent; transition:background-color .15s, border-color .15s, color .15s;
+}
+.setup-checkbox:hover{border-color:var(--blue);}
+.setup-step.done .setup-checkbox{background:var(--success); border-color:var(--success); color:#fff;}
+.setup-step-card{
+  flex:1; min-width:0; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
+  padding:14px 16px; box-shadow:var(--shadow);
+}
+.setup-step.done .setup-step-card{background:#f9fffb; border-color:#bbf7d0;}
+.setup-step-header{
+  display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; border:none; background:transparent;
+  padding:0; margin-bottom:4px; text-align:left; cursor:pointer;
+}
+.setup-chevron{color:var(--text-muted); font-size:12px; flex:0 0 auto;}
+.setup-step-title{font-size:13.5px; font-weight:700; color:var(--text-strong);}
+.setup-step.done .setup-step-title{color:var(--success);}
+.setup-step-num{font-size:10.5px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em;}
+.setup-step-desc{font-size:12.5px; color:var(--text-weak); line-height:1.5; margin-bottom:10px;}
+.setup-step-hint{font-size:11px; color:var(--text-muted); margin-top:10px;}
+.setup-panel{background:var(--grey-100); border:1px solid var(--border); border-radius:var(--r-md); padding:12px 14px; margin-bottom:2px;}
+.setup-field-label{font-size:11.5px; font-weight:700; color:var(--text-weak); display:block; margin-bottom:6px;}
+.setup-field-row{display:flex; gap:8px; flex-wrap:wrap;}
+.setup-input, .setup-select{
+  border:1px solid var(--border); border-radius:var(--r-md); padding:7px 10px; font-size:12.5px; color:var(--text);
+  background:var(--surface); flex:1; min-width:160px;
+}
+.setup-input:focus, .setup-select:focus{outline:2px solid var(--sky-border);}
+.setup-panel-note{font-size:11.5px; color:var(--text-muted); margin-top:8px;}
+.setup-connected-row{font-size:12.5px; color:var(--text-strong); display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.setup-invite-list{display:flex; flex-direction:column; gap:6px; margin-top:10px;}
+.setup-invite-chip{
+  display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md);
+  padding:5px 8px; font-size:12px; color:var(--text-strong);
+}
+.setup-invite-chip span:first-of-type{flex:1;}
+.setup-chip-remove{border:none; background:transparent; color:var(--text-muted); font-size:11px; padding:2px 4px; border-radius:4px; cursor:pointer;}
+.setup-chip-remove:hover{background:var(--grey-100); color:var(--error);}
+.setup-checkbox-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px 14px;}
+.setup-check-item{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text); cursor:pointer;}
+.setup-check-item input{accent-color:var(--blue); width:15px; height:15px; cursor:pointer;}
+.setup-toggle-row{display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:12.5px; font-weight:600; color:var(--text-strong); cursor:pointer;}
+.setup-toggle{width:38px; height:22px; border-radius:999px; background:var(--border); flex:0 0 38px; position:relative; transition:background-color .15s;}
+.setup-toggle.on{background:var(--success);}
+.setup-toggle-knob{position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:999px; background:#fff; box-shadow:var(--shadow); transition:left .15s;}
+.setup-toggle.on .setup-toggle-knob{left:18px;}
+.setup-upload-zone{
+  border:2px dashed var(--border); border-radius:var(--r-md); background:var(--surface); padding:16px; text-align:center;
+  font-size:12.5px; color:var(--text-weak); cursor:pointer; transition:border-color .12s, background-color .12s;
+}
+.setup-upload-zone:hover, .setup-upload-zone.drag-over{border-color:var(--blue); background:var(--sky-bg);}
+.setup-upload-browse{color:var(--blue); font-weight:700;}
+.setup-kb-list{display:flex; flex-direction:column; gap:6px; margin-top:12px;}
+.setup-kb-item{
+  display:flex; align-items:center; gap:9px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md);
+  padding:7px 9px;
+}
+.setup-kb-icon{font-size:16px; flex:0 0 auto;}
+.setup-kb-meta{flex:1; min-width:0;}
+.setup-kb-name{font-size:12.5px; font-weight:600; color:var(--text-strong); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.setup-kb-sub{font-size:11px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+/* ---------- Tickets page ---------- */
+.page-outer{flex:1; min-width:0; display:flex; flex-direction:column; min-height:0;}
+.page-header{
+  flex:0 0 auto; display:flex; flex-direction:column; justify-content:center; gap:2px; min-height:56px;
+  padding:10px 24px; border-bottom:1px solid var(--border); background:var(--surface);
+}
+.page{flex:1; min-width:0; overflow-y:auto; padding:20px 24px; min-height:0;}
+.page-title{font-size:18px; line-height:28px; font-weight:600; color:var(--text-strong);}
+.page-sub{font-size:13px; color:var(--text-weak); margin-top:1px;}
+.page-header-flex{display:flex; align-items:center; justify-content:space-between; gap:16px; width:100%;}
+.search-box-table{background:var(--surface); border-radius:var(--r-md); padding:9px 14px; gap:8px;}
+.search-box-table input{font-size:13.5px;}
+.filter-btn-wrap{position:relative; flex:0 0 auto;}
+.filters-trigger{
+  display:flex; align-items:center; gap:7px; border:1px solid var(--border); background:var(--surface);
+  border-radius:var(--r-md); padding:9px 12px; font-size:13px; color:var(--text-weak); white-space:nowrap; cursor:pointer;
+}
+.filters-trigger:hover{background:var(--grey-100);}
+.filters-trigger.active{border-color:var(--blue); color:var(--blue-dark); background:var(--sky-bg);}
+.filters-trigger-value{font-weight:700; color:var(--text-strong);}
+.filters-trigger.active .filters-trigger-value{color:var(--blue-dark);}
+.clear-filters-link{border:none; background:transparent; color:var(--blue); font-size:13px; font-weight:600; white-space:nowrap; padding:0; cursor:pointer;}
+.clear-filters-link:hover{color:var(--blue-dark); text-decoration:underline;}
+.clear-filters-link:disabled{color:var(--text-muted); cursor:default; text-decoration:none;}
+.filter-panel{
+  position:absolute; top:calc(100% + 8px); right:0; width:260px; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-lg); box-shadow:var(--shadow-lg); padding:14px; z-index:50;
+}
+.filter-panel-section{margin-bottom:12px;}
+.filter-panel-section:last-of-type{margin-bottom:0;}
+.filter-panel-label{font-size:10.5px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; margin-bottom:7px;}
+.filter-panel-options{display:flex; flex-direction:column; gap:6px;}
+.filter-check{display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text); cursor:pointer;}
+.filter-check input{margin:0; cursor:pointer;}
+.filter-panel-actions{display:flex; justify-content:space-between; align-items:center; margin-top:14px; padding-top:12px; border-top:1px solid var(--border);}
+.page-tabs{display:flex; gap:4px; margin-bottom:18px; border-bottom:1px solid var(--border);}
+.page-tab{
+  border:none; background:transparent; padding:9px 4px; margin-right:20px; font-size:13px; font-weight:600;
+  color:var(--text-weak); border-bottom:2px solid transparent; display:flex; align-items:center; gap:7px;
+}
+.page-tab:hover{color:var(--text-strong);}
+.page-tab.active{color:var(--blue); border-bottom-color:var(--blue);}
+.page-tab-count{background:var(--grey-100); color:var(--text-weak); border-radius:var(--r-pill); padding:1px 8px; font-size:11px; font-weight:700;}
+.page-tab.active .page-tab-count{background:var(--sky-bg); color:var(--blue-dark);}
+.kpi-strip{display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:16px;}
+.kpi-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:12px 14px; box-shadow:var(--shadow);}
+.kpi-label{font-size:10.5px; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:.03em;}
+.kpi-value{font-size:21px; font-weight:800; color:var(--text-strong); margin-top:4px;}
+.kpi-value.blue{color:var(--blue);}
+.stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px; align-items:stretch;}
+.stat-grid.full{grid-template-columns:1fr;}
+.stat-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow); padding:16px 18px;}
+.stat-card-title{font-size:13.5px; font-weight:700; color:var(--text-strong);}
+.stat-card-sub{font-size:11.5px; color:var(--text-muted); margin-top:1px; margin-bottom:14px;}
+.stat-bar-row{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+.stat-bar-row:last-child{margin-bottom:0;}
+.stat-bar-label{width:128px; flex-shrink:0; font-size:12.5px; color:var(--text-weak); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.stat-bar-track{flex:1; height:8px; background:var(--grey-100); border-radius:var(--r-pill); overflow:hidden;}
+.stat-bar-fill{height:100%; border-radius:var(--r-pill);}
+.stat-bar-count{width:80px; flex-shrink:0; text-align:right; font-size:12px; font-weight:700; color:var(--text-strong);}
+.stat-bar-count span{color:var(--text-muted); font-weight:600;}
+.compare-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.compare-card{border:1px solid var(--border); border-radius:var(--r-md); padding:14px; text-align:center;}
+.compare-card-icon{font-size:20px;}
+.compare-card-value{font-size:20px; font-weight:800; color:var(--text-strong); margin-top:6px;}
+.compare-card-label{font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:.02em; margin-top:2px;}
+.reports-toggle-row{display:flex; justify-content:flex-end; margin-bottom:10px;}
+.ticket-search-row{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap;}
+.filter-chips{display:flex; gap:7px; margin-bottom:14px; flex-wrap:wrap;}
+.filter-chip{border:1px solid var(--border); background:var(--surface); border-radius:var(--r-pill); padding:6px 13px; font-size:12px; font-weight:600; color:var(--text-weak);}
+.filter-chip.active{background:var(--blue); border-color:var(--blue); color:#fff;}
+.ticket-table{width:100%; border-collapse:collapse; background:var(--surface); border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--shadow);}
+.ticket-table th{text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.03em; color:var(--text-muted); padding:10px 12px; border-bottom:1px solid var(--border); background:var(--grey-100);}
+.ticket-table td{padding:9px 12px; border-bottom:1px solid var(--border); vertical-align:middle; font-size:12.5px;}
+.ticket-table tr:last-child td{border-bottom:none;}
+.ticket-table tr:hover td{background:#fafbfc;}
+.tt-customer{display:flex; align-items:center; gap:8px;}
+.tt-customer-meta{display:flex; flex-direction:column; gap:1px;}
+.tt-customer-name{font-weight:700; font-size:12.5px; color:var(--text-strong);}
+.tt-customer-sub{font-size:10.5px; color:var(--text-muted);}
+.status-pill{border-radius:var(--r-pill); padding:3px 9px; font-size:10.5px; font-weight:700; display:inline-block;}
+.status-Unserved{background:#fff7ed; color:var(--warning);}
+.status-Served{background:#eff8ff; color:var(--blue-dark);}
+.status-Resolved{background:#dcfce7; color:var(--success);}
+.status-Bot{background:#f3e8ff; color:var(--violet);}
+.csat-mini{font-size:10px; font-weight:700; color:var(--warning); margin-top:3px; display:block;}
+
+/* ---------- Tasks page (Kanban) ---------- */
+.kanban-board{display:flex; align-items:flex-start; gap:8px; min-height:0; overflow-x:auto; overflow-y:visible; padding-bottom:8px;}
+.kanban-col{
+  display:flex; flex-direction:column; width:280px; flex:0 0 280px; background:#f3f4f6; border-radius:0 0 var(--r-xl) var(--r-xl);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8); border:1px solid var(--border);
+}
+.kanban-col-header{background:var(--surface); border-bottom:1px solid var(--border); border-radius:0;}
+.kanban-col-accent{height:4px; width:100%; border-radius:0;}
+.kanban-col-title-row{display:flex; align-items:center; gap:8px; padding:10px 12px 9px;}
+.kanban-col-title{font-size:13px; font-weight:600; color:var(--text-strong);}
+.kanban-col-count{
+  border-radius:var(--r-pill); font-size:11px; font-weight:700; padding:1px 8px; background:var(--grey-100); color:var(--text-weak);
+}
+.kanban-col-body{
+  display:flex; flex-direction:column; gap:10px; padding:10px; min-height:80px; flex:1; transition:background-color .12s ease-out;
+}
+.kanban-col-body.drag-over{background:rgba(30,100,220,.08); outline:2px dashed var(--blue); outline-offset:-4px; border-radius:var(--r-md);}
+.kanban-task-card{
+  background:var(--surface); border:1px solid var(--border); border-left-width:3px; border-radius:var(--r-xs);
+  box-shadow:0 1px 2px rgba(15,23,42,.06); padding:10px 12px; cursor:grab; transition:box-shadow .12s ease-out, border-color .12s ease-out;
+}
+.kanban-task-card:hover{border-color:var(--grey-300, #d1d5db); box-shadow:var(--shadow-lg, var(--shadow));}
+.kanban-task-card.dragging{opacity:.4;}
+.kanban-task-card.Critical{border-left-color:var(--error);}
+.kanban-task-card.Medium{border-left-color:var(--warning);}
+.kanban-task-card.Low{border-left-color:var(--success);}
+.kanban-card-top{display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px;}
+.task-id{font-size:11px; font-weight:800; color:var(--blue-dark); text-transform:uppercase; letter-spacing:.02em;}
+.task-title{font-size:13.5px; font-weight:600; color:var(--text-strong); line-height:1.35; margin-bottom:6px;}
+.task-team{font-size:10.5px; color:var(--text-muted); margin-bottom:8px;}
+.task-field-lines{display:flex; flex-direction:column; gap:2px; font-size:11.5px; color:var(--text-default, #1f2937); margin-bottom:8px;}
+.task-field-lines .fl-label{font-weight:600; color:var(--text-weak);}
+.task-footer{display:flex; align-items:center; justify-content:flex-end; padding-top:8px; border-top:1px solid var(--border);}
+.link-btn{border:none; background:transparent; color:var(--blue); font-size:12px; font-weight:700; padding:0; cursor:pointer;}
+.kanban-empty-hint{font-size:11.5px; color:var(--text-muted); text-align:center; padding:10px 4px; border:1px dashed var(--border); border-radius:var(--r-md);}
+.task-engineer-btn{border:none; background:transparent; padding:0; border-radius:999px; cursor:pointer; line-height:0; transition:box-shadow .12s ease-out;}
+.task-engineer-btn:hover{box-shadow:0 0 0 2px var(--sky-border);}
+
+/* ---------- Ticket modal ---------- */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(21,28,36,.5); display:flex; align-items:center; justify-content:center;
+  z-index:200; padding:24px;
+}
+.modal-card{
+  background:var(--surface); border-radius:var(--r-xl); box-shadow:var(--shadow-lg); width:100%; max-width:560px;
+  max-height:85vh; display:flex; flex-direction:column; overflow:hidden;
+}
+.modal-header{
+  display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid var(--border);
+  flex:0 0 auto;
+}
+.modal-title{font-size:15px; font-weight:700; color:var(--text-strong);}
+.modal-close{border:none; background:transparent; color:var(--text-muted); font-size:15px; padding:4px 8px; border-radius:6px;}
+.modal-close:hover{background:var(--grey-100);}
+.modal-body{padding:20px; overflow-y:auto; min-height:0; flex:1;}
+.modal-footer{padding:14px 20px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; flex:0 0 auto;}
+.modal-headline{font-size:15px; font-weight:700; color:var(--text-strong); margin:4px 0 2px;}
+.modal-summary-text{font-size:12.5px; color:var(--text-weak); line-height:1.55; background:var(--grey-100); border-radius:var(--r-md); padding:12px; margin-top:8px;}
+.modal-section-label{font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; margin:16px 0 8px;}
+.task-history-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border);}
+.task-history-row:last-child{border-bottom:none;}
+.task-history-row-main{flex:1; min-width:0;}
+.task-history-row-title{font-size:12.5px; font-weight:600; color:var(--text-strong);}
+.task-history-row-sub{font-size:11px; color:var(--text-muted); margin-top:1px;}
+
+/* ---------- Toasts ---------- */
+#toast-container{position:fixed; bottom:18px; right:18px; display:flex; flex-direction:column; gap:8px; z-index:999;}
+.toast{background:var(--text-strong); color:#fff; padding:10px 16px; border-radius:var(--r-md); font-size:12.5px; font-weight:600; box-shadow:var(--shadow-lg); animation:toast-in .18s ease-out;}
+@keyframes toast-in{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sn-rail" id="sn-rail"></nav>
+  <aside class="sn-flyout" id="sn-flyout"></aside>
+  <div class="view-area">
+    <div class="view" id="view-inbox" hidden>
+      <aside class="convlist">
+        <div class="convlist-top">
+          <div class="convlist-title">Inbox</div>
+          <div class="search-box">🔍<input type="text" placeholder="Search tickets" id="conv-search"></div>
+          <button class="btn-simulate" id="inbox-btn-simulate">＋ Simulate incoming</button>
+        </div>
+        <div class="conv-tabs" id="conv-tabs"></div>
+        <div id="new-banner-slot"></div>
+        <div class="conv-scroll" id="conv-scroll"></div>
+      </aside>
+      <!-- #chatpanel / #infopanel live here while browsing the Inbox, and get moved into
+           #view-chat instead when a conversation is opened from Tickets/Reports (see
+           attachChatPanelsTo()) — same two DOM nodes, same render functions, either way. -->
+    </div>
+    <div class="view" id="view-chat" hidden>
+      <main class="chatpanel" id="chatpanel"></main>
+      <aside class="infopanel" id="infopanel"></aside>
+    </div>
+    <div class="view" id="view-setup" hidden>
+      <div class="page-outer">
+        <div class="page-header" id="setup-page-header"></div>
+        <div class="page" id="setup-page"></div>
+      </div>
+    </div>
+    <div class="view" id="view-tickets" hidden>
+      <div class="page-outer">
+        <div class="page-header" id="tickets-page-header"></div>
+        <div class="page" id="tickets-page"></div>
+      </div>
+    </div>
+    <div class="view" id="view-reports" hidden>
+      <div class="page-outer">
+        <div class="page-header" id="reports-page-header"></div>
+        <div class="page" id="reports-page"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+<div id="modal-root"></div>
+<script>
+/* =========================================================
+   Mobichat Support Console — Indonesia
+   mock/rule-based demo: Mobichat's own support team helping
+   Indonesian business customers who use the Mobichat platform.
+   ========================================================= */
+
+const AVATAR_COLORS = ['#1e64dc','#6d28d9','#16a34a','#d97706','#0891b2','#db2777'];
+function initialsOf(name){ return name.split(' ').filter(Boolean).slice(-2).map(w=>w[0]).join('').toUpperCase(); }
+function colorFor(name){ let h=0; for(const c of name) h=(h*31+c.charCodeAt(0))>>>0; return AVATAR_COLORS[h%AVATAR_COLORS.length]; }
+function avatarHTML(name,size){ size=size||36; return `<div class="avatar" style="width:${size}px;height:${size}px;flex:0 0 ${size}px;background:${colorFor(name)};font-size:${Math.round(size*0.36)}px">${initialsOf(name)}</div>`; }
+function nowTime(){ const d=new Date(); return d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
+function minsAgo(n){ return Date.now()-n*60000; }
+function formatDuration(ms){
+  const mins = Math.max(0, Math.round(ms/60000));
+  if(mins<1) return '<1m';
+  if(mins<60) return mins+'m';
+  const h = Math.floor(mins/60), m = mins%60;
+  return (h+'h '+(m?m+'m':'')).trim();
+}
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* Severity as a coloured icon instead of a plain dot — up chevron for Critical (high),
+   equals sign for Medium, down chevron for Low. */
+const SEVERITY_UI = {
+  Critical: { fg:'var(--error)', bg:'#fef2f2', path:'M4 10L8 6L12 10' },
+  Medium:   { fg:'var(--warning)', bg:'#fff7ed', path:'M3.5 6.5H12.5M3.5 9.5H12.5' },
+  Low:      { fg:'var(--success)', bg:'#f0fdf4', path:'M4 6L8 10L12 6' }
+};
+function severityIconHTML(severity){
+  const s = SEVERITY_UI[severity] || SEVERITY_UI.Medium;
+  return `<span class="sev-icon" style="color:${s.fg};background:${s.bg};" title="${esc(severity)} severity">
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="${s.path}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </span>`;
+}
+function toast(msg){
+  const c=document.getElementById('toast-container');
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  c.appendChild(t); setTimeout(()=>t.remove(),3600);
+}
+
+const BIZ_TEAM_FOR = {
+  Billing:'Billing', WABABug:'Technical', ChatbotBug:'Technical', BroadcastFail:'Technical',
+  AccountSuspended:'Trust & Safety', SeatQuestion:'Customer Success', HowToKanban:'Customer Success',
+  PricingQuestion:'Customer Success', Positive:'Customer Success', InvoiceQuestion:'Customer Success',
+  MultiIssueEscalation:'Trust & Safety'
+};
+const ENG_TEAM_FOR = {
+  Billing:'Billing Engineering', WABABug:'Integrations Engineering', BroadcastFail:'Integrations Engineering',
+  ChatbotBug:'Platform Engineering', AccountSuspended:'Trust & Safety Engineering'
+};
+const ENGINEER_BY_TEAM = {
+  'Integrations Engineering':'Bagas', 'Platform Engineering':'Putri', 'Billing Engineering':'Nadia', 'Trust & Safety Engineering':'Yusuf'
+};
+const TASK_ELIGIBLE = new Set(['Billing','WABABug','ChatbotBug','BroadcastFail','AccountSuspended']);
+
+/* Support agents a ticket can be handed to from the Info tab — the same people already
+   referenced across the seeded conversations (Rani, Dimas, Wulan, Fajar) plus You. */
+const AGENT_ROSTER = [
+  {name:'You', team:'Technical'},
+  {name:'Rani', team:'Billing'},
+  {name:'Dimas', team:'Billing'},
+  {name:'Wulan', team:'Trust & Safety'},
+  {name:'Fajar', team:'Technical'}
+];
+
+function reassignConversation(c, newName){
+  if(!newName || newName===c.assignment.name) return;
+  const prevName = c.assignment.name;
+  c.assignment = {type:'agent', name:newName};
+  c.locked = {by:newName};
+  logActivity(c, `Reassigned from ${prevName} to ${newName}`);
+  toast(`↪️ Reassigned to ${newName}`);
+  renderInfoPanel();
+  renderComposerArea(c);
+  if(state.view==='tickets') renderTicketsPage();
+  if(state.view==='inbox') renderConvList();
+}
+
+/* English drafts + Indonesian (Bahasa) translations per ticket category. All Mobichat
+   customers in this build are Indonesian, so the AI still translates: agent reads/edits
+   the English draft, the send goes out in Indonesian. */
+const SUGGESTIONS = {
+  /* A deliberately hard example: three compounding problems (account suspension +
+     failed payment + locked Task access) in one message, spanning three different
+     teams. Confidence stays realistically low (see c12 below) instead of pretending
+     certainty, and the draft still tries to address every part of the message rather
+     than just the first issue it recognizes. */
+  MultiIssueEscalation: [
+    { en:"I completely understand the urgency here, and I'm sorry for the cascading impact. I've escalated this as a priority case across three teams: Trust & Safety is manually reviewing the suspension, Billing is checking the failed payment separately so it isn't treated as overdue, and our Platform team is restoring your team's Task access. You'll get a direct update within 4 hours given how time-sensitive this is.",
+      id:"Saya sangat mengerti urgensi ini, dan mohon maaf atas dampak beruntunnya. Kasus ini sudah saya eskalasi sebagai prioritas ke tiga tim: Trust & Safety meninjau ulang suspend secara manual, tim Billing mengecek pembayaran yang gagal secara terpisah agar tidak dianggap menunggak, dan tim Platform memulihkan akses Task untuk tim Anda. Anda akan menerima update langsung dalam 4 jam mengingat ini sangat mendesak." },
+    { en:"Thank you for laying all of this out clearly — I can see how each issue is compounding the other. I'm flagging this as a cross-team priority: account review, payment reconciliation, and access restoration are now all being handled in parallel instead of one at a time, so this won't sit in a queue. I'll personally follow up with you once the suspension review is complete.",
+      id:"Terima kasih sudah menjelaskan semuanya dengan jelas — saya paham bagaimana tiap masalah ini saling memperparah. Saya tandai ini sebagai prioritas lintas tim: peninjauan akun, rekonsiliasi pembayaran, dan pemulihan akses sekarang ditangani paralel, bukan satu per satu, jadi tidak akan mengantre lama. Saya akan follow up langsung begitu peninjauan suspend selesai." },
+    { en:"While we work on this in parallel, here's what you can do right away:\n1️⃣ Check your email for the suspension notice — it has your case reference number, please reply to it with your last 3 broadcast campaign names so we can verify they're legitimate.\n2️⃣ Don't retry the failed payment yet — retrying now could create a duplicate charge once we manually reconcile it.\n3️⃣ Once Task access is restored (within a few hours), you'll be able to see all of this tracked as one linked case instead of three separate tickets.\nWe'll message you here the moment any of these are resolved.",
+      id:"Sambil kami tangani semuanya secara paralel, ini yang bisa Anda lakukan sekarang:\n1️⃣ Cek email untuk notifikasi suspend — di situ ada nomor referensi kasus, mohon balas dengan 3 nama campaign broadcast terakhir Anda supaya kami bisa verifikasi keasliannya.\n2️⃣ Jangan coba bayar ulang dulu — kalau dicoba lagi sekarang, bisa jadi malah double charge saat kami rekonsiliasi manual nanti.\n3️⃣ Setelah akses Task pulih (dalam beberapa jam), semua ini akan bisa dilihat sebagai satu kasus gabungan, bukan tiga tiket terpisah.\nKami akan kabari langsung di sini begitu salah satu sudah selesai." }
+  ],
+  Billing: [
+    { en:"So sorry about the billing mix-up! 💳 I've escalated this to our Billing team — it'll be corrected within 24h.",
+      id:"Maaf atas kendala tagihan ini! 💳 Sudah kami eskalasi ke tim Billing — akan diperbaiki dalam 24 jam." },
+    { en:"I can see your payment went through 👀 — escalating to Billing now so your plan updates within a day.",
+      id:"Kami lihat pembayaran Anda berhasil 👀 — sedang kami eskalasi ke tim Billing agar paket Anda aktif dalam sehari." }
+  ],
+  WABABug: [
+    { en:"Sorry for the disconnect! I've logged this with our Integrations team — could you confirm your WhatsApp Business app version?",
+      id:"Maaf atas gangguan koneksi ini! Sudah kami catat ke tim Integrasi — boleh konfirmasi versi aplikasi WhatsApp Business Anda?" },
+    { en:"That sounds frustrating 😣 — escalating to engineering now, I'll update you as soon as it's reconnected.",
+      id:"Pasti bikin kesal 😣 — sedang kami eskalasi ke tim teknis, akan kami kabari begitu tersambung kembali." }
+  ],
+  AccountSuspended: [
+    { en:"I understand how upsetting this is 💙 — I'm sending your case to Trust & Safety for a manual review within 48h.",
+      id:"Kami mengerti ini pasti mengecewakan 💙 — kasus Anda sudah kami kirim ke tim Trust & Safety untuk ditinjau ulang dalam 48 jam." },
+    { en:"Thanks for your patience — a specialist is reviewing your suspension now and will reply directly within 2 days.",
+      id:"Terima kasih atas kesabarannya — spesialis kami sedang meninjau suspensi Anda dan akan membalas langsung dalam 2 hari." }
+  ],
+  ChatbotBug: [
+    { en:"So sorry about your chatbot flow! 💙 I've marked this urgent with our Platform team to fix the trigger.",
+      id:"Mohon maaf atas kendala chatbot Anda! 💙 Sudah kami tandai urgent ke tim Platform untuk memperbaiki trigger-nya." },
+    { en:"I know that's stressful — our team is investigating, expect the fix within 24h.",
+      id:"Kami tahu ini pasti bikin stres — tim kami sedang menginvestigasi, perbaikan diperkirakan dalam 24 jam." }
+  ],
+  BroadcastFail: [
+    { en:"Sorry about the failed broadcast! I've logged this with our Integrations team — mind sharing roughly how many contacts opted in recently?",
+      id:"Maaf atas broadcast yang gagal! Sudah kami catat ke tim Integrasi — boleh info berapa kontak yang baru opt-in belakangan ini?" },
+    { en:"That's frustrating — flagging this as a priority bug, we'll follow up once the fix ships.",
+      id:"Ini pasti menyebalkan — sudah kami tandai prioritas, akan kami kabari begitu perbaikan rilis." }
+  ],
+  SeatQuestion: [
+    { en:"Easy! Go to Settings → Team → Add Agent, then enter your colleague's email 👥 — the new seat activates as soon as they confirm!",
+      id:"Gampang! Buka Settings → Team → Add Agent, lalu masukkan email rekan Anda 👥 — seat baru langsung aktif setelah dikonfirmasi!" }
+  ],
+  HowToKanban: [
+    { en:"Easy! Open the Task menu, click ＋ New Task, then drag cards between columns to update status 📋 — great for tracking customer follow-ups!",
+      id:"Gampang kok! Buka menu Task, klik ＋ New Task, lalu drag kartu antar kolom untuk update status 📋 — cocok buat tracking follow-up pelanggan!" }
+  ],
+  PricingQuestion: [
+    { en:"The Starter plan includes 1,000 broadcast credits/month 📨 — if you need more, you can upgrade to Growth anytime from the Billing menu!",
+      id:"Paket Starter dapat 1.000 kredit broadcast/bulan 📨 — kalau kurang, bisa upgrade ke Growth kapan saja lewat menu Billing!" }
+  ],
+  Positive: [
+    { en:"That's awesome to hear! 🎉 Thanks for letting us know — here's to smoother business ahead with Mobichat!",
+      id:"Senang mendengarnya! 🎉 Terima kasih infonya — semoga bisnis Anda makin lancar bareng Mobichat!" }
+  ],
+  InvoiceQuestion: [
+    { en:"Your invoice is available under Billing → History → select the month you need 🧾 — it downloads automatically as a PDF!",
+      id:"Invoice bisa didownload di menu Billing → History → pilih bulan yang diinginkan 🧾 — otomatis dalam format PDF!" }
+  ]
+};
+
+/* Builds the initial activity trail — ticket creation, AI classification, and routing —
+   so the Log tab reflects everything the AI + routing pipeline already did, not just
+   what the agent does after opening the ticket. */
+function buildInitialLog(o){
+  const t = o.time || nowTime();
+  const log = [
+    {t, text:'Ticket created'},
+    {t, text:`AI classified as ${o.category} · ${o.severity} severity · ${o.confidence}% confidence`}
+  ];
+  if(o.assignment.type==='ai'){
+    log.push({t, text:'🤖 Auto-resolved by AI — no agent needed'});
+  } else {
+    log.push({t, text:`Routed to ${o.team || BIZ_TEAM_FOR[o.category]} · assigned to ${o.assignment.name}`});
+    if(o.locked && o.locked.by && o.locked.by!=='You'){
+      log.push({t, text:`Claimed by ${o.locked.by}`});
+    }
+  }
+  return log;
+}
+
+function conv(o){
+  return Object.assign({
+    unread:0, seen:true, isNew:false, locked:null, taskIds:[],
+    csat:null, notes:'', activityLog: buildInitialLog(o), _suggIdx:0,
+    createdAt: Date.now(), resolvedAt: null
+  }, o, { team: o.team || BIZ_TEAM_FOR[o.category] });
+}
+
+let conversations = [
+  conv({ id:'c1', name:'Siti Rahayu', phone:'+62 812 3344 5566', cid:'CID-70213', status:'Unserved', time:'09:41',
+    createdAt:minsAgo(42), resolvedAt:null,
+    unread:2, lang:'Indonesian', feature:'Billing & Subscription', device:'Chrome on Windows 11', version:'3.4.0',
+    spend:'Rp 52.000.000', memberSince:'2021', pastTickets:6,
+    waited:42, seen:false, isNew:true, sentiment:'Angry', priority:'Urgent', severity:'Critical', category:'Billing',
+    confidence:88, assignment:{type:'agent',name:'Rani'},
+    messages:[
+      {from:'in', lang:'Indonesian', text:'Saya sudah bayar langganan Pro via GoPay tapi akun masih Starter, uang sudah kepotong dari e-wallet saya.', en:"I already paid for the Pro subscription via GoPay but my account is still on Starter, the money was already deducted from my e-wallet.", time:'09:38'},
+      {from:'in', lang:'Indonesian', text:'Ini kedua kalinya kejadian seperti ini bulan ini. Tolong dibantu segera.', en:'This is the second time this happened this month. Please help urgently.', time:'09:41'}
+    ]}),
+
+  conv({ id:'c2', name:'David Halim', phone:'+62 813 5566 7788', cid:'CID-70214', status:'Served', time:'10:12',
+    createdAt:minsAgo(95), resolvedAt:null,
+    lang:'Indonesian', feature:'WhatsApp Integration', device:'Samsung Galaxy A54, Android 14', version:'3.4.0',
+    spend:'Rp 9.800.000', memberSince:'2022', pastTickets:2, waited:0,
+    locked:{by:'You'}, sentiment:'Negative', priority:'High', severity:'Medium', category:'WABABug', confidence:91,
+    assignment:{type:'agent',name:'You'}, taskIds:['T-1'],
+    messages:[
+      {from:'in', lang:'Indonesian', text:'WhatsApp Business API saya terputus sejak pagi, pesan pelanggan tidak masuk sama sekali.', en:"My WhatsApp Business API disconnected since this morning, customer messages aren't coming in at all.", time:'10:05'},
+      {from:'out', text:"So sorry about that! I've flagged this to our engineering team — could you confirm if you scanned a new QR code recently?", label:'You', time:'10:09'},
+      {from:'in', lang:'Indonesian', text:'Belum, saya tidak scan apa-apa. Tiba-tiba putus sendiri.', en:"No, I didn't scan anything. It just disconnected on its own.", time:'10:12'}
+    ]}),
+
+  conv({ id:'c3', name:'Ratna Dewi', phone:'+62 815 2233 4455', cid:'CID-70215', status:'Unserved', time:'08:55',
+    createdAt:minsAgo(51), resolvedAt:null,
+    unread:3, lang:'Indonesian', feature:'Account & Trust', device:'iPhone 13, iOS 17.4', version:'3.4.0',
+    spend:'Rp 650.000', memberSince:'2023', pastTickets:1,
+    waited:51, seen:false, isNew:true, locked:{by:'Wulan'}, sentiment:'Angry', priority:'Urgent', severity:'Critical',
+    category:'AccountSuspended', confidence:79, assignment:{type:'agent',name:'Wulan'},
+    messages:[
+      {from:'in', lang:'Indonesian', text:'Akun saya disuspend karena dianggap spam, padahal saya cuma broadcast promo ke pelanggan lama saya!', en:"My account was suspended for suspected spam, but I only broadcast a promo to my existing customers!", time:'08:50'},
+      {from:'in', lang:'Indonesian', text:'Saya sudah pakai Mobichat 3 tahun, tolong ditinjau ulang.', en:"I've used Mobichat for 3 years, please review this again.", time:'08:55'}
+    ]}),
+
+  conv({ id:'c4', name:'Agus Prasetyo', phone:'+62 817 8899 0011', cid:'CID-70216', status:'Bot', time:'11:02',
+    createdAt:minsAgo(130), resolvedAt:minsAgo(127),
+    lang:'Indonesian', feature:'Team & Seats', device:'MacBook Air, macOS Sonoma', version:'3.4.0',
+    spend:'Rp 2.100.000', memberSince:'2024', pastTickets:0, waited:0,
+    sentiment:'Neutral', priority:'Normal', severity:'Low', category:'SeatQuestion', confidence:95, assignment:{type:'ai'},
+    messages:[
+      {from:'in', lang:'Indonesian', text:'Halo, gimana caranya nambah seat agent baru di paket saya?', en:'Hi, how do I add a new agent seat to my plan?', time:'10:58'},
+      {from:'out', text:"Gampang! Buka Settings → Team → Add Agent, lalu masukkan email rekan Anda 👥 — seat baru langsung aktif setelah dikonfirmasi!", label:'AI', time:'10:59'}
+    ]}),
+
+  conv({ id:'c5', name:'Maya Anggraini', phone:'+62 819 1122 3344', cid:'CID-70217', status:'Served', time:'09:20',
+    createdAt:minsAgo(180), resolvedAt:null,
+    lang:'Indonesian', feature:'Chatbot Builder', device:'iPhone 14, iOS 17.1', version:'3.4.0',
+    spend:'Rp 12.400.000', memberSince:'2021', pastTickets:4,
+    waited:0, locked:{by:'Fajar'}, sentiment:'Negative', priority:'High', severity:'Critical', category:'ChatbotBug',
+    confidence:74, assignment:{type:'agent',name:'Fajar'}, taskIds:['T-3'],
+    messages:[
+      {from:'in', lang:'Indonesian', text:"Chatbot saya tidak lagi merespon kata kunci 'harga', padahal sudah saya setting dari dulu. Pelanggan jadi komplain.", en:"My chatbot no longer responds to the keyword 'harga' (price), even though I set it up a while ago. Customers are complaining now.", time:'09:10'},
+      {from:'out', text:"That's really concerning, I understand 😟 — I've linked this to our Platform team to investigate, it's marked urgent.", label:'Fajar', time:'09:18'},
+      {from:'in', lang:'Indonesian', text:'Terima kasih, saya tunggu ya.', en:"Thank you, I'll wait.", time:'09:20'}
+    ]}),
+
+  conv({ id:'c6', name:'Hendra Gunawan', phone:'+62 821 5566 7788', cid:'CID-70218', status:'Unserved', time:'11:30',
+    createdAt:minsAgo(18), resolvedAt:null,
+    unread:1, lang:'Indonesian', feature:'Billing & Subscription', device:'Chrome on macOS Sonoma', version:'3.4.0',
+    spend:'Rp 61.000.000', memberSince:'2020', pastTickets:9,
+    waited:18, seen:false, isNew:true, sentiment:'Angry', priority:'Urgent', severity:'Critical', category:'Billing',
+    confidence:85, assignment:{type:'agent',name:'Dimas'},
+    messages:[
+      {from:'in', lang:'Indonesian', text:'Kartu saya kena tagihan Mobichat dua kali bulan ini, mohon salah satunya dikembalikan.', en:'My card was charged twice for Mobichat this month, please refund one of them.', time:'11:30'}
+    ]}),
+
+  conv({ id:'c7', name:'Lina Kusuma', phone:'+62 822 3344 5566', cid:'CID-70219', status:'Bot', time:'13:03',
+    createdAt:minsAgo(210), resolvedAt:minsAgo(209),
+    lang:'Indonesian', feature:'Task (Kanban)', device:'iPad Air, iPadOS 17', version:'3.4.0',
+    spend:'Rp 280.000', memberSince:'2024', pastTickets:0, waited:0,
+    sentiment:'Neutral', priority:'Normal', severity:'Low', category:'HowToKanban', confidence:93, assignment:{type:'ai'},
+    messages:[
+      {from:'in', lang:'Indonesian', text:'Cara pakai fitur Task Kanban gimana ya? Saya masih bingung.', en:"How do I use the Task Kanban feature? I'm still confused.", time:'13:02'},
+      {from:'out', text:"Gampang kok! Buka menu Task, klik ＋ New Task, lalu drag kartu antar kolom untuk update status 📋 — cocok buat tracking follow-up pelanggan!", label:'AI', time:'13:03'}
+    ]}),
+
+  conv({ id:'c8', name:'Rudi Setiawan', phone:'+62 823 6677 8899', cid:'CID-70220', status:'Bot', time:'14:10',
+    createdAt:minsAgo(245), resolvedAt:minsAgo(243),
+    lang:'Indonesian', feature:'Billing & Subscription', device:'Xiaomi Redmi Note 12, Android 13', version:'3.4.0',
+    spend:'Rp 1.900.000', memberSince:'2023', pastTickets:1, waited:0,
+    sentiment:'Neutral', priority:'Normal', severity:'Low', category:'PricingQuestion', confidence:90, assignment:{type:'ai'},
+    messages:[
+      {from:'in', lang:'Indonesian', text:'Kalau paket Starter, berapa banyak kredit broadcast per bulan ya?', en:'For the Starter plan, how many broadcast credits are included per month?', time:'14:10'},
+      {from:'out', text:"Paket Starter dapat 1.000 kredit broadcast/bulan 📨 — kalau kurang, bisa upgrade ke Growth kapan saja lewat menu Billing!", label:'AI', time:'14:10'}
+    ]}),
+
+  conv({ id:'c9', name:'Dewi Anjani', phone:'+62 838 1122 3344', cid:'CID-70221', status:'Served', time:'15:06',
+    createdAt:minsAgo(70), resolvedAt:null,
+    lang:'Indonesian', feature:'Broadcast', device:'Oppo A78, Android 13', version:'3.4.0',
+    spend:'Rp 7.600.000', memberSince:'2022', pastTickets:3, waited:0,
+    locked:{by:'You'}, sentiment:'Negative', priority:'High', severity:'Medium', category:'BroadcastFail', confidence:87,
+    assignment:{type:'agent',name:'You'}, taskIds:['T-2'],
+    messages:[
+      {from:'in', lang:'Indonesian', text:'Broadcast saya ke 500 kontak gagal terkirim semua, statusnya failed di dashboard.', en:'My broadcast to 500 contacts all failed to send, the dashboard shows failed status.', time:'15:00'},
+      {from:'out', text:"Really sorry about the failed broadcast! I've logged this with our team — were any of those contacts added recently?", label:'You', time:'15:04'},
+      {from:'in', lang:'Indonesian', text:'Ada beberapa yang baru, tapi sebagian besar kontak lama kok.', en:'Some are new, but most are old contacts.', time:'15:06'}
+    ]}),
+
+  conv({ id:'c10', name:'Bayu Firmansyah', phone:'+62 852 9988 7766', cid:'CID-70222', status:'Bot', time:'16:20',
+    createdAt:minsAgo(300), resolvedAt:minsAgo(299),
+    lang:'Indonesian', feature:'WhatsApp Integration', device:'iPhone 15, iOS 17.5', version:'3.4.0',
+    spend:'Rp 38.500.000', memberSince:'2020', pastTickets:5, waited:0,
+    sentiment:'Positive', priority:'Normal', severity:'Low', category:'Positive', confidence:97, assignment:{type:'ai'},
+    messages:[
+      {from:'in', lang:'Indonesian', text:'Makasih banyak, masalah WhatsApp API minggu lalu udah kelar dan lancar terus sampai sekarang!', en:'Thanks a lot, the WhatsApp API issue from last week is fully resolved and has been running smoothly ever since!', time:'16:20'},
+      {from:'out', text:"Senang mendengarnya! 🎉 Terima kasih infonya — semoga bisnis Anda makin lancar bareng Mobichat!", label:'AI', time:'16:20'}
+    ]}),
+
+  conv({ id:'c11', name:'Indah Permatasari', phone:'+62 856 1234 5678', cid:'CID-70223', status:'Bot', time:'08:15',
+    createdAt:minsAgo(330), resolvedAt:minsAgo(328),
+    lang:'Indonesian', feature:'Billing & Subscription', device:'Samsung Galaxy S23, Android 14', version:'3.4.0',
+    spend:'Rp 320.000', memberSince:'2024', pastTickets:0, waited:0,
+    sentiment:'Neutral', priority:'Normal', severity:'Low', category:'InvoiceQuestion', confidence:92, assignment:{type:'ai'},
+    messages:[
+      {from:'in', lang:'Indonesian', text:'Invoice bulan ini bisa didownload dimana ya?', en:"Where can I download this month's invoice?", time:'08:15'},
+      {from:'out', text:"Invoice bisa didownload di menu Billing → History → pilih bulan yang diinginkan 🧾 — otomatis dalam format PDF!", label:'AI', time:'08:15'}
+    ]}),
+
+  /* Deliberately the hardest ticket in the demo — three compounding issues across three
+     teams in one message. Confidence is realistically low (58%, flagged) instead of the
+     AI pretending certainty, and there's no matching Knowledge Base doc to cite (see
+     CATEGORY_KB_HINTS) since this doesn't fit any single existing article. */
+  conv({ id:'c12', name:'Farhan Nugroho', phone:'+62 811 4455 6677', cid:'CID-70224', status:'Unserved', time:'09:12',
+    createdAt:minsAgo(8), resolvedAt:null,
+    unread:1, seen:false, isNew:true,
+    lang:'Indonesian', feature:'Account & Trust', device:'MacBook Pro, macOS Sonoma', version:'3.4.0',
+    spend:'Rp 18.500.000', memberSince:'2021', pastTickets:4,
+    waited:8, sentiment:'Angry', priority:'Urgent', severity:'Critical',
+    category:'MultiIssueEscalation', confidence:58, assignment:{type:'agent', name:'Wulan'},
+    messages:[
+      {from:'in', lang:'Indonesian',
+        text:'Halo, ini darurat. Akun bisnis kami tiba-tiba disuspend pagi ini pas lagi jalanin broadcast campaign penting ke 2000+ pelanggan, katanya kena flag spam — padahal ini campaign resmi yang sudah kami jalankan tiap bulan.',
+        en:"Hi, this is urgent. Our business account suddenly got suspended this morning while we were running an important broadcast campaign to 2000+ customers — they said it was flagged for spam, but this is a routine official campaign we run every month.",
+        time:'09:08'},
+      {from:'in', lang:'Indonesian',
+        text:'Masalahnya jadi berantai: pembayaran invoice bulan ini juga gagal kepotong dari kartu kami, jadi saya khawatir ini malah dianggap akun nunggak dan makin lama ditinjau.',
+        en:"On top of that, this month's invoice payment also failed to charge from our card, so now I'm worried this will get treated as an overdue account and take even longer to review.",
+        time:'09:10'},
+      {from:'in', lang:'Indonesian',
+        text:'Ditambah lagi, tim saya sekarang nggak bisa buka menu Task sama sekali buat pantau tiket lain, kayak semua akses ke-lock bareng suspend ini. Kami pelanggan dari 2021, tolong dibantu prioritas ya, bisnis kami kena dampak langsung.',
+        en:"And on top of that, our team can't even open the Task menu anymore to track our other tickets — it's like everything got locked along with the suspension. We've been customers since 2021, please help prioritize this, our business is being directly affected.",
+        time:'09:12'}
+    ]}),
+
+  /* David Halim's OLDER, already-closed ticket — same customer (same phone) as c2, a
+     completely separate complaint from weeks ago. This is what "old ticket, only
+     reachable by its own ticket code" demonstrates: it has its own TCK-#### and shows
+     up as its own row in Tickets, but it is NOT bundled into c2's ticket-scoped thread.
+     Only the Inbox (customer-level view) merges it with c2 into one combined history. */
+  conv({ id:'c2old', name:'David Halim', phone:'+62 813 5566 7788', cid:'CID-70214', status:'Resolved', time:'09:20',
+    createdAt:minsAgo(20000), resolvedAt:minsAgo(19950),
+    lang:'Indonesian', feature:'Billing & Subscription', device:'Samsung Galaxy A54, Android 14', version:'3.3.0',
+    spend:'Rp 9.800.000', memberSince:'2022', pastTickets:1, waited:0,
+    sentiment:'Neutral', priority:'Normal', severity:'Low', category:'InvoiceQuestion', confidence:90,
+    assignment:{type:'agent', name:'Rani'}, csat:{rating:5, comment:''},
+    messages:[
+      {from:'in', lang:'Indonesian', text:'Halo, saya mau tanya invoice bulan lalu itu kenapa nominalnya beda dari biasanya ya?', en:"Hi, I wanted to ask why last month's invoice amount was different from usual?", time:'09:14'},
+      {from:'out', text:'Halo Pak David! Itu karena ada prorate upgrade paket di pertengahan bulan kemarin, jadi nominalnya digabung. Bulan ini sudah normal lagi kok 🙂', label:'Rani', time:'09:18'},
+      {from:'in', lang:'Indonesian', text:'Oh gitu, makasih banyak infonya!', en:'Oh I see, thanks a lot for the info!', time:'09:20'}
+    ]})
+];
+
+let tasks = [
+  { id:'T-1', title:'WhatsApp Business API disconnecting', feature:'WhatsApp Integration', category:'WABABug', device:'Samsung Galaxy A54, Android 14',
+    version:'3.4.0', severity:'Medium', confidence:91, playersAffected:1, status:'In Progress', eta:'2 days',
+    team:'Integrations Engineering', engineer:'Bagas', linkedTicketIds:['c2'] },
+  { id:'T-2', title:'Broadcast messages failing to send', feature:'Broadcast', category:'BroadcastFail', device:'Oppo A78, Android 13',
+    version:'3.4.0', severity:'Medium', confidence:87, playersAffected:3, status:'Investigating', eta:'3 days',
+    team:'Integrations Engineering', engineer:'Bagas', linkedTicketIds:['c9'] },
+  { id:'T-3', title:'Chatbot keyword trigger broken', feature:'Chatbot Builder', category:'ChatbotBug', device:'iPhone 14, iOS 17.1',
+    version:'3.4.0', severity:'Critical', confidence:74, playersAffected:1, status:'Open', eta:'1 day',
+    team:'Platform Engineering', engineer:'Putri', linkedTicketIds:['c5'] }
+];
+let taskSeq = 4;
+
+/* Pool cycled by "Simulate incoming" — deterministic 5-step tour:
+   new unserved, AI-absorbed FAQ, merge into c1, new unserved, AI-absorbed FAQ */
+const SIM_POOL = [
+  { type:'new', name:'Yoga Pratama', lang:'Indonesian', feature:'Broadcast', category:'BroadcastFail', severity:'Low',
+    confidence:76, sentiment:'Negative', priority:'High',
+    text:'Broadcast saya kok gagal terus ya beberapa hari ini, tolong dicek.', en:"My broadcasts keep failing the past few days, can you check?" },
+  { type:'ai', name:'Citra Melati', lang:'Indonesian', feature:'Billing & Subscription', category:'PricingQuestion', severity:'Low', confidence:94,
+    sentiment:'Neutral', priority:'Normal', text:'Paket Growth dapat berapa kredit broadcast ya?', en:'How many broadcast credits come with the Growth plan?' },
+  { type:'merge', targetId:'c1', lang:'Indonesian',
+    text:'Sampai sekarang belum masuk juga paketnya, kok lama banget?', en:"Still hasn't come through, why is this taking so long?" },
+  { type:'new', name:'Bambang Setiaji', lang:'Indonesian', feature:'WhatsApp Integration', category:'WABABug', severity:'Medium',
+    confidence:81, sentiment:'Negative', priority:'High',
+    text:'WhatsApp saya juga tiba-tiba disconnect, ini kejadian kedua minggu ini.', en:'My WhatsApp also suddenly disconnected, this is the second time this week.' },
+  { type:'ai', name:'Ayu Lestari', lang:'Indonesian', feature:'Task (Kanban)', category:'HowToKanban', severity:'Low', confidence:91,
+    sentiment:'Neutral', priority:'Normal', text:'Kalau mau assign task ke rekan tim caranya gimana?', en:'How do I assign a task to a teammate?' },
+  { type:'merge', targetId:'c9', lang:'Indonesian',
+    text:'Oh oke, sekarang broadcast saya sudah bisa terkirim lagi. Makasih banyak!', en:"Oh okay, my broadcasts are going through again now. Thanks so much!" }
+];
+
+/* ---------------- state ---------------- */
+const state = {
+  view:'tickets', ticketsTab:'tickets', currentId:null, ticketFilter:'all', ticketSearch:'', simIndex:0, aiPopupOpen:true, reportsShowTable:false,
+  convTab:'all', search:'', chatOrigin:'tickets',
+  filterPanelOpen:false, ticketAdvFilters:{ severity:new Set(), priority:new Set(), assigned:new Set() },
+  navCategory:'omnichannel'
+};
+
+/* Setup guide — a working mini-tool per step so a business customer can actually complete
+   their own onboarding here (connect a number, invite teammates, pick categories, flip
+   switches), rather than just ticking off a checklist. Completion is derived from the real
+   data below, not a separate flag. Framed as the customer's own onboarding, shown here for
+   the demo since this console doesn't have a separate customer-facing app. */
+const SETUP_STEPS = [
+  { id:'whatsapp', required:true, title:'Connect your WhatsApp Business number',
+    desc:'Link your WhatsApp Business API so customer messages land straight in your Inbox instead of your personal phone.',
+    hint:'Takes about 5 minutes — you’ll need your Meta Business Manager login.' },
+  { id:'routing', required:true, title:'Set up complaint categories & AI routing',
+    desc:'Define the types of complaints your business handles — billing disputes, service outages, account issues, and more. Mobichat’s AI uses these to classify incoming complaints, assign severity, and route each one to the right team automatically.',
+    hint:'Start with 5–8 complaint types — you can always add more later.' },
+  { id:'team', required:false, title:'Invite your team & assign departments',
+    desc:'Add teammates and put each one in a department — Billing, Technical, Trust & Safety, or Customer Success — so new tickets route to the right person automatically.',
+    hint:'Every teammate needs an email invite; they set their own password.' },
+  { id:'knowledge', required:false, title:'Add your Company Knowledge Base',
+    desc:'Upload policy documents — refund rules, SLAs, escalation steps, tone of voice — or add quick notes. Mobichat’s AI references these when drafting replies, so answers match how your business actually operates.',
+    hint:'PDF, DOCX, or TXT work — or just type a quick note below.' },
+  { id:'ai-replies', required:false, title:'Turn on AI-assisted replies',
+    desc:'Let Mobichat draft replies, auto-translate them into your customer’s language, and auto-resolve simple FAQs without an agent.',
+    hint:'Agents can always edit an AI draft before sending.' },
+  { id:'csat', required:false, title:'Enable satisfaction surveys',
+    desc:'Automatically ask customers to rate their experience with a quick star rating after an agent resolves their ticket.',
+    hint:'You can review results anytime from the Tickets → Resolved view.' }
+];
+
+/* Live working state behind each step's mini-tool. Steps 1–2 start pre-filled so the
+   guide reads as a business partway through onboarding, not a blank slate. */
+const SETUP_DATA = {
+  whatsapp: { number:'+62 812 3456 7890', connected:true },
+  team: { invites:[ {email:'rani@bisnisanda.id', dept:'Billing'}, {email:'fajar@bisnisanda.id', dept:'Technical'} ] },
+  routing: { categories:[] },
+  knowledge: { items:[
+    { id:'kb1', type:'file', name:'Billing & Refund Policy.pdf', size:'214 KB' },
+    { id:'kb2', type:'file', name:'Technical Troubleshooting Guide.pdf', size:'380 KB' },
+    { id:'kb3', type:'note', name:'Account & Trust Policy', content:'Accounts are only suspended after two documented warnings, except for confirmed fraud. Appeals get a human review within 48h.' }
+  ] },
+  aiReplies: { enabled:false },
+  csat: { enabled:false }
+};
+const COMPLAINT_CATEGORY_OPTIONS = [
+  'Billing Dispute','Service Outage','Account Access','Product/Service Quality','Delivery/Fulfillment','Refund Request','Data & Privacy','Other'
+];
+/* Maps a ticket category to keywords used to find a matching Knowledge Base item —
+   this is what lets the AI popup cite "which document it drew from." It's still a
+   rule-based lookup under the hood, not real retrieval, but it makes the citation
+   reflect whatever the customer has actually uploaded. */
+const CATEGORY_KB_HINTS = {
+  Billing:['billing','refund','payment'], WABABug:['whatsapp','integration','technical'],
+  AccountSuspended:['account','trust','safety'], ChatbotBug:['chatbot','bot','technical'],
+  BroadcastFail:['broadcast','integration','technical']
+};
+function knowledgeSourceFor(category){
+  const hints = CATEGORY_KB_HINTS[category];
+  if(!hints) return null;
+  const item = SETUP_DATA.knowledge.items.find(it=>hints.some(h=>it.name.toLowerCase().includes(h)));
+  return item ? item.name : null;
+}
+function formatBytes(bytes){
+  if(bytes<1024) return bytes+' B';
+  if(bytes<1024*1024) return Math.round(bytes/1024)+' KB';
+  return (bytes/(1024*1024)).toFixed(1)+' MB';
+}
+function computeStepDone(id){
+  switch(id){
+    case 'whatsapp': return SETUP_DATA.whatsapp.connected;
+    case 'team': return SETUP_DATA.team.invites.length>0;
+    case 'routing': return SETUP_DATA.routing.categories.length>0;
+    case 'knowledge': return SETUP_DATA.knowledge.items.length>0;
+    case 'ai-replies': return SETUP_DATA.aiReplies.enabled;
+    case 'csat': return SETUP_DATA.csat.enabled;
+    default: return false;
+  }
+}
+let expandedSetupStep = null;
+
+/* Mobitech DS rail icons (20x20, fill=currentColor) — matches the real app's side-menu-icons set */
+const ICONS = {
+  inbox: '<svg viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.76 2.5C5.23 2.5 4.7 2.67 4.27 2.99C3.84 3.31 3.53 3.75 3.37 4.27L1.36 10.8C1.29 11.03 1.25 11.28 1.25 11.53V15C1.25 15.66 1.51 16.3 1.98 16.77C2.45 17.24 3.09 17.5 3.75 17.5H16.25C16.91 17.5 17.55 17.24 18.02 16.77C18.49 16.3 18.75 15.66 18.75 15V11.53C18.75 11.28 18.71 11.04 18.64 10.8L16.63 4.27C16.47 3.75 16.16 3.31 15.73 2.99C15.3 2.67 14.77 2.5 14.24 2.5H5.76ZM17.28 10.63L15.44 4.63C15.36 4.38 15.2 4.15 14.98 3.99C14.77 3.84 14.51 3.75 14.24 3.75H5.76C5.49 3.75 5.23 3.84 5.02 3.99C4.8 4.15 4.64 4.38 4.57 4.63L2.72 10.63H5.09C5.56 10.62 6.01 10.75 6.41 11C6.8 11.24 7.12 11.59 7.33 12.01L7.54 12.43C7.65 12.64 7.81 12.82 8 12.94C8.2 13.06 8.43 13.13 8.66 13.13H11.34C11.57 13.13 11.8 13.06 12 12.94C12.2 12.82 12.36 12.64 12.46 12.43L12.67 12.01C12.88 11.59 13.2 11.24 13.6 11C13.99 10.75 14.45 10.62 14.91 10.63H17.28Z" fill="currentColor"/></svg>',
+  tickets: '<svg viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M4.69 1.25C3.82 1.25 3.13 1.95 3.13 2.81V17.19C3.13 18.05 3.83 18.75 4.69 18.75H15.31C16.18 18.75 16.88 18.05 16.88 17.19V10.63C16.88 9.8 16.55 9 15.96 8.42C15.37 7.83 14.58 7.5 13.75 7.5H12.19C11.77 7.5 11.38 7.34 11.08 7.04C10.79 6.75 10.63 6.35 10.63 5.94V4.38C10.63 3.55 10.3 2.75 9.71 2.17C9.12 1.58 8.33 1.25 7.5 1.25H4.69ZM6.25 12.5C6.25 12.33 6.32 12.18 6.43 12.06C6.55 11.94 6.71 11.88 6.88 11.88H13.13C13.29 11.88 13.45 11.94 13.57 12.06C13.68 12.18 13.75 12.33 13.75 12.5C13.75 12.67 13.68 12.82 13.57 12.94C13.45 13.06 13.29 13.13 13.13 13.13H6.88C6.71 13.13 6.55 13.06 6.43 12.94C6.32 12.82 6.25 12.67 6.25 12.5ZM6.88 14.38C6.71 14.38 6.55 14.44 6.43 14.56C6.32 14.68 6.25 14.83 6.25 15C6.25 15.17 6.32 15.32 6.43 15.44C6.55 15.56 6.71 15.63 6.88 15.63H10C10.17 15.63 10.32 15.56 10.44 15.44C10.56 15.32 10.63 15.17 10.63 15C10.63 14.83 10.56 14.68 10.44 14.56C10.32 14.44 10.17 14.38 10 14.38H6.88Z" fill="currentColor"/><path d="M10.81 1.51C11.5 2.31 11.88 3.32 11.88 4.38V5.94C11.88 6.11 12.02 6.25 12.19 6.25H13.75C14.8 6.25 15.82 6.63 16.62 7.32C16.25 5.92 15.52 4.65 14.5 3.63C13.48 2.61 12.21 1.88 10.81 1.51Z" fill="currentColor"/></svg>',
+  task: '<svg viewBox="0 0 20 20" fill="none"><path d="M12.5 3.125H7.5V16.875H12.5V3.125ZM13.75 16.875H16.5625C17.425 16.875 18.125 16.175 18.125 15.3125V4.6875C18.125 3.82417 17.425 3.125 16.5625 3.125H13.75V16.875ZM3.4375 3.125H6.25V16.875H3.4375C3.0231 16.875 2.62567 16.7104 2.33265 16.4174C2.03962 16.1243 1.875 15.7269 1.875 15.3125V4.6875C1.875 3.82417 2.575 3.125 3.4375 3.125Z" fill="currentColor"/></svg>',
+  broadcast: '<svg viewBox="0 0 20 20" fill="none"><path d="M14.07 3.62C11.78 4.54 9.34 5 6.88 5H6.25C5.15 5 4.09 5.41 3.29 6.15C2.48 6.89 1.98 7.91 1.88 9.01C1.79 10.1 2.11 11.19 2.79 12.06C3.46 12.92 4.43 13.51 5.52 13.69C5.79 14.82 6.18 15.92 6.67 16.97C7.05 17.81 8.06 18.07 8.82 17.64L9.36 17.32C10.1 16.9 10.34 15.99 10.01 15.26C9.81 14.83 9.64 14.38 9.48 13.92C11.08 14.14 12.62 14.55 14.07 15.13C14.69 13.27 15 11.33 15 9.37C15 7.36 14.67 5.43 14.07 3.62Z" fill="currentColor"/></svg>',
+  chatbot: '<svg viewBox="0 0 20 20" fill="none"><path d="M1 9H2V15H1C0.45 15 0 14.55 0 14V10C0 9.45 0.45 9 1 9ZM17 7.5V16C17 17.1 16.1 18 15 18H5C3.9 18 3 17.1 3 16V7.5C3 6.12 4.12 5 5.5 5H9V3C9 2.45 9.45 2 10 2C10.55 2 11 2.45 11 3V5H14.5C15.88 5 17 6.12 17 7.5ZM8.25 10C8.25 9.31 7.69 8.75 7 8.75C6.31 8.75 5.75 9.31 5.75 10C5.75 10.69 6.31 11.25 7 11.25C7.69 11.25 8.25 10.69 8.25 10ZM8 14H6V15H8V14ZM11 14H9V15H11V14ZM14.25 10C14.25 9.31 13.69 8.75 13 8.75C12.31 8.75 11.75 9.31 11.75 10C11.75 10.69 12.31 11.25 13 11.25C13.69 11.25 14.25 10.69 14.25 10ZM14 14H12V15H14V14ZM20 10V14C20 14.55 19.55 15 19 15H18V9H19C19.55 9 20 9.45 20 10Z" fill="currentColor"/></svg>',
+  contacts: '<svg viewBox="0 0 20 20" fill="none"><path d="M3.75 5.31C3.75 3.45 5.26 1.94 7.12 1.94C8.98 1.94 10.5 3.45 10.5 5.31C10.5 7.17 8.98 8.69 7.12 8.69C5.26 8.69 3.75 7.17 3.75 5.31ZM11.88 7.19C11.88 5.7 13.08 4.5 14.56 4.5C16.05 4.5 17.25 5.7 17.25 7.19C17.25 8.68 16.05 9.88 14.56 9.88C13.08 9.88 11.88 8.68 11.88 7.19ZM1.25 15.94C1.25 12.62 3.94 9.94 7.25 9.94C10.56 9.94 13.25 12.62 13.25 15.94V15.96L13.24 16.06C13.23 16.27 13.12 16.46 12.94 16.56C11.21 17.6 9.2 18.13 7.19 18.12C5.09 18.12 3.13 17.55 1.55 16.56C1.37 16.46 1.26 16.27 1.25 16.06L1.25 15.94Z" fill="currentColor"/></svg>',
+  reports: '<svg viewBox="0 0 20 20" fill="none"><path d="M15.31 1.88C14.45 1.88 13.75 2.58 13.75 3.44V16.56C13.75 17.43 14.45 18.13 15.31 18.13H15.94C16.8 18.13 17.5 17.43 17.5 16.56V3.44C17.5 2.57 16.8 1.88 15.94 1.88H15.31ZM8.13 7.19C8.13 6.32 8.83 5.63 9.69 5.63H10.31C11.18 5.63 11.88 6.33 11.88 7.19V16.56C11.88 17.43 11.18 18.13 10.31 18.13H9.69C8.86 18.13 8.13 17.43 8.13 16.56V7.19ZM2.5 10.94C2.5 10.07 3.2 9.38 4.06 9.38H4.69C5.55 9.38 6.25 10.08 6.25 10.94V16.56C6.25 17.43 5.55 18.13 4.69 18.13H4.06C3.2 18.13 2.5 17.43 2.5 16.56V10.94Z" fill="currentColor"/></svg>',
+  alerts: '<svg viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 2C8.41 2 6.88 2.63 5.76 3.76C4.63 4.88 4 6.41 4 8C4 9.89 3.55 11.67 2.74 13.23C2.61 13.44 2.62 13.7 2.73 13.9C2.85 14.1 3.06 14.24 3.26 14.31C4.33 14.53 5.42 14.7 6.51 14.82C6.59 15.69 6.99 16.5 7.64 17.09C8.28 17.68 9.13 18.01 10 18.01C10.87 18.01 11.72 17.68 12.36 17.09C13.01 16.5 13.41 15.69 13.49 14.82C14.58 14.7 15.67 14.53 16.74 14.31C16.94 14.24 17.15 14.1 17.27 13.9C17.38 13.7 17.39 13.44 17.26 13.23C16.43 11.61 16 9.82 16 8C16 6.41 15.37 4.88 14.24 3.76C13.12 2.63 11.59 2 10 2ZM8.05 14.94C9.35 15.02 10.65 15.02 11.95 14.94C11.85 15.38 11.6 15.78 11.25 16.06C10.89 16.34 10.45 16.5 10 16.5C9.55 16.5 9.11 16.34 8.75 16.06C8.4 15.78 8.15 15.38 8.05 14.94Z" fill="currentColor"/></svg>',
+  billings: '<svg viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 1.875C5.51 1.875 1.88 5.51 1.88 10C1.88 14.49 5.51 18.13 10 18.13C14.49 18.13 18.13 14.49 18.13 10C18.13 5.51 14.49 1.875 10 1.875ZM10.63 5V5.68C11.15 5.77 11.64 5.98 12.06 6.31C12.65 6.78 12.98 7.44 12.98 8.13C12.98 8.82 12.65 9.47 12.06 9.94C11.64 10.27 11.15 10.48 10.63 10.57V13.05C10.9 12.99 11.16 12.87 11.39 12.7L12.13 12.15C12.4 11.95 12.79 12.01 12.99 12.28C13.19 12.54 13.14 12.92 12.87 13.13L12.14 13.68C11.69 14.01 11.17 14.24 10.63 14.33V15C10.63 15.35 10.35 15.63 10 15.63C9.66 15.63 9.38 15.35 9.38 15V14.33C8.83 14.24 8.3 14.01 7.86 13.68L7.13 13.15C6.86 12.95 6.81 12.57 7 12.28C7.2 12.01 7.58 11.95 7.86 12.15L8.61 12.7C8.83 12.87 9.1 12.99 9.38 13.05V10.57C8.86 10.48 8.36 10.27 7.94 9.94C7.35 9.47 7.02 8.82 7.02 8.13C7.02 7.44 7.35 6.78 7.94 6.31C8.36 5.98 8.85 5.77 9.38 5.68V5C9.38 4.65 9.66 4.38 10 4.38C10.35 4.38 10.63 4.65 10.63 5Z" fill="currentColor"/></svg>',
+  profile: '<svg viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.25 5C6.25 4.01 6.65 3.05 7.35 2.35C8.05 1.65 9.01 1.25 10 1.25C10.99 1.25 11.95 1.65 12.65 2.35C13.35 3.05 13.75 4.01 13.75 5C13.75 5.99 13.35 6.95 12.65 7.65C11.95 8.35 10.99 8.75 10 8.75C9.01 8.75 8.05 8.35 7.35 7.65C6.65 6.95 6.25 5.99 6.25 5ZM3.13 16.75C3.15 14.95 3.89 13.23 5.18 11.96C6.46 10.7 8.2 9.99 10 9.99C11.8 9.99 13.54 10.7 14.82 11.96C16.11 13.23 16.85 14.95 16.87 16.75C16.88 16.88 16.84 17 16.78 17.1C16.71 17.2 16.62 17.28 16.51 17.33C14.47 18.27 12.25 18.75 10 18.75C7.68 18.75 5.47 18.24 3.49 17.33C3.38 17.28 3.29 17.2 3.22 17.1C3.16 17 3.12 16.88 3.13 16.75Z" fill="currentColor"/></svg>',
+  integrations: '<svg viewBox="0 0 20 20" fill="none"><path d="M11.46 2.29C11.46 1.43 10.76 0.73 9.9 0.73C9.03 0.73 8.33 1.43 8.33 2.29V3.13H4.79C3.93 3.13 3.23 3.83 3.23 4.69V8.23H2.4C1.53 8.23 0.83 8.93 0.83 9.79C0.83 10.65 1.53 11.35 2.4 11.35H3.23V14.9C3.23 15.76 3.93 16.46 4.79 16.46H8.33V17.29C8.33 18.15 9.03 18.85 9.9 18.85C10.76 18.85 11.46 18.15 11.46 17.29V16.46H15C15.86 16.46 16.56 15.76 16.56 14.9V11.35H17.4C18.26 11.35 18.96 10.65 18.96 9.79C18.96 8.93 18.26 8.23 17.4 8.23H16.56V4.69C16.56 3.82 15.86 3.13 15 3.13H11.46V2.29Z" fill="currentColor"/></svg>',
+  settings: '<svg viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M8.18 2.18C8.29 1.76 8.67 1.46 9.11 1.46H10.89C11.33 1.46 11.71 1.76 11.82 2.18L12.13 3.38C12.6 3.53 13.04 3.74 13.45 4L14.55 3.37C14.93 3.15 15.41 3.22 15.71 3.53L16.97 4.79C17.28 5.09 17.35 5.57 17.13 5.95L16.5 7.05C16.76 7.46 16.97 7.9 17.12 8.37L18.32 8.68C18.74 8.79 19.04 9.17 19.04 9.61V11.39C19.04 11.83 18.74 12.21 18.32 12.32L17.12 12.63C16.97 13.1 16.76 13.54 16.5 13.95L17.13 15.05C17.35 15.43 17.28 15.91 16.97 16.21L15.71 17.47C15.41 17.78 14.93 17.85 14.55 17.63L13.45 17C13.04 17.26 12.6 17.47 12.13 17.62L11.82 18.82C11.71 19.24 11.33 19.54 10.89 19.54H9.11C8.67 19.54 8.29 19.24 8.18 18.82L7.87 17.62C7.4 17.47 6.96 17.26 6.55 17L5.45 17.63C5.07 17.85 4.59 17.78 4.29 17.47L3.03 16.21C2.72 15.91 2.65 15.43 2.87 15.05L3.5 13.95C3.24 13.54 3.03 13.1 2.88 12.63L1.68 12.32C1.26 12.21 0.96 11.83 0.96 11.39V9.61C0.96 9.17 1.26 8.79 1.68 8.68L2.88 8.37C3.03 7.9 3.24 7.46 3.5 7.05L2.87 5.95C2.65 5.57 2.72 5.09 3.03 4.79L4.29 3.53C4.59 3.22 5.07 3.15 5.45 3.37L6.55 4C6.96 3.74 7.4 3.53 7.87 3.38L8.18 2.18ZM10 13.13C11.73 13.13 13.13 11.73 13.13 10C13.13 8.27 11.73 6.88 10 6.88C8.27 6.88 6.88 8.27 6.88 10C6.88 11.73 8.27 13.13 10 13.13Z" fill="currentColor"/></svg>',
+  logout: '<svg viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.25 3.13C5.92 3.13 5.6 3.26 5.37 3.49C5.13 3.73 5 4.04 5 4.38V15.63C5 15.96 5.13 16.27 5.37 16.51C5.6 16.74 5.92 16.88 6.25 16.88H11.25C11.58 16.88 11.9 16.74 12.13 16.51C12.37 16.27 12.5 15.96 12.5 15.63V12.5C12.5 12.16 12.78 11.88 13.13 11.88C13.47 11.88 13.75 12.16 13.75 12.5V15.63C13.75 16.29 13.49 16.92 13.02 17.39C12.55 17.86 11.91 18.13 11.25 18.13H6.25C5.59 18.13 4.95 17.86 4.48 17.39C4.01 16.92 3.75 16.29 3.75 15.63V4.38C3.75 3.71 4.01 3.08 4.48 2.61C4.95 2.14 5.59 1.88 6.25 1.88H11.25C11.91 1.88 12.55 2.14 13.02 2.61C13.49 3.08 13.75 3.71 13.75 4.38V7.5C13.75 7.84 13.47 8.13 13.13 8.13C12.78 8.13 12.5 7.84 12.5 7.5V4.38C12.5 4.04 12.37 3.73 12.13 3.49C11.9 3.26 11.58 3.13 11.25 3.13H6.25ZM10.44 7.06C10.68 7.3 10.68 7.7 10.44 7.94L9.01 9.38H18.13C18.47 9.38 18.75 9.66 18.75 10C18.75 10.34 18.47 10.63 18.13 10.63H9.01L10.44 12.06C10.68 12.3 10.68 12.7 10.44 12.94C10.2 13.18 9.8 13.18 9.56 12.94L7.06 10.44C6.82 10.2 6.82 9.8 7.06 9.56L9.56 7.06C9.8 6.82 10.2 6.82 10.44 7.06Z" fill="currentColor"/></svg>',
+  setup: '<svg viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M4.375 2.5C3.34 2.5 2.5 3.34 2.5 4.375V15.625C2.5 16.66 3.34 17.5 4.375 17.5H15.625C16.66 17.5 17.5 16.66 17.5 15.625V4.375C17.5 3.34 16.66 2.5 15.625 2.5H4.375ZM6.5 6.875C6.5 6.53 6.78 6.25 7.125 6.25H12.875C13.22 6.25 13.5 6.53 13.5 6.875C13.5 7.22 13.22 7.5 12.875 7.5H7.125C6.78 7.5 6.5 7.22 6.5 6.875ZM5.44 9.94C5.68 9.7 6.07 9.7 6.31 9.94L7 10.63L8.94 8.69C9.18 8.45 9.57 8.45 9.81 8.69C10.05 8.93 10.05 9.32 9.81 9.56L7.44 11.94C7.2 12.18 6.8 12.18 6.56 11.94L5.44 10.81C5.2 10.57 5.2 10.18 5.44 9.94ZM6.5 14.375C6.5 14.03 6.78 13.75 7.125 13.75H12.875C13.22 13.75 13.5 14.03 13.5 14.375C13.5 14.72 13.22 15 12.875 15H7.125C6.78 15 6.5 14.72 6.5 14.375Z" fill="currentColor"/></svg>',
+  snLogo: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.02 0-1.99-.22-2.86-.6L3 17l1.1-3.5A6.96 6.96 0 0 1 2 9Z"/><circle cx="6.3" cy="9" r=".9" fill="currentColor" stroke="none"/><circle cx="9" cy="9" r=".9" fill="currentColor" stroke="none"/><circle cx="11.7" cy="9" r=".9" fill="currentColor" stroke="none"/></svg>',
+  crm: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7.5" cy="10" r="5"/><circle cx="12.5" cy="10" r="5"/></svg>',
+  marketing: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8v4h2l9 4V4L4 8H2Z"/><path d="M15.5 8.3a2.6 2.6 0 0 1 0 3.4"/><path d="M6 12v2.5a1.2 1.2 0 0 0 1.2 1.2H8a1.2 1.2 0 0 0 1.2-1.2V13"/></svg>',
+  flow: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4.5" cy="4.5" r="2.2"/><circle cx="15.5" cy="4.5" r="2.2"/><circle cx="10" cy="16" r="2.2"/><path d="M6.5 5.3L13.5 5.3M6 6.3L8.7 13.8M14 6.3L11.3 13.8"/></svg>',
+  mobishop: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h15l1 4.2a2 2 0 0 1-3.83.9 2 2 0 0 1-3.84 0 2 2 0 0 1-3.84 0 2 2 0 0 1-3.83-.9L2.5 4Z"/><path d="M4 9v7.5h12V9"/><path d="M8 16.5V12h4v4.5"/></svg>',
+  docBuilder: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 2.5h6l3 3v12h-9v-15Z"/><path d="M11.5 2.5v3h3"/><path d="M7.5 10.5h5M7.5 13h5M7.5 15.5h3"/></svg>',
+  search: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8.7" cy="8.7" r="5.5"/><path d="M16.5 16.5l-3.8-3.8"/></svg>'
+};
+
+/* Icon rail + flyout menu panel — mirrors side-navigation.structure.json's real IA.
+   Only "Omnichannel" has working pages in this demo (Setup/Inbox/Tickets/Analytic);
+   every other category still renders for visual completeness but its items are
+   out of scope, same as any other not-yet-built section in this demo. */
+const SN_CATEGORIES = [
+  {id:'omnichannel', label:'Omnichannel', icon:'inbox'},
+  {id:'crm', label:'CRM', icon:'crm'},
+  {id:'marketing', label:'Marketing', icon:'marketing'},
+  {id:'aiAgent', label:'AI Agent', icon:'chatbot'},
+  {id:'flow', label:'Flow', icon:'flow'},
+  {id:'mobishop', label:'Mobishop', icon:'mobishop'},
+  {id:'docBuilder', label:'Doc Builder', icon:'docBuilder'},
+  {id:'billing', label:'Billing', icon:'billings'}
+];
+/* Tickets already absorbed the engineering Task board (see the Tickets/Tasks tab
+   merge), so it sits where the real IA's "Task" menu would be — under CRM, alongside
+   the customer-relationship pages, rather than under Omnichannel with Inbox/Analytic. */
+const SN_MENUS_BY_CATEGORY = {
+  omnichannel: [
+    {id:'setup', label:'Setup Guide', icon:'setup', navigable:true},
+    {id:'inbox', label:'Inbox', icon:'inbox', navigable:true},
+    {id:'reports', label:'Analytic', icon:'reports', navigable:true},
+    {id:'integration', label:'Omnichannel integration', icon:'integrations', navigable:false},
+    {id:'omniSettings', label:'Omnichannel Settings', icon:'settings', navigable:false}
+  ],
+  crm: [
+    {id:'tickets', label:'Tickets', icon:'tickets', navigable:true},
+    {id:'contact', label:'Contact', icon:'contacts', navigable:false},
+    {id:'customer', label:'Customer', icon:'contacts', navigable:false},
+    {id:'taskAnalytic', label:'Task analytic', icon:'reports', navigable:false},
+    {id:'crmSettings', label:'CRM Settings', icon:'settings', navigable:false}
+  ]
+};
+
+/* Which top-level nav category a given page/view belongs to — drives both which
+   category highlights active on the rail and which flyout is showing. */
+function categoryForView(v){
+  if(v==='tickets') return 'crm';
+  if(v==='inbox' || v==='setup' || v==='reports') return 'omnichannel';
+  return null;
+}
+
+function openTaskCount(){ return tasks.filter(t=>t.status!=='Fixed').length; }
+function setupRemainingCount(){ return SETUP_STEPS.filter(s=>s.required && !computeStepDone(s.id)).length; }
+function inboxUnreadCount(){ return conversations.filter(c=>c.isNew && !c.seen).length; }
+function snMenuBadge(id){
+  if(id==='inbox') return inboxUnreadCount();
+  if(id==='tickets') return openTaskCount();
+  if(id==='setup') return setupRemainingCount();
+  return 0;
+}
+
+function renderRail(){
+  const rail = document.getElementById('sn-rail');
+  const catHTML = cat => `<button class="sn-rail-btn ${state.navCategory===cat.id?'is-active':''}" data-cat="${cat.id}" title="${cat.label}">
+    <span class="sn-rail-icon-wrap">${ICONS[cat.icon]}</span>
+    <span>${cat.label}</span>
+  </button>`;
+  rail.innerHTML = `
+    <div class="sn-rail-logo">${ICONS.snLogo}</div>
+    <div class="sn-rail-scroll">${SN_CATEGORIES.map(catHTML).join('')}</div>
+    <div class="sn-rail-footer">
+      <button class="sn-rail-util" id="sn-search-btn" title="Search">${ICONS.search}</button>
+      <button class="sn-rail-util" id="sn-alerts-btn" title="Notifications">
+        <span class="sn-badge">22</span>${ICONS.alerts}
+      </button>
+      <button class="sn-rail-util" id="sn-settings-btn" title="Settings">${ICONS.settings}</button>
+      <button class="sn-avatar-btn" id="sn-profile-btn" title="Profile">AF<span class="sn-avatar-dot"></span></button>
+    </div>
+  `;
+  rail.querySelectorAll('[data-cat]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ state.navCategory = btn.dataset.cat; renderRail(); });
+  });
+  ['sn-search-btn','sn-alerts-btn','sn-settings-btn','sn-profile-btn'].forEach(id=>{
+    document.getElementById(id).addEventListener('click', ()=>toast('This section is not part of the demo scope.'));
+  });
+  renderFlyout();
+}
+
+function renderFlyout(){
+  const flyout = document.getElementById('sn-flyout');
+  const cat = SN_CATEGORIES.find(c=>c.id===state.navCategory);
+  const menus = SN_MENUS_BY_CATEGORY[cat.id];
+  if(!menus){
+    flyout.innerHTML = `
+      <div class="sn-flyout-title">${cat.label}</div>
+      <div class="empty-note" style="padding:16px 6px;">This section is not part of the demo scope.</div>
+    `;
+    return;
+  }
+  flyout.innerHTML = `
+    <div class="sn-flyout-title">${cat.label}</div>
+    <ul class="sn-menu-list">
+      ${menus.map(m=>{
+        const active = m.navigable && (state.view===m.id || (state.view==='chat' && state.chatOrigin===m.id));
+        const badge = m.navigable ? snMenuBadge(m.id) : 0;
+        return `<li>
+          <button class="sn-menu-row ${active?'is-active':''}" data-menu="${m.id}" data-navigable="${m.navigable}">
+            ${ICONS[m.icon]}
+            <span>${m.label}</span>
+            ${badge>0?`<span class="sn-badge-inline">${badge>99?'99+':badge}</span>`:''}
+          </button>
+        </li>`;
+      }).join('')}
+    </ul>
+  `;
+  flyout.querySelectorAll('[data-menu]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.dataset.navigable==='true') switchView(btn.dataset.menu);
+      else toast('This section is not part of the demo scope.');
+    });
+  });
+}
+
+function switchView(v){
+  state.view = v;
+  // 'chat' has no menu entry of its own, so it borrows whichever category the page it
+  // was opened from belongs to (state.chatOrigin) rather than always defaulting to one.
+  const cat = categoryForView(v==='chat' ? state.chatOrigin : v);
+  if(cat) state.navCategory = cat;
+  document.getElementById('view-inbox').hidden = v!=='inbox';
+  document.getElementById('view-chat').hidden = v!=='chat';
+  document.getElementById('view-setup').hidden = v!=='setup';
+  document.getElementById('view-tickets').hidden = v!=='tickets';
+  document.getElementById('view-reports').hidden = v!=='reports';
+  renderRail();
+  if(v==='inbox') renderInbox();
+  if(v==='setup') renderSetupPage();
+  if(v==='tickets') renderTicketsPage();
+  if(v==='reports') renderReportsPage();
+  // 'chat' has no menu entry of its own — it's reached via openConversation() (from Inbox
+  // or Tickets), which renders it and remembers state.chatOrigin for the back button.
+}
+
+/* Switch into the Tickets view and land directly on a given sub-tab —
+   used by "View Tasks board", "View ticket" links, etc. */
+function openTicketsTab(tab){
+  state.ticketsTab = tab;
+  switchView('tickets');
+}
+
+function assignmentPillHTML(c){
+  if(c.assignment.type==='ai') return `<span class="pill pill-ai">🤖 AI-handled</span>`;
+  if(c.assignment.name==='You') return `<span class="pill pill-you">👤 You</span>`;
+  return `<span class="pill pill-mate">👤 ${esc(c.assignment.name)}</span>`;
+}
+
+/* ---------------- Inbox (conversation list) ---------------- */
+const CONV_TABS = [
+  {id:'all', label:'All', f:c=>true},
+  {id:'ai', label:'🤖 AI-handled', f:c=>c.assignment.type==='ai'},
+  {id:'unserved', label:'Unserved', f:c=>c.status==='Unserved'},
+  {id:'served', label:'Served', f:c=>c.status==='Served'},
+  {id:'resolved', label:'Resolved', f:c=>c.status==='Resolved'}
+];
+
+function filteredConvs(){
+  const tab = CONV_TABS.find(t=>t.id===state.convTab);
+  // The Inbox is one row per customer, not per ticket — a customer with several
+  // tickets over time is represented by their latest one here.
+  let list = latestTicketsByCustomer(conversations).filter(tab.f);
+  if(state.search.trim()){
+    const q = state.search.trim().toLowerCase();
+    list = list.filter(c=>c.name.toLowerCase().includes(q) || c.feature.toLowerCase().includes(q));
+  }
+  return list;
+}
+
+function previewOf(c){
+  const last = c.messages[c.messages.length-1];
+  if(!last) return '';
+  if(last.from==='sys') return esc(last.text);
+  if(last.type==='csat-response') return esc(last.text);
+  const txt = last.from==='in' ? (last.en ? '🌐 '+last.en : last.text) : last.text;
+  return esc(txt.length>46 ? txt.slice(0,46)+'…' : txt);
+}
+
+/* Card left-rail color + chips — mirrors the real Mobichat InboxView's stripe/chip
+   system (Figma 3347:5259/5370): served=blue, unserved=amber, resolved/bot=green,
+   with a stronger shade for Critical tickets standing in for the real app's
+   "active conversation" state. */
+const DOUBLE_CHECK_SVG = `<svg class="conv-readreceipt" viewBox="0 0 24 24" fill="none"><path d="M1.5 12.5L5.57574 16.5757C5.81005 16.8101 6.18995 16.8101 6.42426 16.5757L9 14M16 7L12 11M7 12L11.5757 16.5757C11.8101 16.8101 12.1899 16.8101 12.4243 16.5757L22 7" stroke="#16A34A" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+
+function convStripeColor(c){
+  const active = c.severity==='Critical';
+  if(c.status==='Served') return active ? '#1e64dc' : '#60b5fa';
+  if(c.status==='Unserved') return active ? '#d97706' : '#fbbf24';
+  return active ? '#16a34a' : '#4ade80';
+}
+
+function assignmentChipHTML(c){
+  if(c.assignment.type==='ai') return `<span class="conv-chip conv-chip-neutral">🤖 AI-handled</span>`;
+  if(c.assignment.name==='You') return `<span class="conv-chip conv-chip-brand">👤 You</span>`;
+  return `<span class="conv-chip conv-chip-neutral">👤 ${esc(c.assignment.name)}</span>`;
+}
+
+function renderConvTabs(){
+  const el = document.getElementById('conv-tabs');
+  const reps = latestTicketsByCustomer(conversations);
+  el.innerHTML = CONV_TABS.map(t=>{
+    const count = reps.filter(t.f).length;
+    return `<button class="conv-tab ${state.convTab===t.id?'active':''}" data-tab="${t.id}">${t.label} <span style="color:var(--text-muted)">${count}</span></button>`;
+  }).join('');
+  el.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click', ()=>{ state.convTab=b.dataset.tab; renderConvList(); }));
+}
+
+function renderNewBanner(){
+  const slot = document.getElementById('new-banner-slot');
+  const n = conversations.filter(c=>c.isNew && !c.seen).length;
+  if(n<=0){ slot.innerHTML=''; return; }
+  slot.innerHTML = `<div class="new-banner" id="new-banner">🔔 ${n} new ticket${n>1?'s':''} <span>Show →</span></div>`;
+  document.getElementById('new-banner').addEventListener('click', ()=>{
+    state.convTab='all'; state.search=''; document.getElementById('conv-search').value='';
+    renderConvTabs(); renderConvList();
+    const first = conversations.find(c=>c.isNew && !c.seen);
+    if(first) openConversation(first.id);
+  });
+}
+
+function renderConvList(){
+  renderConvTabs();
+  renderNewBanner();
+  const scroll = document.getElementById('conv-scroll');
+  const list = filteredConvs();
+  if(list.length===0){ scroll.innerHTML = `<div class="empty-note">No tickets in this view.</div>`; return; }
+  scroll.innerHTML = list.map(c=>{
+    const previewText = previewOf(c);
+    const lastOut = c.messages.length>0 && c.messages[c.messages.length-1].from==='out';
+    const selected = state.currentId===c.id;
+    return `<div class="conv-row ${c.status==='Served'?'served-bg':''} ${selected?'selected':''}" data-id="${c.id}">
+      <span class="conv-stripe" style="width:${selected?8:2}px; background:${convStripeColor(c)};"></span>
+      <div class="conv-row-inner">
+        ${avatarHTML(c.name)}
+        <div class="conv-body">
+          <div class="conv-row-top">
+            <span class="conv-name">${esc(c.name)}</span>
+            <span class="conv-time">${c.time}</span>
+          </div>
+          <div class="conv-preview-row">
+            ${lastOut ? DOUBLE_CHECK_SVG : ''}
+            <span class="conv-preview">${previewText}</span>
+          </div>
+          <div class="conv-bottom-row">
+            <span class="conv-phone-chip">${esc(c.phone)}</span>
+            <div class="conv-chips">
+              ${c.isNew && !c.seen ? '<span class="conv-chip conv-chip-warning">NEW</span>' : ''}
+              ${assignmentChipHTML(c)}
+              ${c.locked ? `<span class="lock-ico" title="${c.locked.by==='You'?'Locked by you':'Locked by '+c.locked.by}">🔒</span>` : ''}
+              ${c.unread>0 ? `<span class="unread-dot">${c.unread}</span>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  scroll.querySelectorAll('[data-id]').forEach(row=>row.addEventListener('click', ()=>openConversation(row.dataset.id)));
+}
+
+/* Moves the shared #chatpanel/#infopanel nodes into the given container — used to put
+   them inline next to the Inbox list, or back into the standalone #view-chat page when
+   a conversation is opened from Tickets/Reports. Same nodes, same render functions. */
+function attachChatPanelsTo(containerId){
+  const container = document.getElementById(containerId);
+  container.appendChild(document.getElementById('chatpanel'));
+  container.appendChild(document.getElementById('infopanel'));
+}
+
+function renderInbox(){
+  renderConvList();
+  const search = document.getElementById('conv-search');
+  search.value = state.search;
+  search.oninput = ()=>{ state.search = search.value; renderConvList(); };
+  const simBtn = document.getElementById('inbox-btn-simulate');
+  if(simBtn) simBtn.onclick = simulateIncoming;
+
+  // Chat + info render inline beside the list — no separate "chat" view to navigate to.
+  attachChatPanelsTo('view-inbox');
+  renderChat();
+  renderInfoPanel();
+}
+
+/* Short, headline-style ticket summary — used on the Tickets table and the ticket modal */
+const HEADLINES = {
+  Billing: 'Subscription payment not reflected',
+  WABABug: 'WhatsApp Business API disconnecting',
+  AccountSuspended: 'Account suspended, disputes spam flag',
+  ChatbotBug: 'Chatbot keyword trigger broken',
+  BroadcastFail: 'Broadcast messages failing to send',
+  SeatQuestion: 'Asking how to add an agent seat',
+  HowToKanban: 'Needs help using the Task Kanban board',
+  PricingQuestion: 'Question about broadcast credit limits',
+  Positive: 'Positive feedback on a recent fix',
+  InvoiceQuestion: 'Asking where to find their invoice',
+  MultiIssueEscalation: 'Suspended account + failed payment + locked Task access'
+};
+function ticketHeadline(c){ return HEADLINES[c.category] || c.category; }
+
+function ticketSummary(c){
+  const lastIn = [...c.messages].reverse().find(m => m.from === 'in' && m.type !== 'csat-response');
+  const quote = lastIn ? (lastIn.en || lastIn.text) : '';
+  const routing = c.assignment.type === 'ai' ? 'auto-resolved by AI' : `routed to ${c.team}, assigned to ${c.assignment.name}`;
+  return `${c.name} (${c.feature}) reported: "${quote}" — sentiment ${c.sentiment.toLowerCase()}, ${routing}.`;
+}
+
+/* ---------------- ticket detail modal ---------------- */
+function openTicketModal(id){
+  const c = getConv(id);
+  if(!c) return;
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title">Ticket summary</div>
+          <button class="modal-close" id="modal-close">✕</button>
+        </div>
+        <div class="modal-body">
+          <div style="display:flex;align-items:center;gap:12px;">
+            ${avatarHTML(c.name,44)}
+            <div>
+              <div style="font-weight:700;font-size:15px;color:var(--text-strong);">${esc(c.name)}</div>
+              <div style="font-size:12px;color:var(--text-weak);">${esc(c.phone)} · ${esc(c.feature)}</div>
+            </div>
+          </div>
+          <div class="modal-section-label">Ticket Details</div>
+          <div class="kv-grid">
+            <div class="kv-item"><span class="kv-label">Ticket ID</span><span class="kv-value">${ticketIdFor(c)}</span></div>
+            <div class="kv-item"><span class="kv-label">Status</span><span class="kv-value"><span class="status-pill status-${c.status}">${c.status}</span></span></div>
+            <div class="kv-item"><span class="kv-label">Team</span><span class="kv-value">${esc(c.team)}</span></div>
+            <div class="kv-item"><span class="kv-label">Age</span><span class="kv-value">${formatDuration(Date.now()-c.createdAt)}</span></div>
+            ${c.csat ? `<div class="kv-item"><span class="kv-label">CSAT</span><span class="kv-value">⭐ ${c.csat.rating}/5</span></div>` : ''}
+          </div>
+          <div class="modal-section-label">Customer Profile</div>
+          <div class="kv-grid">
+            <div class="kv-item"><span class="kv-label">Lifetime spend</span><span class="kv-value">${c.spend}</span></div>
+            <div class="kv-item"><span class="kv-label">Customer since</span><span class="kv-value">${c.memberSince}</span></div>
+            <div class="kv-item"><span class="kv-label">Past tickets</span><span class="kv-value">${c.pastTickets}</span></div>
+            <div class="kv-item"><span class="kv-label">Language</span><span class="kv-value">${c.lang}</span></div>
+            <div class="kv-item"><span class="kv-label">Device</span><span class="kv-value" style="font-size:11.5px;">${esc(c.device)} · v${c.version}</span></div>
+          </div>
+          <div class="modal-section-label">Summary</div>
+          <div class="tag-row" style="margin-bottom:2px;align-items:center;">
+            ${severityIconHTML(c.severity)}
+            <span class="pill" style="background:${c.severity==='Critical'?'#fef2f2':c.severity==='Medium'?'#fff7ed':'#f0fdf4'};color:${c.severity==='Critical'?'var(--error)':c.severity==='Medium'?'var(--warning)':'var(--success)'};">${c.severity}</span>
+            <span class="pill pill-mate">${esc(c.priority)} priority</span>
+            <span class="pill pill-mate">${c.category}</span>
+            <span class="badge-sentiment sent-${c.sentiment}" style="font-size:10px;">${c.sentiment}</span>
+            ${assignmentPillHTML(c)}
+            ${confidenceChipHTML(c.confidence)}
+          </div>
+          <div class="modal-headline">${esc(ticketHeadline(c))}</div>
+          <div class="modal-summary-text">${esc(ticketSummary(c))}</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="modal-cancel">Close</button>
+          <button class="btn btn-primary" id="modal-goto">Open ticket →</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+  document.getElementById('modal-overlay').addEventListener('click', e=>{ if(e.target.id==='modal-overlay') closeModal(); });
+  document.getElementById('modal-goto').addEventListener('click', ()=>{
+    closeModal();
+    openConversation(c.id);
+  });
+}
+function closeModal(){ document.getElementById('modal-root').innerHTML = ''; }
+
+/* ---------------- engineer task-history modal ---------------- */
+function openEngineerHistoryModal(name){
+  const root = document.getElementById('modal-root');
+  const history = tasks.filter(t=>t.engineer===name);
+  const openCount = history.filter(t=>t.status!=='Fixed').length;
+  const fixedCount = history.length - openCount;
+  root.innerHTML = `
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            ${avatarHTML(name,36)}
+            <div>
+              <div class="modal-title">${esc(name)}</div>
+              <div style="font-size:11.5px;color:var(--text-weak);">${history.length} task${history.length===1?'':'s'} handled · ${openCount} open · ${fixedCount} fixed</div>
+            </div>
+          </div>
+          <button class="modal-close" id="modal-close">✕</button>
+        </div>
+        <div class="modal-body">
+          ${history.length ? history.map(t=>`
+            <div class="task-history-row">
+              ${severityIconHTML(t.severity)}
+              <div class="task-history-row-main">
+                <div class="task-history-row-title">${esc(t.title)}</div>
+                <div class="task-history-row-sub">${t.id} · ${esc(t.feature)} · ${t.category}</div>
+              </div>
+              <span class="status-pill status-${t.status==='Fixed'?'Resolved':(t.status==='In Progress'||t.status==='Investigating'?'Served':'Unserved')}">${t.status}</span>
+            </div>
+          `).join('') : `<div class="empty-note">No tasks recorded for this engineer yet.</div>`}
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="modal-cancel">Close</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+  document.getElementById('modal-overlay').addEventListener('click', e=>{ if(e.target.id==='modal-overlay') closeModal(); });
+}
+
+function getConv(id){ return conversations.find(c=>c.id===id); }
+function logActivity(c, text){ c.activityLog.push({t:nowTime(), text}); }
+
+/* All tickets ever raised by this same customer (matched by phone number), oldest
+   first. The Inbox uses this to show the customer's whole history in one thread;
+   the Tickets page never calls this — each ticket there only ever shows its own
+   messages, and an older ticket is only reachable via its own row/ticket code. */
+function customerTickets(c){
+  return conversations.filter(x=>x.phone===c.phone).sort((a,b)=>a.createdAt-b.createdAt);
+}
+
+/* One Inbox row per customer, represented by their most recently created ticket
+   (so status/preview reflect what's current) — customerTickets() is what pulls the
+   rest of that customer's history back in once the row is opened. */
+function latestTicketsByCustomer(list){
+  const latest = new Map();
+  list.forEach(c=>{
+    const cur = latest.get(c.phone);
+    if(!cur || c.createdAt > cur.createdAt) latest.set(c.phone, c);
+  });
+  return [...latest.values()];
+}
+
+/* The sole entry point into a conversation — every path (Inbox list, Tickets table,
+   ticket modal, task card, new-ticket banner) funnels through here. From the Inbox it
+   renders the chat inline next to the list (no navigation, no back button needed —
+   just click another row). From everywhere else it opens the standalone chat view and
+   remembers the origin page in state.chatOrigin so that view's back button can return there. */
+function openConversation(id){
+  const c = getConv(id);
+  if(!c) return;
+  const wasUnseen = !c.seen;
+  c.seen = true; c.isNew = false; c.unread = 0;
+  if(!c.locked){ c.locked = {by:'You'}; logActivity(c,'Claimed by You'); }
+  state.currentId = id;
+  state.aiPopupOpen = true;
+  if(wasUnseen) logActivity(c,'Ticket opened');
+
+  if(state.view==='inbox'){
+    renderConvList();
+    renderChat();
+    renderInfoPanel();
+    return;
+  }
+
+  if(state.view!=='chat') state.chatOrigin = state.view;
+  attachChatPanelsTo('view-chat');
+  switchView('chat');
+  renderChat();
+  renderInfoPanel();
+}
+
+function lockBannerHTML(c){
+  if(!c.locked) return '';
+  if(c.locked.by==='You') return `<div class="chat-banner banner-lock-you">🔒 You're handling this ticket</div>`;
+  return `<div class="chat-banner banner-lock-mate">🔒 Being handled by ${esc(c.locked.by)} — you can view but replies are locked</div>`;
+}
+
+function renderChat(){
+  const c = getConv(state.currentId);
+  const panel = document.getElementById('chatpanel');
+  if(!c){ panel.innerHTML = `<div class="chat-empty">🎫<div>Select a ticket to get started</div></div>`; return; }
+
+  // Inline inside the Inbox there's nothing to navigate back to — the list is right there.
+  const originLabel = {inbox:'Inbox', tickets:'Tickets', reports:'Reports'}[state.chatOrigin] || 'Tickets';
+  panel.innerHTML = `
+    ${state.view==='chat' ? `<div class="chat-back-bar">
+      <button class="chat-back-btn" id="btn-back-to-tickets">← Back to ${originLabel}</button>
+    </div>` : ''}
+    <div class="chat-header">
+      <div class="chat-header-left">
+        ${avatarHTML(c.name,40)}
+        <div>
+          <div class="chat-header-name">${esc(c.name)}</div>
+          <div class="chat-header-sub">
+            <span>${esc(c.phone)}</span><span>·</span><span>💬 Chat</span><span>·</span>
+            <span>🌐 ${c.lang}</span>
+          </div>
+        </div>
+      </div>
+      <div class="chat-header-right">
+        <button class="btn btn-sm" id="btn-call" title="Call ${esc(c.name)}">📞 Call</button>
+        ${(c.status!=='Resolved' && c.assignment.type!=='ai') ? `<button class="btn btn-sm" id="btn-resolve">✓ Mark Resolved</button>` : ''}
+      </div>
+    </div>
+    ${c.assignment.type==='ai' ? `<div class="chat-banner banner-bot">🤖 AI-handled — resolved automatically, no agent needed</div>` : ''}
+    ${lockBannerHTML(c)}
+    <div class="thread" id="thread"></div>
+    <div class="composer-wrap" id="composer-wrap"></div>
+  `;
+
+  renderThread(c);
+  renderComposerArea(c);
+
+  document.getElementById('btn-call').addEventListener('click', ()=>toast(`📞 Calling ${c.name}… (demo only)`));
+  const resolveBtn = document.getElementById('btn-resolve');
+  if(resolveBtn) resolveBtn.addEventListener('click', ()=>markResolved(c.id));
+  const backBtn = document.getElementById('btn-back-to-tickets');
+  if(backBtn) backBtn.addEventListener('click', ()=>switchView(state.chatOrigin || 'tickets'));
+}
+
+function bubbleHTML(m, c){
+  if(m.from==='sys'){
+    return `<div class="msg-row sys"><div class="bubble">${esc(m.text)}</div></div>`;
+  }
+  if(m.type==='csat-response'){
+    return `<div class="msg-row in"><div class="bubble csat-stars">${esc(m.text)}</div><div class="msg-meta">${m.time||''}</div></div>`;
+  }
+  if(m.type==='csat-survey'){
+    return `<div class="msg-row out">
+      <div class="csat-survey-card">
+        <div class="csat-survey-title">📋 How was your experience?</div>
+        <div class="csat-survey-sub">We'd love your feedback on the support you just received.</div>
+        <div class="csat-survey-stars">☆ ☆ ☆ ☆ ☆</div>
+      </div>
+      <div class="msg-meta">You · ${m.time||''}</div>
+    </div>`;
+  }
+  if(m.from==='in'){
+    return `<div class="msg-row in">
+      <div class="bubble">${esc(m.text)}</div>
+      ${m.en ? `<div class="msg-translate">🌐 <span>${esc(m.en)}</span></div>` : ''}
+      <div class="msg-meta">${m.time||''}</div>
+    </div>`;
+  }
+  const isAI = m.label==='AI';
+  return `<div class="msg-row out">
+    <div class="bubble ${isAI?'ai':''}">${esc(m.text)}</div>
+    ${m.translated && m.en ? `<div class="msg-translate">🌐 Drafted in English: “${esc(m.en)}”</div>` : ''}
+    <div class="msg-meta">${isAI?'<span class="msg-label-ai">🤖 AI</span>':esc(m.label||'')} ${m.time||''}</div>
+  </div>`;
+}
+
+/* From the Inbox, a ticket is opened in the context of its customer — the thread
+   shows every ticket that customer has ever raised, oldest first, so an admin can
+   see the whole relationship. From everywhere else (Tickets, the ticket modal, task
+   cards) a ticket is opened on its own — the thread shows only that one ticket's own
+   messages, and an older ticket is only reachable by opening it directly. */
+function renderThread(c){
+  const thread = document.getElementById('thread');
+  const tickets = state.view==='inbox' ? customerTickets(c) : [c];
+  if(tickets.length > 1){
+    thread.innerHTML = tickets.map(t=>
+      `<div class="day-divider">🎫 Ticket ${ticketIdFor(t)} · ${t.category}</div>` + t.messages.map(m=>bubbleHTML(m,t)).join('')
+    ).join('');
+  } else {
+    thread.innerHTML = `<div class="day-divider">Today</div>` + tickets[0].messages.map(m=>bubbleHTML(m,tickets[0])).join('');
+  }
+  thread.scrollTop = thread.scrollHeight;
+}
+
+/* ---------------- composer + AI suggestion popup ---------------- */
+function pickSuggestionSet(category){ return SUGGESTIONS[category] || SUGGESTIONS.Positive; }
+
+function confidenceChipHTML(pct){
+  const cls = pct>=80 ? 'chip-conf-hi' : 'chip-conf-lo';
+  return `<span class="chip ${cls}">🎯 ${pct}% confidence</span>`;
+}
+
+function renderComposerArea(c, prefillText){
+  const wrap = document.getElementById('composer-wrap');
+  if(c.assignment.type==='ai'){
+    wrap.innerHTML = c.csat
+      ? `<div class="resolved-note">🤖 Auto-resolved by AI — CSAT collected (${c.csat.rating}/5 ⭐)</div>`
+      : `<div class="resolved-note">🤖 Auto-resolved by AI — satisfaction survey sent, waiting on the customer…</div>`;
+    return;
+  }
+  if(c.status==='Resolved'){
+    wrap.innerHTML = c.csat
+      ? `<div class="resolved-note">✅ Ticket resolved — CSAT collected (${c.csat.rating}/5 ⭐)</div>`
+      : `<div class="resolved-note">📨 Satisfaction survey sent — waiting on the customer's response…</div>`;
+    return;
+  }
+  const lockedByOther = c.locked && c.locked.by!=='You';
+  if(lockedByOther){
+    wrap.innerHTML = `<div class="resolved-note">🔒 Locked by ${esc(c.locked.by)} — open a different ticket to help elsewhere.</div>`;
+    return;
+  }
+
+  const suggSet = pickSuggestionSet(c.category);
+  const idx = c._suggIdx % suggSet.length;
+  const sugg = suggSet[idx];
+  const sendsIn = c.lang;
+  const flagged = c.confidence < 80;
+  const kbSource = knowledgeSourceFor(c.category);
+
+  // The AI drafts directly in the customer's own language — that's what actually gets sent.
+  const sentText = c.lang==='Indonesian' ? (sugg.id || sugg.en) : sugg.en;
+
+  wrap.innerHTML = `
+    ${state.aiPopupOpen ? `
+    <div class="ai-popup" id="ai-popup">
+      <div class="ai-popup-head">
+        <div class="ai-popup-title">✨ AI Suggested reply</div>
+        <button class="ai-popup-close" id="ai-popup-close">✕</button>
+      </div>
+      <div class="ai-meta-row">
+        ${confidenceChipHTML(c.confidence)}
+        <span class="chip chip-lang">🌐 drafted in ${sendsIn}</span>
+        ${kbSource ? `<span class="chip chip-kb" title="Drafted using this document from your Knowledge Base">📚 ${esc(kbSource)}</span>` : ''}
+        ${flagged ? `<span class="chip chip-flag">⚠️ flagged for human review</span>` : ''}
+      </div>
+      <div class="ai-suggestion-text">${esc(sentText)}</div>
+      <div class="ai-popup-actions">
+        <button class="btn btn-primary btn-sm" id="btn-use-reply">Use this reply</button>
+        <button class="btn btn-sm" id="btn-show-another">Show another →</button>
+        <button class="btn btn-sm btn-quick-send" id="btn-quick-send" title="Send this reply immediately, no review step">⚡ Quick Send</button>
+      </div>
+    </div>` : ''}
+    ${(!state.aiPopupOpen && c.lang!=='English') ? `<div class="hint-row" style="margin:8px 14px 0;">💡 Tip: ${c.lang} customer — try the AI suggestion for an accurate translated reply.</div>` : ''}
+    <div class="composer">
+      <div class="composer-box">
+        <textarea id="composer-text" maxlength="500" placeholder="Type a reply…">${esc(prefillText||'')}</textarea>
+        <div class="composer-toolbar">
+          <div class="composer-icons"><span>📎</span><span>😊</span><span>🖼️</span></div>
+          <span class="char-count" id="char-count">${(prefillText||'').length}/500</span>
+        </div>
+      </div>
+      <div class="composer-actions">
+        <button class="btn" id="btn-ai-trigger">⚡ AI · Suggest reply</button>
+        <button class="btn btn-primary" id="btn-send">Send</button>
+      </div>
+    </div>
+  `;
+
+  const ta = document.getElementById('composer-text');
+  ta.addEventListener('input', ()=>{ document.getElementById('char-count').textContent = `${ta.value.length}/500`; });
+  if(prefillText){ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+
+  const closeBtn = document.getElementById('ai-popup-close');
+  if(closeBtn) closeBtn.addEventListener('click', ()=>{ state.aiPopupOpen=false; renderComposerArea(c, ta.value); });
+
+  const useBtn = document.getElementById('btn-use-reply');
+  if(useBtn) useBtn.addEventListener('click', ()=>useAISuggestion(c));
+
+  const anotherBtn = document.getElementById('btn-show-another');
+  if(anotherBtn) anotherBtn.addEventListener('click', ()=>{ c._suggIdx++; renderComposerArea(c, ta.value); });
+
+  const quickSendBtn = document.getElementById('btn-quick-send');
+  if(quickSendBtn) quickSendBtn.addEventListener('click', ()=>quickSendAISuggestion(c));
+
+  document.getElementById('btn-ai-trigger').addEventListener('click', ()=>{ state.aiPopupOpen=true; renderComposerArea(c, ta.value); });
+  document.getElementById('btn-send').addEventListener('click', ()=>{
+    const text = ta.value.trim();
+    if(!text) return;
+    c.messages.push({from:'out', text, label:'You', time:nowTime()});
+    logActivity(c, 'Agent replied manually');
+    if(c.status==='Unserved') c.status='Served';
+    renderThread(c);
+    renderComposerArea(c);
+  });
+}
+
+function useAISuggestion(c){
+  const suggSet = pickSuggestionSet(c.category);
+  const sugg = suggSet[c._suggIdx % suggSet.length];
+  const sentText = c.lang==='Indonesian' ? (sugg.id || sugg.en) : sugg.en;
+  logActivity(c, 'AI-suggested reply inserted into composer');
+  state.aiPopupOpen = false;
+  renderComposerArea(c, sentText);
+  toast('✨ Reply added to the message box — review and send');
+}
+
+function quickSendAISuggestion(c){
+  const suggSet = pickSuggestionSet(c.category);
+  const sugg = suggSet[c._suggIdx % suggSet.length];
+  const langKey = c.lang==='Indonesian' ? 'id' : 'en';
+  const sentText = sugg[langKey] || sugg.en;
+  const translated = langKey!=='en';
+  c.messages.push({from:'out', text:sentText, label:'You', time:nowTime(), translated, en: translated?sugg.en:null});
+  logActivity(c, 'AI-suggested reply quick-sent'+(translated?' (auto-translated)':''));
+  if(c.status==='Unserved') c.status='Served';
+  state.aiPopupOpen = false;
+  renderThread(c);
+  renderComposerArea(c);
+  toast('⚡ Quick sent'+(translated?` in ${c.lang}`:''));
+}
+
+function markResolved(id){
+  const c = getConv(id);
+  if(!c) return;
+  c.status = 'Resolved';
+  c.resolvedAt = Date.now();
+  logActivity(c, 'Marked Resolved');
+  if(state.currentId===c.id){ renderChat(); renderInfoPanel(); }
+  if(state.view==='tickets') renderTicketsPage();
+  if(state.view==='inbox') renderConvList();
+  toast('✅ Ticket marked Resolved — satisfaction survey sent');
+  sendCSATSurvey(c);
+}
+
+/* Not scoped to "the currently open conversation" — markResolved() can now be triggered
+   on a ticket that isn't the one on screen (e.g. auto-resolve from a merged customer
+   message), so every render here is guarded by state.currentId instead of assumed. */
+function sendCSATSurvey(c){
+  c.messages.push({from:'out', type:'csat-survey', time:nowTime()});
+  logActivity(c, 'Satisfaction survey sent');
+  if(state.currentId===c.id){ renderThread(c); renderComposerArea(c); }
+  setTimeout(()=>{
+    const rating = c.confidence>=85 ? 5 : c.confidence>=75 ? 4 : 4;
+    const stars = '⭐'.repeat(rating);
+    c.messages.push({from:'in', type:'csat-response', text:stars, time:nowTime()});
+    c.csat = {rating, comment:''};
+    logActivity(c, `CSAT received ${stars}`);
+    if(state.currentId===c.id){ renderThread(c); renderComposerArea(c); }
+    if(state.view==='tickets') renderTicketsPage();
+    if(state.view==='inbox') renderConvList();
+    toast(`⭐ CSAT received: ${rating}/5 from ${c.name}`);
+  }, 1300);
+}
+
+/* A bot-handled ticket has no human review step, so it's treated as closed the moment
+   the AI replies: status flips straight to Resolved and the CSAT survey goes out right
+   away, mirroring the human markResolved()/sendCSATSurvey() flow above. Used both for
+   brand-new AI tickets (animated, live:true) and to backfill the seeded ones on load
+   (instant, no timers/toasts — nothing was actually "just" resolved). */
+function resolveAITicket(c, opts){
+  const live = !!(opts && opts.live);
+  c.status = 'Resolved';
+  if(!c.resolvedAt) c.resolvedAt = live ? Date.now() : (c.createdAt + 2*60000);
+  const rating = c.confidence>=85 ? 5 : c.confidence>=75 ? 4 : 4;
+  const stars = '⭐'.repeat(rating);
+  c.messages.push({from:'out', type:'csat-survey', time:c.time||nowTime()});
+  logActivity(c, 'Satisfaction survey sent');
+
+  const applyRating = ()=>{
+    c.messages.push({from:'in', type:'csat-response', text:stars, time:c.time||nowTime()});
+    c.csat = {rating, comment:''};
+    logActivity(c, `CSAT received ${stars}`);
+  };
+
+  if(!live){ applyRating(); return; }
+  if(state.currentId===c.id){ renderThread(c); renderComposerArea(c); }
+  setTimeout(()=>{
+    applyRating();
+    if(state.currentId===c.id){ renderThread(c); renderComposerArea(c); }
+    if(state.view==='tickets') renderTicketsPage();
+    if(state.view==='inbox') renderConvList();
+    toast(`⭐ CSAT received: ${rating}/5 from ${c.name}`);
+  }, 1300);
+}
+
+/* ---------------- info panel ---------------- */
+let infoTab = 'info';
+
+function renderInfoPanel(){
+  const c = getConv(state.currentId);
+  const panel = document.getElementById('infopanel');
+  if(!c){ panel.innerHTML=''; return; }
+  panel.innerHTML = `
+    <div class="info-tabs">
+      <button class="info-tab ${infoTab==='info'?'active':''}" data-itab="info">Info</button>
+      <button class="info-tab ${infoTab==='task'?'active':''}" data-itab="task">Task</button>
+      <button class="info-tab ${infoTab==='log'?'active':''}" data-itab="log">Log</button>
+    </div>
+    <div class="info-body" id="info-body"></div>
+  `;
+  panel.querySelectorAll('[data-itab]').forEach(b=>b.addEventListener('click', ()=>{ infoTab=b.dataset.itab; renderInfoPanel(); }));
+  const body = document.getElementById('info-body');
+  if(infoTab==='info') body.innerHTML = infoTabHTML(c);
+  else if(infoTab==='task') body.innerHTML = taskTabHTML(c);
+  else body.innerHTML = logTabHTML(c);
+
+  const createBtn = document.getElementById('btn-create-task');
+  if(createBtn) createBtn.addEventListener('click', ()=>createEngineeringTask(c));
+  const notesArea = document.getElementById('notes-area');
+  if(notesArea) notesArea.addEventListener('input', e=>{ c.notes = e.target.value; });
+  const reassignSelect = document.getElementById('reassign-select');
+  if(reassignSelect) reassignSelect.addEventListener('change', e=>{ reassignConversation(c, e.target.value); });
+}
+
+function infoTabHTML(c){
+  return `
+    <div class="info-card">
+      <div class="info-card-title">Contact</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        ${avatarHTML(c.name,40)}
+        <div><div class="kv-value">${esc(c.name)}</div><div class="kv-label">${esc(c.cid)}</div></div>
+      </div>
+      <div class="kv-grid">
+        <div class="kv-item"><span class="kv-label">Phone</span><span class="kv-value">${esc(c.phone)}</span></div>
+        <div class="kv-item"><span class="kv-label">Language</span><span class="kv-value">${c.lang}</span></div>
+        <div class="kv-item"><span class="kv-label">Channel</span><span class="kv-value">💬 Chat</span></div>
+        <div class="kv-item"><span class="kv-label">Product</span><span class="kv-value">${c.product||'Mobichat'}</span></div>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">Problem Notes</div>
+      <textarea class="notes-area" id="notes-area" placeholder="Describe the customer's issue and any troubleshooting steps so far…">${esc(c.notes)}</textarea>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">Customer Profile</div>
+      <div class="kv-grid">
+        <div class="kv-item"><span class="kv-label">Lifetime spend</span><span class="kv-value">${c.spend}</span></div>
+        <div class="kv-item"><span class="kv-label">Customer since</span><span class="kv-value">${c.memberSince}</span></div>
+        <div class="kv-item"><span class="kv-label">Past tickets</span><span class="kv-value">${c.pastTickets}</span></div>
+        <div class="kv-item"><span class="kv-label">Feature area</span><span class="kv-value">${esc(c.feature)}</span></div>
+        <div class="kv-item"><span class="kv-label">Device</span><span class="kv-value" style="font-weight:500;font-size:11.5px;">${esc(c.device)} · v${c.version}</span></div>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">Main Agent</div>
+      <div class="agent-row">${avatarHTML(c.assignment.type==='ai'?'AI Bot':c.assignment.name,32)}
+        <div><div class="agent-name">${c.assignment.type==='ai'?'🤖 AI Assistant':esc(c.assignment.name)}</div><div class="agent-role">${esc(c.team)}</div></div>
+      </div>
+      ${c.assignment.type==='agent' ? `
+      <div class="reassign-row">
+        <select class="reassign-select" id="reassign-select">
+          <option value="">↪️ Assign to someone else…</option>
+          ${AGENT_ROSTER.filter(a=>a.name!==c.assignment.name).map(a=>`<option value="${esc(a.name)}">${esc(a.name)} · ${esc(a.team)}</option>`).join('')}
+        </select>
+      </div>` : ''}
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">Participants</div>
+      <div style="display:flex;gap:-4px;">${avatarHTML('You',28)}${c.assignment.type==='agent' && c.assignment.name!=='You' ? avatarHTML(c.assignment.name,28) : ''}</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">Assigned Department</div>
+      <span class="pill pill-mate" style="font-size:11px;">${esc(c.team)}</span>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">Tags</div>
+      <div class="tag-row">
+        <span class="pill" style="background:${c.severity==='Critical'?'#fef2f2':c.severity==='Medium'?'#fff7ed':'#f0fdf4'};color:${c.severity==='Critical'?'var(--error)':c.severity==='Medium'?'var(--warning)':'var(--success)'};">${c.severity}</span>
+        <span class="pill pill-mate">${c.category}</span>
+        <span class="badge-sentiment sent-${c.sentiment}" style="font-size:10px;">${c.sentiment}</span>
+        <span class="pill pill-mate">${c.priority}</span>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">Connected Channels</div>
+      <div class="integration-row">
+        <div class="integration-badge"><span class="dot"></span>WhatsApp</div>
+        <div class="integration-badge"><span class="dot"></span>Instagram</div>
+        <div class="integration-badge"><span class="dot"></span>Website</div>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">Media</div>
+      <div class="media-grid"><div class="media-box">🖼️</div><div class="media-box">🖼️</div><div class="media-box">🖼️</div></div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">Bookmarks</div>
+      <div class="empty-note">No bookmarked messages yet.</div>
+    </div>
+  `;
+}
+
+function taskTabHTML(c){
+  const linked = c.taskIds.map(id=>tasks.find(t=>t.id===id)).filter(Boolean);
+  const eligible = TASK_ELIGIBLE.has(c.category);
+  let html = '';
+
+  if(linked.length){
+    html += `<div class="info-card">
+      <div class="info-card-title">Linked Engineering Task${linked.length>1?'s':''} (${linked.length})</div>
+      ${linked.map(t=>`
+        <div class="task-mini" style="margin-bottom:${t===linked[linked.length-1]?'0':'10px'};">
+          <div class="tm-id">${t.id} · ${t.status}</div>
+          <div style="font-weight:700;margin:4px 0;">${esc(t.title)}</div>
+          <div class="kv-grid">
+            <div class="kv-item"><span class="kv-label">Severity</span><span class="kv-value">${t.severity}</span></div>
+            <div class="kv-item"><span class="kv-label">Customers affected</span><span class="kv-value">${t.playersAffected}</span></div>
+            <div class="kv-item"><span class="kv-label">Fix ETA</span><span class="kv-value">${t.eta}</span></div>
+            <div class="kv-item"><span class="kv-label">Engineer</span><span class="kv-value" style="font-size:11px;">${esc(t.engineer)}</span></div>
+          </div>
+        </div>
+      `).join('')}
+      <button class="btn btn-sm" style="margin-top:10px;width:100%;" onclick="openTicketsTab('tasks')">View Tasks board →</button>
+    </div>`;
+  }
+
+  if(eligible){
+    html += `
+      <div class="info-card">
+        <div class="info-card-title">${linked.length ? 'Report Another Issue' : 'Engineering Task'}</div>
+        <div class="empty-note" style="text-align:left;">${linked.length
+          ? 'Spotted a separate engineering issue on this same ticket? File another task — device and version carry over automatically.'
+          : `This looks like a technical issue affecting the customer. Creating a task auto-fills device + version so they never repeat themselves, and dedupes against existing bugs for ${esc(c.feature)}.`}</div>
+        <button class="btn btn-violet" id="btn-create-task" style="width:100%;margin-top:10px;">🛠 Create ${linked.length ? 'another ' : ''}engineering task</button>
+      </div>`;
+  }
+
+  return html || `<div class="empty-note">No engineering task needed for this ticket.</div>`;
+}
+
+function logTabHTML(c){
+  if(!c.activityLog.length) return `<div class="empty-note">No activity yet.</div>`;
+  return `<div class="info-card">${c.activityLog.map(l=>`<div class="log-item"><span class="log-time">${l.t}</span><span>${esc(l.text)}</span></div>`).join('')}</div>`;
+}
+
+function createEngineeringTask(c){
+  const key = c.feature+'|'+c.category;
+  // Exclude tasks already linked to THIS ticket, so an agent can file more than one
+  // distinct task off the same conversation instead of only ever merging into one.
+  const existing = tasks.find(t=>t.status!=='Fixed' && (t.feature+'|'+t.category)===key && !c.taskIds.includes(t.id));
+  if(existing){
+    existing.playersAffected++;
+    existing.linkedTicketIds.push(c.id);
+    c.taskIds.push(existing.id);
+    logActivity(c, `Merged into existing task ${existing.id}`);
+    toast(`🔗 Merged into ${existing.id} — now ${existing.playersAffected} customers affected`);
+  } else {
+    const engTeam = ENG_TEAM_FOR[c.category] || 'Platform Engineering';
+    const t = {
+      id:'BUG-'+(1020+taskSeq++), title:taskTitleFor(c), feature:c.feature, category:c.category, device:c.device,
+      version:c.version, severity:c.severity, confidence:c.confidence, playersAffected:1,
+      status: c.severity==='Critical' ? 'Open' : 'Investigating',
+      eta: c.severity==='Critical' ? '1 day' : c.severity==='Medium' ? '3 days' : '5 days',
+      team: engTeam, engineer: ENGINEER_BY_TEAM[engTeam] || 'Unassigned', linkedTicketIds:[c.id]
+    };
+    tasks.unshift(t);
+    c.taskIds.push(t.id);
+    logActivity(c, `Engineering task ${t.id} created · assigned to ${t.engineer}`);
+    toast(`🛠 Engineering task ${t.id} created`);
+  }
+  renderRail();
+  renderInfoPanel();
+  if(state.view==='tickets') renderTicketsPage();
+}
+
+function taskTitleFor(c){
+  const map = {
+    Billing:'Subscription payment not reflected', WABABug:'WhatsApp Business API disconnecting',
+    AccountSuspended:'Account suspension needs manual review', ChatbotBug:'Chatbot keyword trigger broken',
+    BroadcastFail:'Broadcast messages failing to send'
+  };
+  return (map[c.category]||c.category) + ' — ' + c.feature;
+}
+
+/* ---------------- simulate incoming ---------------- */
+let simCounter = 100;
+
+/* A customer closing the loop with a "thanks, it's fixed" reply is treated as a
+   resolution signal on its own — no need to wait for the agent to click Mark Resolved. */
+const CLOSING_THANKS_KEYWORDS = [
+  'makasih','terima kasih','thank you','thanks','thx',
+  'sudah beres','sudah fixed','sudah bisa','udah bisa','udah beres',
+  "it's fixed",'already fixed','all fixed','fixed now','working now','works now',
+  'resolved now','all good now','solved'
+];
+function isClosingThanksMessage(text){
+  const t = (text||'').toLowerCase();
+  return CLOSING_THANKS_KEYWORDS.some(k=>t.includes(k));
+}
+
+function simulateIncoming(){
+  const tpl = SIM_POOL[state.simIndex % SIM_POOL.length];
+  state.simIndex++;
+
+  if(tpl.type==='merge'){
+    const c = getConv(tpl.targetId);
+    c.messages.push({from:'in', lang:tpl.lang, text:tpl.text, en:tpl.en, time:nowTime()});
+    c.time = nowTime();
+    c.waited = 0;
+
+    // Bot/agent already replied, and the customer's new message reads like a close-out —
+    // auto-resolve and send the CSAT survey instead of just reopening the ticket.
+    const hasPriorReply = c.messages.some(m=>m.from==='out' && m.type!=='csat-survey');
+    if(hasPriorReply && c.status!=='Resolved' && isClosingThanksMessage(`${tpl.text} ${tpl.en||''}`)){
+      logActivity(c, `${c.name} confirmed the issue is fixed`);
+      renderRail();
+      markResolved(c.id);
+      return;
+    }
+
+    if(c.status==='Resolved') c.status='Unserved';
+    if(state.currentId !== c.id){ c.unread = (c.unread||0)+1; c.seen=false; }
+    logActivity(c, 'New message merged into existing thread');
+    toast(`↩️ New message from ${c.name} merged into existing ticket — no duplicate created`);
+    if(state.currentId===c.id && (state.view==='chat' || state.view==='inbox')) renderChat();
+    if(state.view==='tickets') renderTicketsPage();
+    if(state.view==='inbox') renderConvList();
+    renderRail();
+    return;
+  }
+
+  simCounter++;
+  const id = 'sim'+simCounter;
+
+  if(tpl.type==='ai'){
+    const suggSet = pickSuggestionSet(tpl.category);
+    const sugg = suggSet[0];
+    const replyText = tpl.lang==='Indonesian' ? (sugg.id || sugg.en) : sugg.en;
+    const c = conv({
+      id, name:tpl.name, phone:randomPhone(), cid:'CID-'+Math.floor(10000+Math.random()*89999),
+      status:'Bot', time:nowTime(), lang:tpl.lang, feature:tpl.feature, device:'Chrome on Windows 11', version:'3.4.0',
+      spend:'Rp '+(Math.floor(Math.random()*400)+50)+'.000',
+      memberSince:'2024', pastTickets:0, waited:0, sentiment:tpl.sentiment, priority:tpl.priority,
+      severity:tpl.severity, category:tpl.category, confidence:tpl.confidence, assignment:{type:'ai'},
+      csat:null, resolvedAt:Date.now(),
+      messages:[
+        {from:'in', lang:tpl.lang, text:tpl.text, en:tpl.en, time:nowTime()},
+        {from:'out', text:replyText, label:'AI', time:nowTime()}
+      ]
+    });
+    conversations.unshift(c);
+    logActivity(c, 'Auto-resolved by AI');
+    toast(`🤖 AI auto-resolved a new ticket from ${c.name} — satisfaction survey sent`);
+    resolveAITicket(c, {live:true});
+  } else {
+    const c = conv({
+      id, name:tpl.name, phone:randomPhone(), cid:'CID-'+Math.floor(10000+Math.random()*89999),
+      status:'Unserved', time:nowTime(), lang:tpl.lang, feature:tpl.feature, device:'Chrome on Windows 11', version:'3.4.0',
+      spend:'Rp '+(Math.floor(Math.random()*1500)+100)+'.000',
+      memberSince:'2023', pastTickets:Math.floor(Math.random()*3), waited:0, seen:false, isNew:true, unread:1,
+      sentiment:tpl.sentiment, priority:tpl.priority, severity:tpl.severity, category:tpl.category,
+      confidence:tpl.confidence, assignment:{type:'agent', name: pickRouteAgent(tpl.category)},
+      messages:[{from:'in', lang:tpl.lang, text:tpl.text, en:tpl.en, time:nowTime()}]
+    });
+    conversations.unshift(c);
+    toast(`🔔 New ticket from ${c.name}`);
+  }
+  renderRail();
+  if(state.view==='tickets') renderTicketsPage();
+  if(state.view==='inbox') renderConvList();
+}
+
+function randomPhone(){
+  return '+62 8'+Math.floor(10000000+Math.random()*89999999);
+}
+function pickRouteAgent(category){
+  const team = BIZ_TEAM_FOR[category];
+  if(team==='Technical') return Math.random()<0.5 ? 'You' : 'Fajar';
+  if(team==='Billing') return Math.random()<0.5 ? 'Rani' : 'Dimas';
+  if(team==='Trust & Safety') return 'Wulan';
+  return 'You';
+}
+
+/* ---------------- Setup guide page ---------------- */
+function setupStepsListHTML(steps){
+  return `<div class="setup-steps">
+    ${steps.map((s,i)=>{
+      const done = computeStepDone(s.id);
+      const open = expandedSetupStep===s.id;
+      return `
+      <div class="setup-step ${done?'done':''}">
+        <div class="setup-step-rail">
+          <span class="setup-checkbox">${done?'✓':''}</span>
+          ${i<steps.length-1 ? '<div class="setup-step-line"></div>' : ''}
+        </div>
+        <div class="setup-step-card">
+          <button class="setup-step-header" data-toggle-step="${s.id}">
+            <div>
+              <div class="setup-step-num">Step ${i+1}${done?' · Complete':''}</div>
+              <div class="setup-step-title">${esc(s.title)}</div>
+            </div>
+            <span class="setup-chevron">${open?'▾':'▸'}</span>
+          </button>
+          <div class="setup-step-desc">${esc(s.desc)}</div>
+          ${open ? setupStepPanelHTML(s.id) : ''}
+          <div class="setup-step-hint">${esc(s.hint)}</div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderSetupPage(){
+  document.getElementById('setup-page-header').innerHTML = `
+    <div class="page-title">Setup Guide</div>
+    <div class="page-sub">How your business sets up Mobichat's ticketing system</div>
+  `;
+  const page = document.getElementById('setup-page');
+  const requiredSteps = SETUP_STEPS.filter(s=>s.required);
+  const optionalSteps = SETUP_STEPS.filter(s=>!s.required);
+  const requiredDone = requiredSteps.filter(s=>computeStepDone(s.id)).length;
+  const optionalDone = optionalSteps.filter(s=>computeStepDone(s.id)).length;
+  const pct = Math.round(requiredDone/requiredSteps.length*100);
+  const isLive = requiredDone===requiredSteps.length;
+  const fullyDone = isLive && optionalDone===optionalSteps.length;
+
+  if(expandedSetupStep===null){
+    const firstTodo = [...requiredSteps, ...optionalSteps].find(s=>!computeStepDone(s.id));
+    expandedSetupStep = firstTodo ? firstTodo.id : null;
+  }
+
+  page.innerHTML = `
+    <div class="setup-banner">
+      <div>
+        <div class="setup-banner-title">👋 Welcome to Mobichat</div>
+        <div class="setup-banner-sub">Just 2 required steps get you live — connect WhatsApp and pick your complaint categories. Everything else below is optional and can wait until later; it just makes Mobichat work better for you.</div>
+      </div>
+      <div class="setup-progress-wrap">
+        <div class="setup-progress-label"><span>${requiredDone} of ${requiredSteps.length} required</span><span>${pct}%</span></div>
+        <div class="setup-progress-track"><div class="setup-progress-fill" style="width:${pct}%"></div></div>
+      </div>
+    </div>
+
+    <div class="setup-section-label">🔒 Required to go live <span class="setup-section-count">${requiredDone}/${requiredSteps.length}</span></div>
+    ${setupStepsListHTML(requiredSteps)}
+
+    ${isLive
+      ? `<div class="setup-live-banner">🎉 You're live! Customer messages are now flowing into your Inbox automatically. Everything below is optional.</div>`
+      : `<div class="setup-locked-note">🔒 Finish the required steps above to start receiving tickets. The optional steps below can wait.</div>`}
+
+    <div class="setup-section-label">✨ Recommended <span class="setup-section-count">${optionalDone}/${optionalSteps.length}</span>${fullyDone ? ' · All done — fully set up!' : ' — optional, but these make Mobichat work better for you'}</div>
+    ${setupStepsListHTML(optionalSteps)}
+  `;
+
+  wireSetupStepHandlers();
+}
+
+function setupStepPanelHTML(id){
+  if(id==='whatsapp'){
+    const d = SETUP_DATA.whatsapp;
+    return `<div class="setup-panel">
+      ${d.connected ? `
+        <div class="setup-connected-row">✅ Connected: <strong>${esc(d.number)}</strong>
+          <button class="link-btn" data-action="whatsapp-disconnect">Disconnect</button>
+        </div>
+      ` : `
+        <label class="setup-field-label">WhatsApp Business number</label>
+        <div class="setup-field-row">
+          <input type="text" class="setup-input" id="whatsapp-input" placeholder="+62 8xx xxxx xxxx" value="${esc(d.number||'')}">
+          <button class="btn btn-primary btn-sm" data-action="whatsapp-connect">Verify & Connect</button>
+        </div>
+        <div class="setup-panel-note">We'll send a one-time verification code to this number via WhatsApp.</div>
+      `}
+    </div>`;
+  }
+  if(id==='team'){
+    const invites = SETUP_DATA.team.invites;
+    return `<div class="setup-panel">
+      <label class="setup-field-label">Invite a teammate</label>
+      <div class="setup-field-row">
+        <input type="email" class="setup-input" id="team-email-input" placeholder="teammate@yourbusiness.id">
+        <select class="setup-select" id="team-dept-select">
+          <option>Billing</option><option>Technical</option><option>Trust & Safety</option><option>Customer Success</option>
+        </select>
+        <button class="btn btn-primary btn-sm" data-action="team-invite">Send Invite</button>
+      </div>
+      <div class="setup-invite-list">
+        ${invites.map((inv,i)=>`
+          <div class="setup-invite-chip">${avatarHTML(inv.email,22)}<span>${esc(inv.email)}</span><span class="pill pill-mate">${esc(inv.dept)}</span><button class="setup-chip-remove" data-action="team-remove" data-idx="${i}" title="Remove">✕</button></div>
+        `).join('') || `<div class="empty-note">No teammates invited yet.</div>`}
+      </div>
+    </div>`;
+  }
+  if(id==='routing'){
+    const cats = SETUP_DATA.routing.categories;
+    return `<div class="setup-panel">
+      <label class="setup-field-label">Which complaint types does your business handle?</label>
+      <div class="setup-checkbox-grid">
+        ${COMPLAINT_CATEGORY_OPTIONS.map(cat=>`
+          <label class="setup-check-item">
+            <input type="checkbox" data-action="routing-toggle" data-cat="${esc(cat)}" ${cats.includes(cat)?'checked':''}>
+            <span>${esc(cat)}</span>
+          </label>
+        `).join('')}
+      </div>
+      <div class="setup-panel-note">${cats.length} categor${cats.length===1?'y':'ies'} selected — Mobichat's AI will start classifying complaints into these automatically.</div>
+    </div>`;
+  }
+  if(id==='knowledge'){
+    const items = SETUP_DATA.knowledge.items;
+    return `<div class="setup-panel">
+      <label class="setup-field-label">Upload documents</label>
+      <div class="setup-upload-zone" id="kb-dropzone">
+        <div>📎 Drag files here, or <span class="setup-upload-browse">click to browse</span></div>
+        <div class="setup-panel-note" style="margin-top:2px;">PDF, DOCX, or TXT — you can add several at once.</div>
+      </div>
+      <input type="file" id="kb-file-input" multiple accept=".pdf,.doc,.docx,.txt" style="display:none;">
+
+      <label class="setup-field-label" style="margin-top:14px;">Or add a quick note</label>
+      <div class="setup-field-row">
+        <input type="text" class="setup-input" id="kb-note-title" placeholder="e.g. Shipping Policy" style="flex:0 0 200px;">
+        <input type="text" class="setup-input" id="kb-note-content" placeholder="What should the AI know?">
+        <button class="btn btn-primary btn-sm" data-action="kb-add-note">Add Note</button>
+      </div>
+
+      <div class="setup-kb-list">
+        ${items.map(it=>`
+          <div class="setup-kb-item">
+            <span class="setup-kb-icon">${it.type==='file'?'📄':'📝'}</span>
+            <div class="setup-kb-meta">
+              <div class="setup-kb-name">${esc(it.name)}</div>
+              <div class="setup-kb-sub">${it.type==='file' ? esc(it.size) : esc(it.content||'')}</div>
+            </div>
+            <button class="setup-chip-remove" data-action="kb-remove" data-id="${it.id}" title="Remove">✕</button>
+          </div>
+        `).join('') || `<div class="empty-note">No knowledge added yet.</div>`}
+      </div>
+      <div class="setup-panel-note">${items.length} document${items.length===1?'':'s'} in your Knowledge Base — the AI cites these when it drafts a reply (look for the 📚 chip on a suggestion).</div>
+    </div>`;
+  }
+  if(id==='ai-replies'){
+    const on = SETUP_DATA.aiReplies.enabled;
+    return `<div class="setup-panel">
+      <label class="setup-toggle-row">
+        <span>Enable AI-assisted replies & auto-translation</span>
+        <span class="setup-toggle ${on?'on':''}" data-action="ai-toggle"><span class="setup-toggle-knob"></span></span>
+      </label>
+      <div class="setup-panel-note">${on ? '✅ AI will draft replies, auto-translate them, and auto-resolve simple FAQs.' : 'Off — agents will type and translate every reply manually.'}</div>
+    </div>`;
+  }
+  if(id==='csat'){
+    const on = SETUP_DATA.csat.enabled;
+    return `<div class="setup-panel">
+      <label class="setup-toggle-row">
+        <span>Send a satisfaction survey after every resolved ticket</span>
+        <span class="setup-toggle ${on?'on':''}" data-action="csat-toggle"><span class="setup-toggle-knob"></span></span>
+      </label>
+      ${on ? `<div class="csat-survey-card" style="margin-top:10px;">
+        <div class="csat-survey-title">📋 How was your experience?</div>
+        <div class="csat-survey-sub">Preview of what your customers will see.</div>
+        <div class="csat-survey-stars">☆ ☆ ☆ ☆ ☆</div>
+      </div>` : ''}
+    </div>`;
+  }
+  return '';
+}
+
+function wireSetupStepHandlers(){
+  const page = document.getElementById('setup-page');
+
+  page.querySelectorAll('[data-toggle-step]').forEach(b=>b.addEventListener('click', ()=>{
+    const id = b.dataset.toggleStep;
+    expandedSetupStep = expandedSetupStep===id ? null : id;
+    renderSetupPage();
+  }));
+
+  const waBtn = page.querySelector('[data-action="whatsapp-connect"]');
+  if(waBtn) waBtn.addEventListener('click', ()=>{
+    const val = document.getElementById('whatsapp-input').value.trim();
+    if(!val){ toast('Enter a phone number first'); return; }
+    SETUP_DATA.whatsapp.number = val;
+    SETUP_DATA.whatsapp.connected = true;
+    toast('✅ WhatsApp Business number connected');
+    renderRail(); renderSetupPage();
+  });
+  const waDisc = page.querySelector('[data-action="whatsapp-disconnect"]');
+  if(waDisc) waDisc.addEventListener('click', ()=>{
+    SETUP_DATA.whatsapp.connected = false;
+    renderRail(); renderSetupPage();
+  });
+
+  const inviteBtn = page.querySelector('[data-action="team-invite"]');
+  if(inviteBtn) inviteBtn.addEventListener('click', ()=>{
+    const emailEl = document.getElementById('team-email-input');
+    const deptEl = document.getElementById('team-dept-select');
+    const email = emailEl.value.trim();
+    if(!email || !email.includes('@')){ toast('Enter a valid email address'); return; }
+    SETUP_DATA.team.invites.push({email, dept:deptEl.value});
+    toast(`✉️ Invite sent to ${email}`);
+    renderRail(); renderSetupPage();
+  });
+  page.querySelectorAll('[data-action="team-remove"]').forEach(b=>b.addEventListener('click', ()=>{
+    SETUP_DATA.team.invites.splice(Number(b.dataset.idx), 1);
+    renderRail(); renderSetupPage();
+  }));
+
+  const kbDropzone = document.getElementById('kb-dropzone');
+  const kbFileInput = document.getElementById('kb-file-input');
+  if(kbDropzone && kbFileInput){
+    const addFiles = files=>{
+      if(!files || !files.length) return;
+      Array.from(files).forEach(f=>{
+        SETUP_DATA.knowledge.items.push({ id:'kb'+Date.now()+Math.random().toString(36).slice(2,5), type:'file', name:f.name, size:formatBytes(f.size) });
+      });
+      toast(`📎 ${files.length} document${files.length>1?'s':''} uploaded`);
+      renderRail(); renderSetupPage();
+    };
+    kbDropzone.addEventListener('click', ()=>kbFileInput.click());
+    kbFileInput.addEventListener('change', ()=>addFiles(kbFileInput.files));
+    kbDropzone.addEventListener('dragover', e=>{ e.preventDefault(); kbDropzone.classList.add('drag-over'); });
+    kbDropzone.addEventListener('dragleave', ()=>kbDropzone.classList.remove('drag-over'));
+    kbDropzone.addEventListener('drop', e=>{
+      e.preventDefault();
+      kbDropzone.classList.remove('drag-over');
+      addFiles(e.dataTransfer.files);
+    });
+  }
+  const kbAddNoteBtn = page.querySelector('[data-action="kb-add-note"]');
+  if(kbAddNoteBtn) kbAddNoteBtn.addEventListener('click', ()=>{
+    const titleEl = document.getElementById('kb-note-title');
+    const contentEl = document.getElementById('kb-note-content');
+    const title = titleEl.value.trim();
+    const content = contentEl.value.trim();
+    if(!title){ toast('Give your note a title first'); return; }
+    SETUP_DATA.knowledge.items.push({ id:'kb'+Date.now()+Math.random().toString(36).slice(2,5), type:'note', name:title, content });
+    toast(`📝 “${title}” added to your Knowledge Base`);
+    renderRail(); renderSetupPage();
+  });
+  page.querySelectorAll('[data-action="kb-remove"]').forEach(b=>b.addEventListener('click', ()=>{
+    const idx = SETUP_DATA.knowledge.items.findIndex(it=>it.id===b.dataset.id);
+    if(idx>-1) SETUP_DATA.knowledge.items.splice(idx,1);
+    renderRail(); renderSetupPage();
+  }));
+
+  page.querySelectorAll('[data-action="routing-toggle"]').forEach(cb=>cb.addEventListener('change', ()=>{
+    const cat = cb.dataset.cat;
+    const list = SETUP_DATA.routing.categories;
+    const idx = list.indexOf(cat);
+    if(cb.checked && idx===-1) list.push(cat);
+    if(!cb.checked && idx>-1) list.splice(idx,1);
+    renderRail(); renderSetupPage();
+  }));
+
+  const aiToggle = page.querySelector('[data-action="ai-toggle"]');
+  if(aiToggle) aiToggle.addEventListener('click', ()=>{
+    SETUP_DATA.aiReplies.enabled = !SETUP_DATA.aiReplies.enabled;
+    renderRail(); renderSetupPage();
+  });
+
+  const csatToggle = page.querySelector('[data-action="csat-toggle"]');
+  if(csatToggle) csatToggle.addEventListener('click', ()=>{
+    SETUP_DATA.csat.enabled = !SETUP_DATA.csat.enabled;
+    renderRail(); renderSetupPage();
+  });
+}
+
+/* ---------------- Tickets page ---------------- */
+const TICKET_FILTERS = [
+  {id:'all', label:'All', f:c=>true},
+  {id:'mine', label:'🙋 My queue', f:c=>c.assignment.type==='agent' && c.assignment.name==='You'},
+  {id:'ai', label:'🤖 AI-handled', f:c=>c.assignment.type==='ai'},
+  {id:'unserved', label:'Unserved', f:c=>c.status==='Unserved'},
+  {id:'served', label:'Served', f:c=>c.status==='Served'},
+  {id:'resolved', label:'✅ Resolved', f:c=>c.status==='Resolved'},
+  {id:'Billing', label:'Billing', f:c=>c.team==='Billing'},
+  {id:'Technical', label:'Technical', f:c=>c.team==='Technical'},
+  {id:'Trust & Safety', label:'Trust & Safety', f:c=>c.team==='Trust & Safety'},
+  {id:'Customer Success', label:'Customer Success', f:c=>c.team==='Customer Success'}
+];
+
+function computeKPIs(){
+  const total = conversations.length;
+  const aiHandled = conversations.filter(c=>c.assignment.type==='ai').length;
+  const yourQueue = conversations.filter(c=>c.assignment.type==='agent' && c.assignment.name==='You' && c.status!=='Resolved').length;
+  const agentsHandle = conversations.filter(c=>c.assignment.type==='agent').length;
+  const avgConfidence = Math.round(conversations.reduce((s,c)=>s+c.confidence,0)/total);
+  const csatList = conversations.filter(c=>c.csat).map(c=>c.csat.rating);
+  const csatPct = csatList.length ? Math.round(csatList.reduce((a,b)=>a+b,0)/csatList.length/5*100) : null;
+  return { total, aiHandled, aiHandledPct: Math.round(aiHandled/total*100), yourQueue, agentsHandle, avgConfidence, csatPct };
+}
+
+function ticketIdFor(c){ return 'TCK-'+(1030+conversations.indexOf(c)); }
+
+function ticketMatchesSearch(c, q){
+  if(!q) return true;
+  const hay = [ticketIdFor(c), c.name, c.feature, c.category, c.team, c.assignment.name||'', ticketHeadline(c)]
+    .join(' ').toLowerCase();
+  return hay.includes(q.toLowerCase());
+}
+
+/* Advanced filter panel — narrows the ticket table by Severity/Priority/Assigned on top
+   of whatever the quick filter chips + search box already narrowed it to. Each dimension
+   is a checkbox set; an empty set means "don't filter on this dimension". */
+const FILTER_SEVERITY_OPTS = ['Critical','Medium','Low'];
+const FILTER_PRIORITY_OPTS = ['Urgent','High','Normal'];
+const FILTER_ASSIGNED_OPTS = [...AGENT_ROSTER.map(a=>a.name), 'AI'];
+
+function assignedKeyFor(c){ return c.assignment.type==='ai' ? 'AI' : c.assignment.name; }
+
+function matchesAdvFilters(c){
+  const f = state.ticketAdvFilters;
+  if(f.severity.size && !f.severity.has(c.severity)) return false;
+  if(f.priority.size && !f.priority.has(c.priority)) return false;
+  if(f.assigned.size && !f.assigned.has(assignedKeyFor(c))) return false;
+  return true;
+}
+
+function activeAdvFilterCount(){
+  const f = state.ticketAdvFilters;
+  return f.severity.size + f.priority.size + f.assigned.size;
+}
+
+function toggleAdvFilter(kind, value){
+  const set = state.ticketAdvFilters[kind];
+  if(set.has(value)) set.delete(value); else set.add(value);
+  renderTicketsPage();
+}
+
+function filterCheckHTML(kind, value, label){
+  const checked = state.ticketAdvFilters[kind].has(value);
+  return `<label class="filter-check">
+    <input type="checkbox" data-fkind="${kind}" data-fval="${esc(value)}" ${checked?'checked':''}>
+    ${label}
+  </label>`;
+}
+
+function filterPanelHTML(){
+  return `<div class="filter-panel" id="filter-panel">
+    <div class="filter-panel-section">
+      <div class="filter-panel-label">Severity</div>
+      <div class="filter-panel-options">
+        ${FILTER_SEVERITY_OPTS.map(s=>filterCheckHTML('severity', s, `${severityIconHTML(s)}${s}`)).join('')}
+      </div>
+    </div>
+    <div class="filter-panel-section">
+      <div class="filter-panel-label">Priority</div>
+      <div class="filter-panel-options">
+        ${FILTER_PRIORITY_OPTS.map(p=>filterCheckHTML('priority', p, p)).join('')}
+      </div>
+    </div>
+    <div class="filter-panel-section">
+      <div class="filter-panel-label">Assigned to</div>
+      <div class="filter-panel-options">
+        ${FILTER_ASSIGNED_OPTS.map(a=>filterCheckHTML('assigned', a, a==='AI' ? '🤖 AI-handled' : `👤 ${esc(a)}`)).join('')}
+      </div>
+    </div>
+    <div class="filter-panel-actions">
+      <button class="link-btn" id="filter-clear">Clear filters</button>
+      <button class="btn btn-primary btn-sm" id="filter-done">Done</button>
+    </div>
+  </div>`;
+}
+
+/* Tickets and Tasks share one page now — they're two views onto the same underlying work
+   (a task is just an engineering issue spawned from a ticket), so browsing them as separate
+   rail destinations was extra navigation for no real benefit. A tab bar switches between them. */
+function ticketsTasksTabBarHTML(){
+  return `<div class="page-tabs">
+    <button class="page-tab ${state.ticketsTab==='tickets'?'active':''}" data-ptab="tickets">🎫 Tickets <span class="page-tab-count">${conversations.length}</span></button>
+    <button class="page-tab ${state.ticketsTab==='tasks'?'active':''}" data-ptab="tasks">🛠️ Tasks <span class="page-tab-count">${openTaskCount()}</span></button>
+  </div>`;
+}
+
+function renderTicketsPage(){
+  const onTasksTab = state.ticketsTab==='tasks';
+
+  // Preserve focus/cursor across re-renders — the whole header+table gets rebuilt on every
+  // keystroke, filter click, or task action, so without this the search box would lose focus.
+  const searchEl = document.getElementById('ticket-search');
+  const hadFocus = !onTasksTab && document.activeElement === searchEl;
+  const cursor = hadFocus ? searchEl.selectionStart : null;
+
+  document.getElementById('tickets-page-header').innerHTML = `
+    <div class="page-header-flex">
+      <div>
+        <div class="page-title">${onTasksTab ? 'Engineering Tasks' : 'Tickets'}</div>
+        <div class="page-sub">${onTasksTab ? 'Auto-created from support tickets · deduped by feature + category · drag a card to update its status' : 'Mobichat customer support — Indonesia · AI-triaged queue'}</div>
+      </div>
+      ${onTasksTab ? '' : `<button class="btn-simulate" id="btn-simulate" style="white-space:nowrap;">＋ Simulate incoming</button>`}
+    </div>
+  `;
+  if(!onTasksTab) document.getElementById('btn-simulate').addEventListener('click', simulateIncoming);
+
+  const page = document.getElementById('tickets-page');
+
+  if(onTasksTab){
+    page.innerHTML = ticketsTasksTabBarHTML() + `
+      <div class="kanban-board">
+        ${TASK_STAGES.map(stage=>{
+          const inStage = tasks.filter(t=>t.status===stage.id);
+          return `
+          <section class="kanban-col">
+            <div class="kanban-col-header">
+              <div class="kanban-col-accent" style="background:${stage.accent}"></div>
+              <div class="kanban-col-title-row">
+                <span class="kanban-col-title">${stage.label}</span>
+                <span class="kanban-col-count">${inStage.length}</span>
+              </div>
+            </div>
+            <div class="kanban-col-body" data-status="${stage.id}">
+              ${inStage.map(t=>taskCardHTML(t)).join('') || `<div class="kanban-empty-hint">Drop a card here</div>`}
+            </div>
+          </section>`;
+        }).join('')}
+      </div>
+    `;
+    wireTaskBoardHandlers(page);
+  } else {
+    const k = computeKPIs();
+    const filter = TICKET_FILTERS.find(f=>f.id===state.ticketFilter);
+    const q = state.ticketSearch.trim();
+    const rows = conversations.filter(filter.f).filter(c=>ticketMatchesSearch(c,q)).filter(matchesAdvFilters);
+
+    page.innerHTML = ticketsTasksTabBarHTML() + `
+      <div class="kpi-strip">
+        <div class="kpi-card"><div class="kpi-label">Total Tickets</div><div class="kpi-value">${k.total}</div></div>
+        <div class="kpi-card"><div class="kpi-label">AI Auto-handled</div><div class="kpi-value blue">${k.aiHandledPct}%</div></div>
+        <div class="kpi-card"><div class="kpi-label">🙋 Your Queue</div><div class="kpi-value">${k.yourQueue}</div></div>
+        <div class="kpi-card"><div class="kpi-label">Agents Handle</div><div class="kpi-value">${k.agentsHandle}</div></div>
+        <div class="kpi-card"><div class="kpi-label">⚡ AI Sorting Confidence</div><div class="kpi-value blue">${k.avgConfidence}%</div></div>
+        <div class="kpi-card"><div class="kpi-label">⭐ CSAT</div><div class="kpi-value">${k.csatPct!==null ? k.csatPct+'%' : '—'}</div></div>
+      </div>
+      <div class="ticket-search-row">
+        <div class="search-box search-box-table" style="width:380px;flex:0 1 380px;">🔍<input type="text" id="ticket-search" placeholder="Search by ticket, customer, category…" value="${esc(state.ticketSearch)}"></div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="filter-btn-wrap">
+            <button class="filters-trigger ${activeAdvFilterCount()>0?'active':''}" id="filter-btn" aria-label="Filter tickets">
+              <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M3 4.5h14l-5.25 6.1v5.15l-3.5 1.75v-6.9L3 4.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <span>Filters:</span>
+              <span class="filters-trigger-value">${activeAdvFilterCount()>0 ? activeAdvFilterCount()+' selected' : 'All Types'}</span>
+              <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            ${state.filterPanelOpen ? filterPanelHTML() : ''}
+          </div>
+          <button class="clear-filters-link" id="filter-clear-inline" ${activeAdvFilterCount()===0?'disabled':''}>Clear Filters</button>
+        </div>
+      </div>
+      <div class="filter-chips">${TICKET_FILTERS.map(f=>`<button class="filter-chip ${state.ticketFilter===f.id?'active':''}" data-tf="${f.id}">${f.label}</button>`).join('')}</div>
+      <div style="overflow-x:auto;">
+      <table class="ticket-table">
+        <thead><tr>
+          <th>Ticket</th><th>Customer</th><th>Assigned</th><th>Severity</th><th>Category</th><th>Status</th><th>Age</th><th>Summary</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${rows.map(c=>ticketRowHTML(c)).join('') || `<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px;">${q ? `No tickets match “${esc(q)}”.` : 'No tickets in this filter.'}</td></tr>`}
+        </tbody>
+      </table>
+      </div>
+    `;
+    page.querySelectorAll('[data-tf]').forEach(b=>b.addEventListener('click', ()=>{ state.ticketFilter=b.dataset.tf; renderTicketsPage(); }));
+    page.querySelectorAll('[data-modal]').forEach(b=>b.addEventListener('click', ()=>openTicketModal(b.dataset.modal)));
+
+    const newSearchEl = document.getElementById('ticket-search');
+    newSearchEl.addEventListener('input', e=>{ state.ticketSearch = e.target.value; renderTicketsPage(); });
+    if(hadFocus){ newSearchEl.focus(); newSearchEl.setSelectionRange(cursor, cursor); }
+
+    document.getElementById('filter-btn').addEventListener('click', e=>{
+      e.stopPropagation();
+      state.filterPanelOpen = !state.filterPanelOpen;
+      renderTicketsPage();
+    });
+    document.getElementById('filter-clear-inline').addEventListener('click', e=>{
+      e.stopPropagation();
+      state.ticketAdvFilters.severity.clear();
+      state.ticketAdvFilters.priority.clear();
+      state.ticketAdvFilters.assigned.clear();
+      renderTicketsPage();
+    });
+    if(state.filterPanelOpen){
+      document.querySelectorAll('#filter-panel input[type=checkbox]').forEach(cb=>{
+        cb.addEventListener('change', ()=>toggleAdvFilter(cb.dataset.fkind, cb.dataset.fval));
+      });
+      document.getElementById('filter-clear').addEventListener('click', e=>{
+        e.stopPropagation();
+        state.ticketAdvFilters.severity.clear();
+        state.ticketAdvFilters.priority.clear();
+        state.ticketAdvFilters.assigned.clear();
+        renderTicketsPage();
+      });
+      document.getElementById('filter-done').addEventListener('click', e=>{
+        e.stopPropagation();
+        state.filterPanelOpen = false;
+        renderTicketsPage();
+      });
+    }
+  }
+
+  page.querySelectorAll('[data-ptab]').forEach(b=>b.addEventListener('click', ()=>{ state.ticketsTab=b.dataset.ptab; renderTicketsPage(); }));
+}
+
+function ticketRowHTML(c){
+  const ticketId = ticketIdFor(c);
+  const isNew = c.isNew && !c.seen;
+  return `<tr${isNew ? ' style="background:#eff8ff;"' : ''}>
+    <td style="font-weight:700;color:var(--blue-dark);">${ticketId}</td>
+    <td><div class="tt-customer">${avatarHTML(c.name,28)}<div class="tt-customer-meta">
+      <span class="tt-customer-name">${esc(c.name)} ${isNew ? '<span class="pill pill-new">NEW</span>' : ''}</span>
+      <span class="tt-customer-sub">${esc(c.feature)} · ${esc(c.team)}</span>
+    </div></div></td>
+    <td>${assignmentPillHTML(c)}</td>
+    <td>${severityIconHTML(c.severity)}${c.severity}</td>
+    <td>${c.category}${c.confidence<80?'<div class="kv-label">⚠️ flagged for review</div>':''}</td>
+    <td><span class="status-pill status-${c.status}">${c.status}</span>${c.csat ? `<span class="csat-mini">⭐ ${c.csat.rating}/5</span>` : ''}</td>
+    <td style="color:var(--text-weak);white-space:nowrap;">${formatDuration(Date.now()-c.createdAt)}</td>
+    <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;color:var(--text-strong);">${esc(ticketHeadline(c))}</td>
+    <td><button class="link-btn" data-modal="${c.id}">View ticket →</button></td>
+  </tr>`;
+}
+
+/* ---------------- Tasks page (Kanban) ---------------- */
+const TASK_STAGES = [
+  { id:'Open', label:'Open', accent:'#d97706' },
+  { id:'Investigating', label:'Investigating', accent:'#0284c7' },
+  { id:'In Progress', label:'In Progress', accent:'#1e64dc' },
+  { id:'Fixed', label:'Fixed', accent:'#16a34a' }
+];
+
+function wireTaskBoardHandlers(page){
+  page.querySelectorAll('[data-viewticket]').forEach(b=>b.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    openConversation(b.dataset.viewticket);
+  }));
+
+  page.querySelectorAll('[data-engineer]').forEach(b=>b.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    openEngineerHistoryModal(b.dataset.engineer);
+  }));
+
+  page.querySelectorAll('.kanban-task-card').forEach(card=>{
+    card.addEventListener('dragstart', e=>{
+      e.dataTransfer.setData('text/plain', card.dataset.taskId);
+      e.dataTransfer.effectAllowed = 'move';
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', ()=>card.classList.remove('dragging'));
+  });
+
+  page.querySelectorAll('.kanban-col-body').forEach(col=>{
+    col.addEventListener('dragover', e=>{ e.preventDefault(); col.classList.add('drag-over'); });
+    col.addEventListener('dragleave', ()=>col.classList.remove('drag-over'));
+    col.addEventListener('drop', e=>{
+      e.preventDefault();
+      col.classList.remove('drag-over');
+      const taskId = e.dataTransfer.getData('text/plain');
+      const task = tasks.find(t=>t.id===taskId);
+      const newStatus = col.dataset.status;
+      if(task && task.status !== newStatus){
+        task.status = newStatus;
+        toast(`${task.id} moved to ${newStatus}`);
+        renderRail();
+        renderTicketsPage();
+      }
+    });
+  });
+}
+
+function taskCardHTML(t){
+  return `<div class="kanban-task-card ${t.severity}" draggable="true" data-task-id="${t.id}">
+    <div class="kanban-card-top">
+      <span class="task-id">${t.id}</span>
+      <span style="display:flex;align-items:center;gap:6px;">
+        ${confidenceChipHTML(t.confidence)}
+        <button class="task-engineer-btn" data-engineer="${esc(t.engineer)}" title="${esc(t.engineer)} — view task history">${avatarHTML(t.engineer,22)}</button>
+      </span>
+    </div>
+    <div class="task-title">${esc(t.title)}</div>
+    <div class="task-team">${t.team} · ${esc(t.engineer)}</div>
+    <div class="task-field-lines">
+      <div><span class="fl-label">Feature:</span> ${esc(t.feature)}</div>
+      <div><span class="fl-label">Category:</span> ${t.category}</div>
+      <div><span class="fl-label">Device:</span> ${esc(t.device)} · v${t.version}</div>
+      <div><span class="fl-label">Customers affected:</span> ${t.playersAffected}</div>
+      <div><span class="fl-label">Fix ETA:</span> ${t.eta}</div>
+    </div>
+    <div class="task-footer">
+      <button class="link-btn" data-viewticket="${t.linkedTicketIds[0]}">View ticket →</button>
+    </div>
+  </div>`;
+}
+
+/* ---------------- Reports page (statistics summary) ---------------- */
+function statBarRowHTML(label, count, max, color, extra){
+  const pct = max>0 ? Math.round((count/max)*100) : 0;
+  return `<div class="stat-bar-row">
+    <div class="stat-bar-label" title="${esc(label)}">${esc(label)}</div>
+    <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+    <div class="stat-bar-count">${count}${extra?` <span>${extra}</span>`:''}</div>
+  </div>`;
+}
+
+function renderReportsPage(){
+  document.getElementById('reports-page-header').innerHTML = `
+    <div class="page-title">Reports</div>
+    <div class="page-sub">A statistical overview of your support performance</div>
+  `;
+  const page = document.getElementById('reports-page');
+  const total = conversations.length;
+
+  const resolved = conversations.filter(c=>c.resolvedAt);
+  const durations = resolved.map(c=>c.resolvedAt-c.createdAt);
+  const avgMs = durations.length ? durations.reduce((a,b)=>a+b,0)/durations.length : null;
+  const fastestMs = durations.length ? Math.min(...durations) : null;
+  const slowestMs = durations.length ? Math.max(...durations) : null;
+  const aiDurations = resolved.filter(c=>c.assignment.type==='ai').map(c=>c.resolvedAt-c.createdAt);
+  const humanDurations = resolved.filter(c=>c.assignment.type==='agent').map(c=>c.resolvedAt-c.createdAt);
+  const avgAiMs = aiDurations.length ? aiDurations.reduce((a,b)=>a+b,0)/aiDurations.length : null;
+  const avgHumanMs = humanDurations.length ? humanDurations.reduce((a,b)=>a+b,0)/humanDurations.length : null;
+  const resolutionRate = total ? Math.round((resolved.length/total)*100) : 0;
+
+  const csatList = conversations.filter(c=>c.csat).map(c=>c.csat.rating);
+  const avgCsat = csatList.length ? (csatList.reduce((a,b)=>a+b,0)/csatList.length).toFixed(1) : null;
+
+  const STATUS_ORDER = [
+    {id:'Unserved', color:'var(--warning)'}, {id:'Served', color:'var(--blue)'},
+    {id:'Resolved', color:'var(--success)'}
+  ];
+  const statusCounts = STATUS_ORDER.map(s=>({...s, count: conversations.filter(c=>c.status===s.id).length}));
+  const statusMax = Math.max(1, ...statusCounts.map(s=>s.count));
+
+  const TEAM_ORDER = ['Billing','Technical','Trust & Safety','Customer Success'];
+  const teamCounts = TEAM_ORDER.map(t=>({label:t, count: conversations.filter(c=>c.team===t).length}));
+  const teamMax = Math.max(1, ...teamCounts.map(t=>t.count));
+
+  const categoryTally = {};
+  conversations.forEach(c=>{ categoryTally[c.category] = (categoryTally[c.category]||0)+1; });
+  const categoryCounts = Object.entries(categoryTally).sort((a,b)=>b[1]-a[1]).map(([label,count])=>({label,count}));
+  const categoryMax = Math.max(1, ...categoryCounts.map(c=>c.count));
+
+  const csatBuckets = [5,4,3,2,1].map(star=>({
+    label:'⭐'.repeat(star)+' '.repeat(0), star,
+    count: csatList.filter(r=>r===star).length
+  }));
+  const csatMax = Math.max(1, ...csatBuckets.map(b=>b.count));
+
+  const rows = [...conversations].sort((a,b)=>b.createdAt-a.createdAt);
+
+  page.innerHTML = `
+    <div class="kpi-strip">
+      <div class="kpi-card"><div class="kpi-label">Total Tickets</div><div class="kpi-value">${total}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Resolution Rate</div><div class="kpi-value blue">${resolutionRate}%</div></div>
+      <div class="kpi-card"><div class="kpi-label">Avg Resolution Time</div><div class="kpi-value">${avgMs!==null ? formatDuration(avgMs) : '—'}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Fastest / Slowest</div><div class="kpi-value" style="font-size:15px;">${fastestMs!==null?formatDuration(fastestMs):'—'} / ${slowestMs!==null?formatDuration(slowestMs):'—'}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Avg CSAT</div><div class="kpi-value">${avgCsat!==null ? `⭐ ${avgCsat}` : '—'}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Still Open</div><div class="kpi-value">${total-resolved.length}</div></div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-card-title">Tickets by Status</div>
+        <div class="stat-card-sub">Where every ticket currently sits</div>
+        ${statusCounts.map(s=>statBarRowHTML(s.id, s.count, statusMax, s.color, total?Math.round(s.count/total*100)+'%':'')).join('')}
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-title">Tickets by Team</div>
+        <div class="stat-card-sub">Routing volume across support teams</div>
+        ${teamCounts.map(t=>statBarRowHTML(t.label, t.count, teamMax, 'var(--blue)', total?Math.round(t.count/total*100)+'%':'')).join('')}
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-title">Tickets by Category</div>
+        <div class="stat-card-sub">Most common reasons customers reach out</div>
+        ${categoryCounts.map(c=>statBarRowHTML(c.label, c.count, categoryMax, 'var(--blue-dark)')).join('')}
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-title">CSAT Distribution</div>
+        <div class="stat-card-sub">${csatList.length} survey response${csatList.length===1?'':'s'} received</div>
+        ${csatList.length
+          ? csatBuckets.map(b=>statBarRowHTML(b.star+' star'+(b.star===1?'':'s'), b.count, csatMax, 'var(--warning)')).join('')
+          : `<div style="color:var(--text-muted); font-size:12.5px;">No CSAT responses yet.</div>`}
+      </div>
+    </div>
+
+    <div class="stat-card" style="margin-bottom:18px;">
+      <div class="stat-card-title">Resolution Speed — AI vs Human</div>
+      <div class="stat-card-sub">Average time to resolve, by who handled it</div>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="compare-card-icon">🤖</div>
+          <div class="compare-card-value">${avgAiMs!==null ? formatDuration(avgAiMs) : '—'}</div>
+          <div class="compare-card-label">AI-handled · ${aiDurations.length} resolved</div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-card-icon">👤</div>
+          <div class="compare-card-value">${avgHumanMs!==null ? formatDuration(avgHumanMs) : '—'}</div>
+          <div class="compare-card-label">Human-handled · ${humanDurations.length} resolved</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reports-toggle-row">
+      <button class="link-btn" data-action="toggle-report-table">${state.reportsShowTable ? 'Hide ticket-level detail ▴' : 'Show ticket-level detail ▾'}</button>
+    </div>
+    ${state.reportsShowTable ? `
+    <div style="overflow-x:auto;">
+    <table class="ticket-table">
+      <thead><tr>
+        <th>Ticket</th><th>Customer</th><th>Category</th><th>Status</th><th>Created</th><th>Time Taken</th><th>CSAT</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${rows.map(c=>reportRowHTML(c)).join('')}
+      </tbody>
+    </table>
+    </div>` : ''}
+  `;
+  page.querySelectorAll('[data-modal]').forEach(b=>b.addEventListener('click', ()=>openTicketModal(b.dataset.modal)));
+  const toggleBtn = page.querySelector('[data-action="toggle-report-table"]');
+  if(toggleBtn) toggleBtn.addEventListener('click', ()=>{ state.reportsShowTable = !state.reportsShowTable; renderReportsPage(); });
+}
+
+function reportRowHTML(c){
+  const ticketId = ticketIdFor(c);
+  const createdAgo = formatDuration(Date.now()-c.createdAt)+' ago';
+  const timeTaken = c.resolvedAt
+    ? formatDuration(c.resolvedAt-c.createdAt)
+    : `<span style="color:var(--warning);">Ongoing (${formatDuration(Date.now()-c.createdAt)})</span>`;
+  return `<tr>
+    <td style="font-weight:700;color:var(--blue-dark);">${ticketId}</td>
+    <td><div class="tt-customer">${avatarHTML(c.name,26)}<div class="tt-customer-meta">
+      <span class="tt-customer-name">${esc(c.name)}</span>
+      <span class="tt-customer-sub">${esc(c.feature)} · ${assignmentPillHTML(c)}</span>
+    </div></div></td>
+    <td>${c.category}</td>
+    <td><span class="status-pill status-${c.status}">${c.status}</span></td>
+    <td style="color:var(--text-weak);">${createdAgo}</td>
+    <td style="font-weight:600;">${timeTaken}</td>
+    <td>${c.csat ? `<span class="csat-mini" style="margin-top:0;">⭐ ${c.csat.rating}/5</span>` : '<span style="color:var(--text-muted);">—</span>'}</td>
+    <td><button class="link-btn" data-modal="${c.id}">View ticket →</button></td>
+  </tr>`;
+}
+
+/* ---------------- bootstrap ---------------- */
+// Every AI-handled seed ticket is treated as already closed — backfill Resolved status
+// + a CSAT rating for any that haven't gone through resolveAITicket() yet.
+conversations.forEach(c=>{ if(c.assignment.type==='ai' && c.status!=='Resolved') resolveAITicket(c); });
+
+// Tickets is the landing page — there's no Inbox list to default into, and no
+// conversation is pre-opened since the only way in is picking a ticket first.
+renderRail();
+switchView('tickets');
+</script>
+</body>
+</html>
