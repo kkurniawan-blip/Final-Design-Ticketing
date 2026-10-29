@@ -3,6 +3,7 @@
 (function () {
   'use strict';
   const P = (window.P = {});
+  P.acts = {}; P.ins = {}; P.sheets = {};
 
   /* ------------------------------------------------------------------ dates */
   // Fixed "today" so the prototype's weeks, calendar and ages stay consistent.
@@ -91,6 +92,7 @@
     timer: 'M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM12 9v4M10 2.5h4',
     slash: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM5.6 5.6l12.8 12.8',
     flag: 'M5 21V4M5 4h12l-2 4 2 4H5',
+    link: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1',
     sprout: 'M12 21v-8M12 13c0-4-3-6-7-6 0 4 3 6 7 6zM12 11c0-3.5 2.5-6 7-6 0 3.5-2.5 6-7 6z'
   };
   P.ic = (name, size = 22, extra = '') => {
@@ -108,7 +110,8 @@
 
   /* ------------------------------------------------------------------ state */
   P.defaults = () => ({
-    stage: 'preg', covered: false, quota: 3, scans: 2, name: '', askName: true, reduce: false, lossActive: false, prevStage: null,
+    stage: 'preg', covered: false, quota: 3, scans: 2, name: '', askName: true, reduce: false, lossActive: false, lossKind: 'preg', prevStage: null,
+    returning: true, clock: '09.41', night: 'auto', testContent: false, leaveOptIn: false,
     consent: { health: true, partner: false, hospital: false, marketing: false, ai: false },
     partner: { fertile: false, week: false, checkup: false, tasks: false, alert: false }, partnerExample: false,
     cycle: { lmp: '2026-10-20', len: 28, unknown: false, logs: { '2026-10-20': ['Haid mulai'], '2026-10-24': ['Haid selesai'], '2026-10-27': ['Kram ringan'] } },
@@ -122,7 +125,7 @@
     stagePick: 'preg',
     cost: { step: 1, tier: 'mid', room: 'k1', cover: ['bpjs'], reserve: true },
     hosp: { sort: 'dist', f: { dist: 'all', tier: 'all', bpjs: false, nicu: false, room: 'all' }, open: {} },
-    booking: { hosp: 'b', type: 'konsul', day: 1, time: '09.00', doctor: '', pay: 'bpjs', share: { name: true, phone: true, week: false, hpl: false, notes: false }, note: '' },
+    booking: { hosp: 'b', type: 'konsul', day: 2, time: '09.00', doctor: '', pay: null, share: { name: true, phone: true, week: false, hpl: false, notes: false }, note: '' },
     request: { status: 'sent', sharing: true, cancelled: false, added: false },
     questions: ['Apakah hasil pemeriksaanku sejauh ini baik?'],
     guideWeek: 14,
@@ -135,8 +138,8 @@
       { k: 6, who: 'Dokter + USG', state: 'up', date: '' }
     ],
     birth: { done: { ktp: true, bpjs: true, kia: false, b1: true, b2: false, b3: false, b4: false, y1: false, y2: true, y3: false, y4: false }, assign: { b3: true }, driver: 'pasangan', hosp: '[RS A]' },
-    nutri: { mode: 'scan', phase: 'idle', foods: [{ n: 'Nasi putih', c: 'tinggi' }, { n: 'Sayur bayam', c: 'sedang' }, { n: 'Tempe', c: 'tinggi' }], menu: '' },
-    meals: { tab: 'hamil', filters: ['halal'], loc: 'rumah', day: 1, slot: 'siang' },
+    nutri: { mode: 'scan', phase: 'idle', foods: [{ n: 'Nasi putih', c: 'yakin' }, { n: 'Sayur bayam', c: 'cek' }, { n: 'Tempe', c: 'yakin' }], menu: '' },
+    meals: { tab: 'hamil', filters: [], loc: 'rumah', day: 1, slot: 'siang' },
     ai: null, bidan: null, aiShare: false,
     konsul: { type: 'obg', doc: null, mode: 'chat', slot: null, share: { week: false, notes: false, visits: false, hpl: false }, done: false },
     emergTab: null,
@@ -152,6 +155,8 @@
 
   /* stage → tone */
   P.stageTone = (s) => ({ plan: 'plan', preg: 'preg', baby: 'baby' }[s] || 'neutral');
+  // Night: on, off, or automatic between 21.00 and 05.59 on the (simulated) clock.
+  P.isNight = () => { const s = P.S; if (s.night === 'on') return true; if (s.night === 'off') return false; const h = parseInt(s.clock, 10); return h >= 21 || h < 6; };
   P.homeOf = (s) => ({ plan: 'planHome', preg: 'pregHome', baby: 'babyHome' }[s] || 'account');
 
   /* pregnancy maths (Naegele). The doctor's ultrasound date always wins over HPHT. */
@@ -177,7 +182,13 @@
     ${back ? `<button class="ib" ${backTo ? `data-go="${backTo}"` : 'data-back'} aria-label="Kembali">${ic('back')}</button>` : ''}
     <h1 tabindex="-1" data-focus>${title}${sub ? `<span class="sub">${sub}</span>` : ''}</h1>
     ${step ? `<span class="step">${step}</span>` : ''}${right}</header>`;
-  P.homeHdr = (greet, right) => `<header class="hdr"><div class="brand">${P.logo(30, false)}<h1 tabindex="-1" data-focus>${greet}</h1></div>${right}</header>`;
+  // Home header always carries a labelled emergency button within one tap.
+  P.homeHdr = (greet, right) => `<header class="hdr"><div class="brand">${P.logo(30, false)}<h1 tabindex="-1" data-focus>${greet}</h1></div>
+    <button type="button" class="hdr-sos" data-go="emergency">${ic('phone', 18)}<span>Darurat</span></button>${right}</header>`;
+  // Name prompt shared by the three homes.
+  P.namePrompt = () => P.S.askName && !P.S.name ? `<form class="card tight solid" data-submit="saveName"><label class="lbl" for="nm-in">Mau dipanggil apa?</label>
+    <div class="btn-row" style="align-items:center"><input class="inp" id="nm-in" placeholder="Nama panggilanmu" autocomplete="given-name" style="flex:2"><button type="submit" class="btn btn-primary btn-sm" style="flex:0 0 auto"><span>Simpan</span></button></div>
+    <button type="button" class="btn-text" style="align-self:flex-start;border:0;background:none" data-act="skipName">Lewati</button></form>` : '';
 
   const attrs = (o) => Object.entries(o).filter(([, v]) => v !== undefined && v !== null && v !== false).map(([k, v]) => v === true ? k : `${k}="${esc(v)}"`).join(' ');
   P.attrs = attrs;
@@ -193,9 +204,9 @@
     if (pressed !== undefined) a[role === 'radio' ? 'aria-checked' : 'aria-pressed'] = pressed ? 'true' : 'false';
     return `<button ${attrs(a)}>${pressed ? ic('check', 16) : icon ? ic(icon, 16) : ''}${label}</button>`;
   };
-  P.sw = (id, label, desc, on, act, val) => `<div class="sw-row"><div class="grow"><div class="t" id="${id}-l">${label}</div>${desc ? `<p class="t-sec" id="${id}-d">${desc}</p>` : ''}</div>
+  P.sw = (id, label, desc, on, act, val, disabled) => `<div class="sw-row ${disabled ? 'off' : ''}"><div class="grow"><div class="t" id="${id}-l">${label}</div>${desc ? `<p class="t-sec" id="${id}-d">${desc}</p>` : ''}</div>
     <span class="sw-state" aria-hidden="true">${on ? 'Aktif' : 'Mati'}</span>
-    <button type="button" class="sw" role="switch" id="${id}" aria-checked="${on ? 'true' : 'false'}" aria-labelledby="${id}-l" ${desc ? `aria-describedby="${id}-d"` : ''} data-act="${act}" data-v="${val || id}">${ic('check', 14, 'class="on-ic"')}</button></div>`;
+    <button type="button" class="sw" role="switch" id="${id}" aria-checked="${on ? 'true' : 'false'}" aria-labelledby="${id}-l" ${desc ? `aria-describedby="${id}-d"` : ''} data-act="${act}" data-v="${val || id}" ${disabled ? 'disabled' : ''}>${ic('check', 14, 'class="on-ic"')}</button></div>`;
   P.field = ({ id, label, type = 'text', value = '', ph = '', hint = '', err = '', warn = '', pre = '', suf = '', input = '', mode = '', act = '', extra = '' }) => {
     const desc = [hint && `${id}-h`, err && `${id}-e`, warn && `${id}-w`].filter(Boolean).join(' ');
     const control = `<input class="inp" id="${id}" type="${type}" value="${esc(value)}" ${ph ? `placeholder="${esc(ph)}"` : ''} ${mode ? `inputmode="${mode}"` : ''} ${input ? `data-in="${input}"` : ''} ${act ? `data-ch="${act}"` : ''} ${desc ? `aria-describedby="${desc}"` : ''} ${err ? 'aria-invalid="true"' : ''} ${extra}>`;
@@ -205,9 +216,39 @@
       ${err ? `<span class="errmsg" id="${id}-e">${ic('alertc', 18)}${err}</span>` : ''}
       ${warn ? `<span class="warnmsg" id="${id}-w">${ic('info', 18)}${warn}</span>` : ''}</div>`;
   };
-  P.seg = (label, opts, val, act) => `<div class="seg" role="tablist" aria-label="${esc(label)}">${opts.map(([v, t]) => `<button type="button" role="tab" aria-selected="${v === val}" data-act="${act}" data-v="${v}">${t}</button>`).join('')}</div>`;
+  // Segmented control = single choice, so it is a radio group (not tabs).
+  P.seg = (label, opts, val, act) => `<div class="seg" role="radiogroup" aria-label="${esc(label)}">${opts.map(([v, t]) => `<button type="button" role="radio" aria-checked="${v === val}" data-act="${act}" data-v="${v}">${t}</button>`).join('')}</div>`;
+  // Locale-independent date picker: three labelled selects, shows "29 Apr 2027" style values.
+  P._ds = {};
+  P.dateSel = ({ id, label, value = '', act, f = '', years, optional = false, hint = '', err = '' }) => {
+    const pd = P.parse(value), part = P._ds[id] || {}, yrs = years || [2025, 2026, 2027];
+    const d = pd ? { getDate: () => pd.getDate(), getMonth: () => pd.getMonth(), getFullYear: () => pd.getFullYear() }
+      : { getDate: () => part.d, getMonth: () => (part.m ? part.m - 1 : -1), getFullYear: () => part.y };
+    const opt = (v, t, on) => `<option value="${v}" ${on ? 'selected' : ''}>${t}</option>`;
+    const blank = optional || !pd ? opt('', '—', false) : '';
+    return `<fieldset class="field datesel ${err ? 'err' : ''}" ${hint || err ? `aria-describedby="${hint ? id + '-h' : ''} ${err ? id + '-e' : ''}"` : ''}><legend class="lbl">${label}</legend><div class="ds-row">
+      <label class="ds"><span>Tanggal</span><select class="inp" id="${id}-d" data-ch="dateSel" data-id="${id}" data-act2="${act}" data-f="${f}">${blank}${Array.from({ length: 31 }, (_, i) => opt(i + 1, i + 1, d && d.getDate() === i + 1)).join('')}</select></label>
+      <label class="ds wide"><span>Bulan</span><select class="inp" id="${id}-m" data-ch="dateSel" data-id="${id}" data-act2="${act}" data-f="${f}">${blank}${P.MONL.map((m, i) => opt(i + 1, m, d && d.getMonth() === i)).join('')}</select></label>
+      <label class="ds"><span>Tahun</span><select class="inp" id="${id}-y" data-ch="dateSel" data-id="${id}" data-act2="${act}" data-f="${f}">${blank}${yrs.map((y) => opt(y, y, d && d.getFullYear() === y)).join('')}</select></label></div>
+      ${hint ? `<span class="hint" id="${id}-h">${hint}</span>` : ''}${err ? `<span class="errmsg" id="${id}-e">${ic('alertc', 18)}${err}</span>` : ''}</fieldset>`;
+  };
+  P.acts.dateSel = (el) => {
+    const id = el.dataset.id, q = (x) => +P.el().querySelector('#' + id + '-' + x).value;
+    let d = q('d'), m = q('m'), y = q('y'), v = '';
+    if (d && m && y) { d = Math.min(d, new Date(y, m, 0).getDate()); v = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`; delete P._ds[id]; }
+    else P._ds[id] = { d, m, y };
+    P.acts[el.dataset.act2]({ value: v, dataset: { f: el.dataset.f } });
+  };
   P.src = (t) => `<span class="src">${ic('doc', 14)}Sumber: ${t}</span>`;
   P.sos = () => `<button type="button" class="pill-sos" data-go="emergency"><span class="dot" aria-hidden="true"></span>${ic('phone', 18)}Bantuan darurat</button>`;
+  // One calm row that opens the danger list, instead of many red chips in everyday sheets.
+  P.dangerRow = (list) => `<button type="button" class="danger-row" data-sheet="dangerPick" data-v="${list}">${ic('alert', 22)}<span class="grow"><b>Ada tanda bahaya?</b><span>Ketuk untuk melihat daftar dan minta bantuan</span></span>${ic('chev', 20)}</button>`;
+  // Fictional test-session content replaces brackets when "Konten uji" is on.
+  P.TEST = [['[RS Ibu & Anak B]', 'RSIA Kenanga (contoh)'], ['[RS A]', 'RS Melati (contoh)'], ['[RSUD C]', 'RSUD Cempaka (contoh)'], ['[RS D]', 'RS Anggrek (contoh)'], ['[RS E]', 'RSUD Teratai (contoh)'],
+    ['[Bidan Nama]', 'Bidan Rina (contoh)'], ['[Nama kantor]', 'PT Sinar Contoh'], ['[Nama Anak]', 'Ara'], ['[Nama pasien]', 'Dewi S.'], ['[Nama]', 'Dewi'],
+    ['[x menit]', '10 menit'], ['[x jam]', '2 jam'], ['[KODE-6]', 'PLK-4821'], ['[nomor HP]', '812-xxxx-5521'], ['[Foto RS]', 'Foto RS (contoh)'],
+    ['[Layanan dukungan]', 'Layanan dukungan (contoh)'], ['[Vendor A]', 'Dapur Sehat (contoh)'], ['[alamat rumah]', 'Jl. Contoh No. 12, Kemang'], ['[alamat kantor]', 'Jl. Contoh Raya No. 8, Kuningan']];
+  P.applyTest = (html) => { if (!P.S.testContent) return html; let h = html; P.TEST.forEach(([a, b]) => { h = h.split(a).join(b); }); return h; };
   P.check = (id, label, checked, act, sub = '', v = '') => `<label class="check ${checked ? 'done' : ''}" for="${id}"><input type="checkbox" id="${id}" ${checked ? 'checked' : ''} data-ch="${act}" data-v="${v || id}"><span class="box">${ic('check', 16)}</span><span class="grow"><span class="t">${label}</span>${sub ? `<br><span class="t-sec">${sub}</span>` : ''}</span></label>`;
   P.tick = (id, label, checked, act, v) => `<label class="check" for="${id}"><input type="checkbox" id="${id}" ${checked ? 'checked' : ''} data-ch="${act}" data-v="${v}"><span class="box">${ic('check', 16)}</span><span class="grow">${label}</span></label>`;
   P.covered = () => P.S.covered ? `<span class="badge cover">${ic('shieldc', 15)}Ditanggung</span>` : '';
@@ -221,8 +262,8 @@
     calm: [['#A9B7BD', 300, 160, -80, .35]],
     welcome: [['#FF8A6B', 280, -80, -30, .45], ['#C86DD7', 300, 190, 260, .45], ['#34D6A6', 230, -60, 600, .4]]
   };
-  P.orbs = (tone, drift) => `<div class="orbs ${drift ? 'drift' : ''}" aria-hidden="true">${(ORBS[tone] || ORBS.neutral).map(([c, s, x, y, o]) => `<i class="orb" style="background:${c};width:${s}px;height:${s}px;left:${x}px;top:${y}px;opacity:${o}"></i>`).join('')}</div>`;
-  P.statusbar = () => `<div class="status" aria-hidden="true"><b>9:41</b><span>
+  P.orbs = (tone, drift, night) => `<div class="orbs ${drift ? 'drift' : ''}" aria-hidden="true">${(ORBS[tone] || ORBS.neutral).map(([c, s, x, y, o]) => `<i class="orb" style="background:${c};width:${s}px;height:${s}px;left:${x}px;top:${y}px;opacity:${night ? Math.min(o, 0.2) : o}"></i>`).join('')}</div>`;
+  P.statusbar = () => `<div class="status" aria-hidden="true"><b>${(P.S.clock || '09.41').replace(/^0/, '').replace('.', ':')}</b><span>
     <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg>
     <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".45"/><rect x="2.5" y="2.5" width="17" height="8" rx="2" fill="currentColor"/><rect x="24.6" y="4.5" width="1.6" height="4" rx=".8" fill="currentColor" opacity=".45"/></svg></span></div>`;
 
@@ -232,14 +273,14 @@
     preg: [['pregHome', 'home', 'Beranda'], ['kontrol', 'calendar', 'Kontrol'], null, ['meals', 'leaf', 'Gizi'], ['tanya', 'sparkle', 'Tanya']],
     baby: [['babyHome', 'home', 'Beranda'], ['growth', 'chart', 'Tumbuh'], null, ['meals', 'leaf', 'Gizi'], ['tanya', 'sparkle', 'Tanya']]
   };
-  P.tabbar = (stage, active) => `<nav class="tabbar" aria-label="Navigasi utama">${TABS[stage].map((t) => t
+  P.tabbar = (stage, active) => `<div class="tabband" aria-hidden="true"></div><nav class="tabbar" aria-label="Navigasi utama">${TABS[stage].map((t) => t
     ? `<button type="button" class="tab" ${t[0] === active ? 'aria-current="page"' : ''} data-go="${t[0]}" ${t[0] === 'meals' && stage === 'baby' ? 'data-arg="mpasi"' : ''}>${ic(t[1], 22)}<span>${t[2]}</span></button>`
     : `<div class="catat"><button type="button" aria-label="Catat" data-sheet="catat">${ic('plus', 28)}</button><span aria-hidden="true">Catat</span></div>`).join('')}</nav>`;
 
   /* ------------------------------------------------------------------ registry */
-  P.screens = {}; P.order = []; P.acts = {}; P.ins = {}; P.sheets = {};
+  P.screens = {}; P.order = [];
   P.def = (spec) => { P.screens[spec.id] = spec; P.order.push(spec.id); };
-  P.toneOf = (sp) => sp.tone === 'shared' ? P.stageTone(P.S.stage) : (typeof sp.tone === 'function' ? sp.tone() : sp.tone);
+  P.toneOf = (sp) => sp.tone === 'shared' ? (P.S.lossActive ? 'calm' : P.stageTone(P.S.stage)) : (typeof sp.tone === 'function' ? sp.tone() : sp.tone);
 
   /* ------------------------------------------------------------------ runtime */
   let root, scr, scroll, dock, layer, toasts, cur = null, hist = [], sheet = null, timers = [];
@@ -251,6 +292,9 @@
     scr.addEventListener('click', onClick);
     scr.addEventListener('input', (e) => { const t = e.target.closest('[data-in]'); if (t && P.ins[t.dataset.in]) P.ins[t.dataset.in](t, e); });
     scr.addEventListener('change', (e) => { const t = e.target.closest('[data-ch]'); if (t && P.acts[t.dataset.ch]) P.acts[t.dataset.ch](t, e); });
+    // Whole switch row is the tap target, not only the 56×34 switch.
+    scr.addEventListener('click', (e) => { const fld = e.target.closest('.inputbar .fld'); if (fld && e.target.tagName !== 'INPUT') { const i = fld.querySelector('input'); i && i.focus(); } });
+    scr.addEventListener('click', (e) => { const row = e.target.closest('.sw-row'); if (row && !e.target.closest('.sw,a,button')) { const b = row.querySelector('.sw'); if (b && !b.disabled) b.click(); } });
     scr.addEventListener('submit', (e) => { const f = e.target.closest('[data-submit]'); if (f) { e.preventDefault(); P.acts[f.dataset.submit] && P.acts[f.dataset.submit](f, e); } });
     scr.addEventListener('keydown', onKey);
   };
@@ -288,7 +332,7 @@
     let bottom = r.dock ? `<div class="dock">${r.dock}</div>` : '';
     if (r.tab) bottom = P.tabbar(r.tab, id);
     if (r.bar) bottom = r.bar;
-    return { tone, main: r.main, bottom, tab: !!r.tab, drift: !!sp.drift, orbTone: sp.orbs || tone };
+    return { tone, main: P.applyTest(r.main), bottom: P.applyTest(bottom), tab: !!r.tab, drift: !!sp.drift, orbTone: sp.orbs || tone, night: P.isNight() };
   };
 
   P.go = (id, o = {}) => {
@@ -321,7 +365,10 @@
     scr.dataset.tone = c.tone;
     scr.classList.toggle('has-tab', c.tab);
     scr.classList.toggle('reduce', !!P.S.reduce);
-    scr.querySelector('.orbs-slot').innerHTML = P.orbs(c.orbTone, c.drift);
+    scr.classList.toggle('night', c.night);
+    scr.classList.toggle('testmode', !!P.S.testContent);
+    scr.querySelector('.orbs-slot').innerHTML = P.orbs(c.orbTone, c.drift, c.night);
+    scr.querySelector('.status').outerHTML = P.statusbar();
     const ae = document.activeElement, aeId = ae && scr.contains(ae) ? ae.id : null;
     const sel = aeId && ae.selectionStart != null ? [ae.selectionStart, ae.selectionEnd] : null;
     scroll.innerHTML = c.main;
@@ -354,14 +401,14 @@
     sheet.danger = m.danger;
     const keep = !fresh && document.activeElement && layer.contains(document.activeElement) ? document.activeElement.id : null;
     const st = !fresh && layer.querySelector('.sheet-b') ? layer.querySelector('.sheet-b').scrollTop : 0;
-    layer.innerHTML = m.html; layer.classList.add('open');
+    layer.innerHTML = P.applyTest(m.html); layer.classList.add('open');
     if (!fresh) { const s = layer.querySelector('.sheet'); if (s) s.style.animation = 'none'; const sc = layer.querySelector('.scrim'); if (sc) sc.style.animation = 'none'; const b = layer.querySelector('.sheet-b'); if (b) b.scrollTop = st; }
     if (keep) { const n = layer.querySelector('#' + CSS.escape(keep)); n && n.focus({ preventScroll: true }); }
   }
   P.openSheet = (name, arg) => {
     if (!P.sheets[name]) return;
     const opener = document.activeElement;
-    sheet = { name, arg, opener };
+    sheet = { name, arg, opener }; P._dangerUndo = null;
     paintSheet(true); setInert(true);
     if (sheet.danger) toasts.innerHTML = ''; // nothing may cover the danger panel
     const f = layer.querySelector(sheet.danger ? '.call-119' : '#sh-t');
@@ -376,7 +423,9 @@
     layer.classList.remove('open'); layer.innerHTML = ''; setInert(false);
     if (!silent && op && scr.contains(op)) op.focus({ preventScroll: true });
   };
-  P.acts.dangerBack = () => P.closeSheet(true);
+  // "Salah pilih, kembali" also undoes the choice that opened the panel.
+  P.openDanger = (sign, undo) => { P.openSheet('danger', sign); P._dangerUndo = undo || null; };
+  P.acts.dangerBack = () => { const u = P._dangerUndo; P._dangerUndo = null; P.closeSheet(true); if (u) { u(); P.rerender(); } };
 
   /* ------------------------------------------------------------------ toasts */
   P.toast = (msg, o = {}) => {
@@ -384,6 +433,7 @@
     t.className = 'toast';
     t.innerHTML = `${ic(o.icon || 'checkc', 20)}<span class="grow">${msg}</span>${o.undo ? '<button type="button">Urungkan</button>' : ''}`;
     if (o.undo) t.querySelector('button').addEventListener('click', () => { o.undo(); t.remove(); P.rerender(); });
+    toasts.innerHTML = ''; // one toast at a time
     toasts.appendChild(t);
     setTimeout(() => t.remove(), o.ms || 4200);
   };
@@ -399,8 +449,8 @@
       if (setup && setup.state) setup.state(P.S);
       const c = P.compose(id);
       let sh = '';
-      if (setup && setup.sheet) { const m = P.sheetMarkup(setup.sheet, setup.sheetArg); sh = `<div class="layer open">${m.html}</div>`; }
-      return `<div class="scr reduce ${c.tab ? 'has-tab' : ''}" data-tone="${c.tone}">${P.orbs(c.orbTone)}${P.statusbar()}<div class="scroll">${c.main}</div>${c.bottom}${sh}</div>`;
+      if (setup && setup.sheet) { const m = P.sheetMarkup(setup.sheet, setup.sheetArg); sh = `<div class="layer open">${P.applyTest(m.html)}</div>`; }
+      return `<div class="scr reduce ${c.tab ? 'has-tab' : ''} ${c.night ? 'night' : ''} ${P.S.testContent ? 'testmode' : ''}" data-tone="${c.tone}">${P.orbs(c.orbTone, false, c.night)}${P.statusbar()}<div class="scroll">${c.main}</div>${c.bottom}${sh}</div>`;
     } finally { P.S = JSON.parse(saved); }
   };
 })();

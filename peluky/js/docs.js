@@ -20,7 +20,11 @@
     ground: (o) => mix(hex(o), 0.5, GROUND),
     calmGlass: () => mix(W, 0.72, hex('#E9EDEF')),
     redTint: (o) => mix(hex('#FDE2E2'), 0.97, hex(o)),
-    toast: (o) => mix(hex('#2A1830'), 0.92, hex(o))
+    toast: (o) => mix(hex('#2A1830'), 0.92, hex(o)),
+    // Night: dark glass over the orb at full opacity (real night orbs are ≤20%); bare night ground with an orb at 25%.
+    nightGlass: (o) => mix([38, 27, 44], 0.74, hex(o)),
+    nightSheet: (o) => mix([44, 32, 51], 0.94, hex(o)),
+    nightGround: (o) => mix(hex(o), 0.25, hex('#150F19'))
   };
   const worst = (fg, surf, tintFn) => {
     let min = Infinity, at = '';
@@ -105,6 +109,12 @@ filter: blur(76–90px); opacity: .35–.5;
 box-shadow: 0 0 0 1px var(--glow), 0 0 28px -4px var(--glow);</pre>
       <div class="scr demo glassdemo" data-tone="preg">${P.orbs('preg')}<div class="card glow" style="position:relative;margin:40px 24px"><p class="t-sec">Hero card · glow</p><p class="t-h3">Minggu ke-14</p></div><div class="card" style="position:relative;margin:0 24px 40px"><p class="t-sec">Standard glass card</p><p class="t-body">Text never sits directly on an orb.</p></div></div></div></section>
 
+    <section class="doc-sec" id="ds-night"><h2>Night display</h2>
+      <p class="lead">For 2 a.m. feeds: automatic between 21.00 and 06.00, or set to always / off in Akun. Same layout, low-luminance violet ground, orbs dimmed to 20%. Fills keep their deep colours; text colours switch to light tints checked on the notes page.</p>
+      <div class="swatches">${[['Night ground', '#150F19'], ['Night glass', '#261B2C'], ['Night ink', '#F3EDF5'], ['Night muted', '#CFC2D3'], ['Berry text', '#EBB1F3'], ['Coral text', '#FFB9A3'], ['Green text', '#8BE9CB']].map(([n, h]) => `<div class="swatch"><span style="background:${h}"></span><b>${n}</b><code>${h}</code></div>`).join('')}</div>
+      <div class="scr demo night" data-tone="baby" style="max-width:430px">${P.orbs('baby', false, true)}<div class="stack" style="position:relative;gap:12px"><div class="card glow"><p class="t-sec">Menyusui · sisi kiri berjalan</p><p class="timer" style="font-size:44px">12:08</p></div>${btn('Selesai & simpan', { icon: 'check' })}<div class="card tight"><p class="t-body">Teks sekunder <span class="t-sec">tetap terbaca di malam hari</span></p></div></div></div>
+    </section>
+
     <section class="doc-sec" id="ds-motion"><h2>Motion</h2>
       <ul class="plain"><li>Content rises in ≤ 0.34s with a 40ms stagger (transform + opacity only).</li><li>Sheets slide up in 0.32s; toasts fade up in 0.3s; buttons press-scale to 0.98.</li><li>Orbs drift 19–24s, on the welcome screen only.</li><li>Calm screens (emergency, loss) have no motion.</li><li><code>prefers-reduced-motion: reduce</code> switches every animation and transition off.</li></ul></section>
 
@@ -112,8 +122,8 @@ box-shadow: 0 0 0 1px var(--glow), 0 0 28px -4px var(--glow);</pre>
       <div class="comp-grid">
         <div class="comp"><h3>Buttons</h3><div class="scr demo" data-tone="preg"><div class="stack">${btn('Primary · Hamil')}${btn('Glass', { kind: 'glass' })}${btn('Text button', { kind: 'text', cls: 'center' })}${btn('Telepon <span class="num">119</span> (ambulans)', { kind: 'danger', icon: 'phone' })}${btn('Disabled', { disabled: true })}</div></div>
           <div class="scr demo" data-tone="plan" style="margin-top:10px">${btn('Primary · Merencanakan')}</div><div class="scr demo" data-tone="baby" style="margin-top:10px">${btn('Primary · Setelah lahir')}</div><div class="scr demo" data-tone="neutral" style="margin-top:10px">${btn('Primary · Akun')}</div></div>
-        <div class="comp"><h3>Chips, badges, source</h3><div class="scr demo" data-tone="preg"><div class="stack" style="gap:12px"><div class="chips">${chip('Default')}${chip('Selected', { pressed: true })}${chip('Tanda bahaya', { cls: 'danger', icon: 'alert' })}</div>
-          <div class="chips"><span class="badge mitra">${ic('heart', 14)}Mitra Peluky</span><span class="badge cover">${ic('shieldc', 14)}Ditanggung</span><span class="badge stage">${ic('calendar', 14)}Hamil</span><span class="badge money">${ic('coins', 14)}Biaya</span></div>${src('Chubb Life, Jan 2026')}</div></div></div>
+        <div class="comp"><h3>Chips, badges, source</h3><div class="scr demo" data-tone="preg"><div class="stack" style="gap:12px"><div class="chips">${chip('Default')}${chip('Selected', { pressed: true })}${chip('Tanda bahaya', { cls: 'danger', icon: 'alert' })}</div>${P.dangerRow('hamil').replace('data-sheet', 'tabindex="-1" data-x')}
+          <div class="chips"><span class="badge mitra">${ic('link', 14)}Mitra Peluky</span><span class="badge cover">${ic('shieldc', 14)}Ditanggung</span><span class="badge stage">${ic('calendar', 14)}Hamil</span><span class="badge money">${ic('coins', 14)}Biaya</span></div>${src('Chubb Life, Jan 2026')}</div></div></div>
         <div class="comp"><h3>Inputs</h3><div class="scr demo" data-tone="preg"><div class="stack" style="gap:14px">${field({ id: 'dsi1', label: 'Nomor HP', pre: '+62', ph: '812 3456 7890' })}${field({ id: 'dsi2', label: 'Kode kantor/asuransi', value: 'SALAH1', err: 'Kode tidak ditemukan. Cek lagi atau tanya HR-mu.' })}${field({ id: 'dsi3', label: 'Panjang badan', value: '82', suf: 'cm', warn: 'Angkanya tidak biasa, cek lagi ya.' })}</div></div></div>
         <div class="comp"><h3>Switches, segmented, checkbox</h3><div class="scr demo" data-tone="preg"><div class="stack" style="gap:12px"><div class="rows">${sw('dss1', 'Data kesehatan', 'Untuk kalender dan pengingat.', true, 'noop')}${sw('dss2', 'Info & promosi', '', false, 'noop')}</div>${seg('Contoh', [['a', 'Scan'], ['b', 'Menu'], ['c', 'Manual']], 'a', 'noop')}${P.check('dsc1', 'KTP', true, 'noop')}${P.check('dsc2', 'Buku KIA', false, 'noop')}</div></div></div>
         <div class="comp"><h3>Cards</h3><div class="scr demo" data-tone="baby">${P.orbs('baby')}<div class="stack" style="position:relative;gap:12px"><div class="card glow"><p class="t-h3">Hero · glow outline</p><p class="t-sec">One per home.</p></div><div class="card tinted"><p class="t-h3">Tinted · stage</p><p class="t-sec">Follow-ups, nudges.</p></div><div class="card amber"><p class="t-h3">Amber · calm status</p><p class="t-sec" style="color:var(--ink)">Outside range. Never red.</p></div></div></div></div>
@@ -152,6 +162,25 @@ box-shadow: 0 0 0 1px var(--glow), 0 0 28px -4px var(--glow);</pre>
     ${FILLS.map(([n, c]) => { const r = ratio(W, hex(c)); return `<tr><td>${n}</td><td>15–20px</td><td><span class="swc" style="background:#fff;border:1px solid #ccc"></span><code>#FFFFFF</code></td><td>Solid fill <span class="swc" style="background:${c}"></span><code>${c}</code></td><td><b>${fmt(r)}</b></td><td>4.5:1</td><td>${mark(r >= 4.5)}</td></tr>`; }).join('')}
     ${[['Calm text', '#1D2B30'], ['Calm secondary', '#4F6066'], ['Calm accent', '#3D5560']].map(([n, c]) => { const r = ratio(hex(c), SURF.calmGlass()); return `<tr><td>${n}</td><td>13–22px</td><td><span class="swc" style="background:${c}"></span><code>${c}</code></td><td>Glass over calm ground</td><td><b>${fmt(r)}</b></td><td>4.5:1</td><td>${mark(r >= 4.5)}</td></tr>`; }).join('')}
   </tbody></table></div>`;
+  const NIGHT = [
+    ['Body & headings', '#F3EDF5', 'nightGlass', 4.5], ['Secondary text', '#CFC2D3', 'nightGlass', 4.5], ['Text on bare night ground', '#F3EDF5', 'nightGround', 4.5],
+    ['Pregnancy text', '#EBB1F3', 'nightGlass', 4.5], ['Planning text / errors', '#FFB9A3', 'nightGlass', 4.5], ['After-birth text', '#8BE9CB', 'nightGlass', 4.5], ['Money text', '#FFD98A', 'nightGlass', 4.5],
+    ['Placeholder on input fill', '#A495A8', 'nightSheet', 4.5], ['Control borders (non-text)', '#A495A8', 'nightGlass', 3]
+  ];
+  const nightTable = () => `<div class="tbl-wrap"><table class="doc-tbl"><thead><tr><th scope="col">Night text style</th><th scope="col">Colour</th><th scope="col">Worst surface</th><th scope="col">Ratio</th><th scope="col">Needs</th><th scope="col">Result</th></tr></thead><tbody>
+    ${NIGHT.map(([n, c, sf, need]) => { const [r, at] = worst(hex(c), sf); return `<tr><td>${n}</td><td><span class="swc" style="background:${c}"></span><code>${c}</code></td><td>${{ nightGlass: 'Night glass 74%', nightSheet: 'Night sheet 94%', nightGround: 'Night ground, orb 25%' }[sf]} over ${at}</td><td><b>${fmt(r)}</b></td><td>${need}:1</td><td>${mark(r >= need)}</td></tr>`; }).join('')}
+    ${[['Primary · Hamil', '#8E2A8B'], ['Primary · Merencanakan', '#C04A1A'], ['Primary · Setelah lahir', '#0B7A5C'], ['Primary · Akun (night)', '#7A5A82']].map(([n, c]) => { const r = ratio(W, hex(c)); return `<tr><td>${n} (white text)</td><td><span class="swc" style="background:${c}"></span><code>${c}</code></td><td>Solid fill</td><td><b>${fmt(r)}</b></td><td>4.5:1</td><td>${mark(r >= 4.5)}</td></tr>`; }).join('')}
+  </tbody></table></div>`;
+  // Danger triage test set: colloquial Jakarta phrasing, from the design review. Expected vs live result.
+  const TRIAGE = [
+    ['Berapa tekanan darah normal?', 'none'], ['Gula darah tinggi, aman nggak?', 'none'], ['Golongan darah saya O', 'none'],
+    ['Kaki bengkak sore hari, normal?', 'ask'], ['Badan lemas', 'ask'], ['Keluar flek', 'ask'],
+    ['aku capek banget pengen mati aja', 'mental'], ['pengen hilang aja dari dunia', 'mental'],
+    ['gak bisa napas', 'danger'], ['panas tinggi dari semalam', 'danger'], ['bayi tidak gerak dari tadi pagi', 'danger'], ['janin jarang gerak', 'danger'],
+    ['bibir bayi biru', 'danger'], ['bayi step', 'danger'], ['perut kenceng terus tiap 5 menit', 'danger'], ['keluar darah banyak', 'danger'], ['air ketuban rembes', 'danger']
+  ];
+  const triageTable = () => `<div class="tbl-wrap"><table class="doc-tbl"><thead><tr><th scope="col">Message</th><th scope="col">Expected</th><th scope="col">Prototype result</th><th scope="col">Match</th></tr></thead><tbody>
+    ${TRIAGE.map(([t, e]) => { const r = P.triage(t).level; return `<tr><td>“${t}”</td><td>${e}</td><td>${r}</td><td>${mark(r === e)}</td></tr>`; }).join('')}</tbody></table></div>`;
   const RULES = [
     ['Muted on bare ground', '#5E4B62', 'ground', 4.5, 'Muted text is never placed on bare ground; text there uses ink.'],
     ['Coral deep as small text', '#C04A1A', 'glass', 4.5, 'Coral deep is used for fills and ≥24px numerals only; small coral text uses #8F3210.'],
@@ -165,7 +194,9 @@ box-shadow: 0 0 0 1px var(--glow), 0 0 28px -4px var(--glow);</pre>
     ['Needs clinical review', [
       ['Weekly guide body', '“[Perkembangan janin minggu ke-x · menunggu tinjauan klinis]”, “[Perubahan umum minggu ini]”, “[Ilustrasi ukuran minggu x · sumber]”', '15'],
       ['Danger-sign lists and wording', 'Hamil (9), Nifas (9), Bayi (5); planning day-log chips “Nyeri perut hebat”, “Perdarahan sangat banyak”', '9, 14, 23, 25, 26'],
-      ['AI danger keyword list', 'Regex that routes to the red card (perdarahan, kejang, sesak, ketuban, bunuh diri …)', '20, 21'],
+      ['Danger triage', 'Prototype rules (danger / crisis / ask-first / none) with colloquial normalisation. Must be replaced by a clinically reviewed classifier and a larger test set written by mothers; current test set is below.', '20, 21'],
+      ['Crisis copy and counselling', '“Kamu tidak sendiri”, counsellor button, low-mood card. Validated postnatal mood screen (EPDS, Indonesian version) is a placeholder pending licence and clinical review.', '20, 26, panel'],
+      ['Loss-specific warning signs', '“Setelah keguguran” list on the emergency screen', '23, 24'],
       ['Tanya Peluky answers', 'Seed answers (kafein, masa subur, MPASI), generic “[Jawaban singkat dari referensi klinis]”, every “Sumber: [referensi klinis]” chip', '20'],
       ['Midwife sample threads', 'Three sample conversations and their safety wording', '21'],
       ['Recovery check', 'Six questions, answer wording and danger / moderate / low-mood tiers', '26'],
@@ -182,7 +213,10 @@ box-shadow: 0 0 0 1px var(--glow), 0 0 28px -4px var(--glow);</pre>
       ['Clinicians', '[dr. Nama, Sp.OG], [dr. Nama, Sp.A], [Nama, Konselor laktasi], [Bidan Nama], [Foto]', '12, 21, 22, 23'],
       ['Prices', '[Rp …], [Rp …/bulan] for savings plan, package table, meals, consults, Premium, portal fee, HR programme', '10, 12, 19, 22, 34, 37, 38'],
       ['Distances and times', '[x km], [x menit], reply time [x menit], response time [x jam]', '11, 12, 13, 17, 21, 23, 37'],
-      ['Mental-health line', '[Layanan dukungan] and [Jam layanan] (must be verified before testing)', '14, 23, 24, 26'],
+      ['Mental-health line', '[Layanan dukungan] and [Jam layanan]. Candidate to verify: Kemenkes 119 ext 8.', '14, 20, 23, 24, 26'],
+      ['Midwife service hours', '[06.00–22.00], on-call reply time [x menit]', '21'],
+      ['Obstetric 24-hour ER (PONEK) status', 'Per-hospital flag used in filters, cards and “IGD kebidanan terdekat”', '11, 12, 23'],
+      ['Test-session content set', 'Fictional names, travel times and codes behind the “Test-session content” toggle; clinicians and hospitals are marked “(contoh)”. Clinical copy stays placeholder.', 'all'],
       ['Employer & insurer', '[Nama kantor], [KODE-KANTOR], [kuota], every “[angka]” tile', '10, 31, 34, 35, 36, 38'],
       ['Vendor', '[Vendor A], [Foto menu], [alamat rumah], [alamat kantor]', '19'],
       ['Identity', '[Nama], [Nama Anak], +62 [nomor HP], [KODE-6], [Nama pasien], [catatan pasien]', '25, 31, 32, 33, 37'],
@@ -193,7 +227,9 @@ box-shadow: 0 0 0 1px var(--glow), 0 0 28px -4px var(--glow);</pre>
     ['Verify before testing', [
       ['Sourced figures', 'Chubb Life (Jan 2026), Cermati (diakses Okt 2026), Kompas TV (Sep 2025), Kemenkes 6× check-ups, UU KIA No. 4/2024, PP 33/2012, Permenkes 2/2020 girls 0–6 m table', '9, 10, 11, 16, 27, 28, 29'],
       ['Privacy promises', '“Kami tidak menjual datamu”, consent defaults, per-request hospital sharing, partner off-by-default, employer ≥10 rule enforced server-side', '4, 12, 32, 36, 38'],
-      ['Free vs Premium list', 'Must match the final pricing decision; safety features stay free', '34'],
+      ['Free vs Premium list', 'Must match the final pricing decision; safety features stay free and the midwife queue is ordered by urgency, never by plan', '34'],
+      ['BPJS referral note', '“BPJS biasanya perlu rujukan dari faskes tingkat 1” needs a cited source', '12'],
+      ['Employer leave forecast', 'Opt-in only, quarterly counts under 10 suppressed; must be enforced server-side', '36, 38'],
       ['Calls and directions', 'Prototype only shows a toast; production dials 119 / opens maps', '14, 23, 24']
     ]]
   ];
@@ -202,10 +238,13 @@ box-shadow: 0 0 0 1px var(--glow), 0 0 28px -4px var(--glow);</pre>
     <section class="doc-sec"><h2>How the worst case is measured</h2>
       <p class="lead">Each surface is composited over the most saturated orb at <b>full</b> opacity, then the lowest ratio across berry, coral, aqua and sun is kept. Real orbs are blurred and sit at 35–50%, so on-device contrast is higher than shown. Bare ground assumes an orb at 50% over #F7F5FB.</p>
       ${contrastTable()}
+      <h3 style="margin-top:22px">Night display</h3><p class="lead">Night glass is dark violet; the worst case assumes a full-opacity orb behind it (night orbs are drawn at 20% or less). Danger panels stay light at night so red keeps its meaning.</p>
+      ${nightTable()}
       <h3 style="margin-top:22px">Pairs that fail, and the rule that keeps them out</h3>
       <div class="tbl-wrap"><table class="doc-tbl"><thead><tr><th scope="col">Pair</th><th scope="col">Worst ratio</th><th scope="col">Rule in the design</th></tr></thead><tbody>
         ${RULES.map(([n, c, s, need, rule]) => { const [r] = worst(hex(c), s); return `<tr><td>${n}</td><td><b>${fmt(r)}</b> <small>(needs ${need}:1)</small></td><td>${rule}</td></tr>`; }).join('')}</tbody></table></div>
     </section>
+    <section class="doc-sec"><h2>Danger triage test set</h2><p class="lead">How the prototype’s free-text triage handles everyday and crisis phrasing. “ask” means it asks “Apakah ini terjadi sekarang?” before alarming. This is a starting set; real mothers’ wording must extend it.</p>${triageTable()}</section>
     <section class="doc-sec"><h2>Placeholder register</h2><p class="lead">Numbers in the last column are screen numbers from the prototype (A1–G38).</p>
       ${PH.map(([g, rows]) => `<h3>${g}</h3><div class="tbl-wrap"><table class="doc-tbl"><thead><tr><th scope="col">Item</th><th scope="col">Placeholder or content</th><th scope="col">Screens</th></tr></thead><tbody>${rows.map(([a, b, c]) => `<tr><td><b>${a}</b></td><td>${b}</td><td class="num">${c}</td></tr>`).join('')}</tbody></table></div>`).join('')}
     </section>

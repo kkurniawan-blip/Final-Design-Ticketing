@@ -38,9 +38,14 @@
       ${s.desktop ? `<h3>Frame width</h3><div class="vw-seg">${[1280, 1024, 768, 390].map((w) => `<button type="button" aria-pressed="${deskW === w}" data-w="${w}">${w}</button>`).join('')}</div>` : `
       <h3>Prototype state</h3>
       <div class="vw-ctl"><span>Mother’s stage</span><div class="vw-seg">${[['plan', 'Rencana'], ['preg', 'Hamil'], ['baby', 'Bayi']].map(([k, t]) => `<button type="button" aria-pressed="${st.stage === k}" data-stage="${k}">${t}</button>`).join('')}</div></div>
+      <div class="vw-ctl"><span>User</span><div class="vw-seg">${[[true, 'Returning'], [false, 'New']].map(([v, t]) => `<button type="button" aria-pressed="${st.returning === v}" data-ret="${v}">${t}</button>`).join('')}</div></div>
+      <div class="vw-ctl"><span>Phone clock</span><div class="vw-seg">${[['09.41', '09:41'], ['02.14', '02:14']].map(([v, t]) => `<button type="button" aria-pressed="${st.clock === v}" data-clock="${v}">${t}</button>`).join('')}</div></div>
+      <div class="vw-ctl"><span>Night display</span><div class="vw-seg">${[['auto', 'Auto'], ['on', 'On'], ['off', 'Off']].map(([v, t]) => `<button type="button" aria-pressed="${st.night === v}" data-night="${v}">${t}</button>`).join('')}</div></div>
       <label class="vw-ctl vw-tog"><span>Ditanggung (covered)</span><input type="checkbox" id="vw-cov" ${st.covered ? 'checked' : ''}></label>
+      <label class="vw-ctl vw-tog"><span>Test-session content (fictional)</span><input type="checkbox" id="vw-test" ${st.testContent ? 'checked' : ''}></label>
       <div class="vw-ctl"><span>Free Tanya quota</span><div class="vw-seg">${[3, 1, 0].map((q) => `<button type="button" aria-pressed="${st.quota === q}" data-quota="${q}">${q}</button>`).join('')}</div></div>
       <label class="vw-ctl vw-tog"><span>Preview reduced motion</span><input type="checkbox" id="vw-rm" ${st.reduce ? 'checked' : ''}></label>`}
+      ${s.desktop ? '' : `<button type="button" class="vw-reset" id="vw-fs">${ic('device', 16)}Full-screen test mode</button>`}
       <button type="button" class="vw-reset" id="vw-reset">${ic('refresh', 16)}Reset prototype</button>`;
   }
   notes.addEventListener('click', (e) => {
@@ -54,6 +59,10 @@
       if (x.sheet) P.openSheet(x.sheet, x.sheetArg);
     } else if (b.dataset.stage) { P.S.stage = b.dataset.stage; P.S.ai = null; P.S.bidan = null; P.S.emergTab = null; P.go(id, { replace: true }); }
     else if (b.dataset.quota) { P.S.quota = +b.dataset.quota; P.rerender(); }
+    else if (b.dataset.ret) { P.S.returning = b.dataset.ret === 'true'; P.S.ai = null; P.S.bidan = null; P.S.followup = P.S.returning ? { preg: 'pusing', baby: 'si kecil rewel' } : { preg: null, baby: null }; P.go(id, { replace: true }); }
+    else if (b.dataset.clock) { P.S.clock = b.dataset.clock; P.go(id, { replace: true }); }
+    else if (b.dataset.night) { P.S.night = b.dataset.night; P.rerender(); }
+    else if (b.id === 'vw-fs') { setFull(true); }
     else if (b.dataset.w) { deskW = +b.dataset.w; showDesk(deskId); }
     else if (b.id === 'vw-reset') { P.S = P.defaults(); P.resetHistory(); location.hash = 'welcome'; route(); }
     renderNotes(id);
@@ -61,6 +70,7 @@
   notes.addEventListener('change', (e) => {
     if (e.target.id === 'vw-cov') { P.S.covered = e.target.checked; P.rerender(); }
     if (e.target.id === 'vw-rm') { P.S.reduce = e.target.checked; P.rerender(); }
+    if (e.target.id === 'vw-test') { P.S.testContent = e.target.checked; P.rerender(); }
   });
 
   /* ---------------------------------------------------------------- nav sync */
@@ -94,14 +104,25 @@
   });
   desk.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('tr[data-dact]')) { e.preventDefault(); e.target.click(); } });
 
+  /* ---------------------------------------------------------------- full-screen test mode (for sessions with mothers) */
+  function setFull(on) {
+    document.body.classList.toggle('fullscreen', on);
+    if (on) { P.S.testContent = true; P.rerender(); }
+    fit(); renderNotes(deskId || P.cur());
+  }
+  $('#vw-exit').addEventListener('click', () => setFull(false));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.body.classList.contains('fullscreen') && !$('#app').contains(e.target)) setFull(false); });
+
   /* ---------------------------------------------------------------- scale to fit */
   function fit() {
     const stage = $('#vw-stage'); if (!stage || view !== 'proto') return;
-    const narrow = window.innerWidth < 760;
-    const w = stage.clientWidth - (narrow ? 0 : 32), h = narrow ? Infinity : stage.clientHeight - 32;
+    const full = document.body.classList.contains('fullscreen');
+    const narrow = window.innerWidth < 760 && !full;
+    const w = full ? window.innerWidth : stage.clientWidth - (narrow ? 0 : 32), h = full ? window.innerHeight : narrow ? Infinity : stage.clientHeight - 32;
     if (!deskId) {
-      const s = Math.min(1, w / 410, h / 864);
-      const ph = $('#vw-phone'); ph.style.width = 410 * s + 'px'; ph.style.height = 864 * s + 'px';
+      const bare = full && window.innerWidth <= 500, BW = bare ? 390 : 410, BH = bare ? 844 : 864;
+      const s = full ? Math.min(w / BW, h / BH) : Math.min(1, w / BW, h / BH);
+      const ph = $('#vw-phone'); ph.style.width = BW * s + 'px'; ph.style.height = BH * s + 'px';
       $('#vw-bezel').style.transform = `scale(${s})`;
     } else {
       const fr = desk.querySelector('.desk-frame'), sc = desk.querySelector('.desk-scale'); if (!fr) return;
@@ -158,6 +179,7 @@
   $('#vw-proto-tab').addEventListener('click', (e) => { e.preventDefault(); location.hash = deskId || P.cur() || 'welcome'; });
   window.addEventListener('hashchange', route);
   route();
+  try { if (new URLSearchParams(location.search).has('test')) setFull(true); } catch (_) {}
   requestAnimationFrame(fit);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
 })();

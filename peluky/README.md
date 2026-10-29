@@ -29,10 +29,15 @@ peluky/
   tools/build-single.mjs  inlines everything into one HTML fragment for sharing
 ```
 
+## Prototype controls (right panel)
+
+Mother's stage, returning vs new user, phone clock (09:41 / 02:14, which drives the automatic night display), night display (auto / on / off), Ditanggung, Tanya quota, test-session content (fictional names and travel times marked “(contoh)”), reduced motion, and **Full-screen test mode** for sessions with mothers (also `index.html?test`). Press Escape or “Exit test mode” to leave it.
+
 ## Prototype conventions
 
 - "Today" is fixed at 29 Oct 2026 so weeks, calendar and baby age stay consistent.
 - Calls (119, doctor, support line), directions, share and payment show a toast instead of leaving the page.
 - Sign-up: any 6-digit code works except `000000` (wrong-code state). Office code: anything ≥4 chars except `SALAH1`.
+- The danger triage test set (colloquial phrasing → danger / crisis / ask-first / none) is on the `#notes` view, computed live.
 - All placeholders are in square brackets (`[RS A]`, `[Rp …]`, `[Layanan dukungan]` …). The full register is on the `#notes` view.
 - Only the sourced figures from the brief are used, each shown with its source and date.

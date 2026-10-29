@@ -9,8 +9,8 @@
   const nextImun = () => P.S.imun.done.indexOf(false);
   P.def({
     id: 'babyHome', sec: 'E', n: 25, name: 'Beranda bayi', tone: 'baby',
-    notes: 'One primary card (next immunisation) carries the glow. Mother’s own recovery check sits right below the baby hero, so her health is not an afterthought. “Tanda bahaya bayi” opens danger chips that lead to the red panel.',
-    states: [{ label: 'Sheet tanda bahaya bayi', sheet: 'babyDanger' }, { label: 'Sheet catat', sheet: 'catat', state: (S) => { S.stage = 'baby'; } }],
+    notes: 'One primary card (next immunisation) carries the glow. Mother’s own recovery check sits right below the baby hero, so her health is not an afterthought. “Darurat” in the header and the “Ada tanda bahaya?” row (above the fold) open the baby danger list, which leads to the red panel. Follow-up asks about the baby, not about her.',
+    states: [{ label: 'Sheet tanda bahaya bayi', sheet: 'dangerPick', sheetArg: 'bayi' }, { label: 'Sheet catat', sheet: 'catat', state: (S) => { S.stage = 'baby'; } }],
     render: () => {
       const s = P.S, age = P.babyAge(), ni = nextImun(), last = s.growth.data[s.growth.data.length - 1];
       return {
@@ -18,19 +18,20 @@
           ${P.followCard('baby')}
           <section class="card" aria-label="Si kecil"><div class="card-row"><span class="ph-img" style="width:72px;height:72px;border-radius:26px;padding:0;font-size:11px" aria-hidden="true">[Foto]</span>
             <div class="grow"><h2 class="t-h2">${P.babyName()}</h2><p class="num" style="margin:2px 0 0;font-size:18px;font-weight:600">${age.txt}</p><p class="t-sec">Lahir ${P.fmt(P.parse(s.baby.dob))}</p></div></div></section>
+          ${P.dangerRow('bayi')}
           ${ni >= 0 ? `<button type="button" class="card glow" data-go="imun"><span class="card-row"><span class="bubble-ic">${ic('syringe')}</span><span class="grow"><span class="t-sec" style="display:block">Imunisasi berikutnya</span><span class="t-h3" style="display:block">[Nama vaksin] · [Usia …]</span><span class="t-sec">Konfirmasi jadwal ke dokter/bidan</span></span>${ic('chev')}</span></button>` : ''}
           <button type="button" class="card tight" data-act="toRecovery"><span class="card-row"><span class="bubble-ic">${ic('heart')}</span><span class="grow"><span class="t-h3" style="display:block">Cek pemulihanmu</span><span class="t-sec">6 pertanyaan, satu ketukan tiap jawaban</span></span>${ic('chev')}</span></button>
           <button type="button" class="card tight" data-go="growth"><span class="card-row"><span class="bubble-ic">${ic('chart')}</span><span class="grow"><span class="t-h3" style="display:block">Lihat grafik tumbuh</span><span class="t-sec num">Terakhir: ${String(last.v).replace('.', ',')} cm · ${last.m} bulan</span></span>${ic('chev')}</span></button>
+          ${P.namePrompt()}
           <div class="tiles">${[['menyusui', 'timer', 'Menyusui'], ['mpasi', 'utensils', 'MPASI'], ['imun', 'syringe', 'Imunisasi'], ['bidan', 'chat', 'Bidan']].map(([g, i, t]) => `<button type="button" class="card tile" data-go="${g}"><span class="bubble-ic">${ic(i)}</span>${t}</button>`).join('')}</div>
-          ${btn('Tanda bahaya bayi', { kind: 'glass', icon: 'alert', 'data-sheet': 'babyDanger' })}
-          ${sos()}
         </div>`,
         tab: 'baby'
       };
     }
   });
   P.acts.toRecovery = () => { P.S.recoveryCalm = false; P.go('recovery'); };
-  P.sheets.babyDanger = () => ({
+  P.sheets.babyDanger = () => P.sheets.dangerPick('bayi');
+  P._oldBabyDanger = () => ({
     title: 'Tanda bahaya bayi',
     body: `<p class="t-body">Ketuk yang sedang dialami si kecil.</p><div class="chips">${P.DANGER.bayi.map((t) => chip(t, { cls: 'danger', icon: 'alert', 'data-sheet': 'danger', 'data-v': t })).join('')}</div>
       <p class="t-sec">Ragu? Telepon 119 atau ke IGD terdekat.</p>`
@@ -50,7 +51,7 @@
   ];
   P.def({
     id: 'recovery', sec: 'E', n: 26, name: 'Cek pemulihan', tone: () => P.S.recoveryCalm ? 'calm' : 'baby',
-    notes: 'Six one-tap questions. Danger answers open the red panel immediately (self-harm and prolonged sadness also show the support line). Moderate answers add an inline “Chat bidan” card. Low mood gets a calm, non-alarming card. Opened from the loss screen it renders in the calm palette with no baby references.',
+    notes: 'Six one-tap questions. Danger answers open the red panel immediately (self-harm and prolonged sadness lead with “Kamu tidak sendiri” and a counsellor button); “Salah pilih, kembali” also undoes the answer. Options are plain chips, so red stays rare. Moderate answers add an inline “Chat bidan” card. Low mood gets a calm, non-alarming card. Opened from the loss screen it renders in the calm palette with no baby references.',
     states: [{ label: 'Jawaban sedang + suasana hati', state: (S) => { S.recovery.a = { bleed: 0, wound: 1, fever: 0, mood: 1 }; } }],
     render: () => {
       const a = P.S.recovery.a, n = Object.keys(a).length;
@@ -60,10 +61,11 @@
           ${RQ.map(([k, q, i, opts]) => {
             const sel = a[k], o = sel !== undefined ? opts[sel] : null;
             return `<section class="card tight" aria-labelledby="rq-${k}"><div class="card-row"><span class="bubble-ic">${ic(i)}</span><h2 class="t-h3 grow" id="rq-${k}">${q}</h2>${o ? `<span class="t-sec">${ic('check', 16, 'style="display:inline;vertical-align:-3px"')} Dijawab</span>` : ''}</div>
-              <div class="chips" role="radiogroup" aria-labelledby="rq-${k}">${opts.map(([t, lv], j) => chip(t, { role: 'radio', pressed: sel === j, cls: lv === 'danger' ? 'danger' : '', icon: lv === 'danger' ? 'alert' : '', 'data-act': 'rqAns', 'data-k': k, 'data-v': j })).join('')}</div>
+              <div class="chips" role="radiogroup" aria-labelledby="rq-${k}">${opts.map(([t, lv], j) => chip(t, { role: 'radio', pressed: sel === j, 'data-act': 'rqAns', 'data-k': k, 'data-v': j })).join('')}</div>
               ${o && o[1] === 'mod' ? `<div class="card tight tinted" style="box-shadow:none"><p class="t-sec" style="color:var(--ink)">Sebaiknya ceritakan ke bidan.</p>${btn('Chat bidan', { cls: 'btn-sm', icon: 'chat', 'data-go': 'bidan', 'data-arg': `${q}: ${t2(o)}` })}</div>` : ''}
-              ${o && o[1] === 'low' ? `<div class="card tight" style="box-shadow:none;background:#fff"><p class="t-h3">Bicara dengan profesional</p><p class="t-sec">Perasaan naik turun itu wajar. Kamu tidak harus menghadapinya sendiri.</p>
-                <div class="btn-row">${btn('Chat bidan', { kind: 'glass', cls: 'btn-sm', 'data-go': 'bidan' })}${btn('[Layanan dukungan]', { kind: 'glass', cls: 'btn-sm', 'data-act': 'callSupport' })}</div></div>` : ''}
+              ${o && o[1] === 'low' ? `<div class="card tight solid" style="box-shadow:none"><p class="t-h3">Bicara dengan profesional</p><p class="t-sec">Perasaan naik turun itu wajar. Kamu tidak harus menghadapinya sendiri.</p>
+                ${btn('Bicara dengan konselor', { kind: 'support', cls: 'btn-sm', icon: 'heart', 'data-act': 'callSupport', style: 'width:100%' })}${btn('Chat bidan', { kind: 'glass', cls: 'btn-sm', 'data-go': 'bidan', style: 'width:100%' })}
+                <p class="t-sec">Ingin cek lebih lengkap? [Kuesioner suasana hati tervalidasi (EPDS) · perlu lisensi & tinjauan klinis]</p></div>` : ''}
             </section>`;
           }).join('')}
           ${sos()}
@@ -75,8 +77,10 @@
   const t2 = (o) => o[0];
   P.acts.rqAns = (el) => {
     const k = el.dataset.k, j = +el.dataset.v, opt = RQ.find((q) => q[0] === k)[3][j];
-    P.S.recovery.a[k] = j; P.rerender();
-    if (opt[1] === 'danger') P.openSheet('danger', opt[2]);
+    const a = P.S.recovery.a, prev = a[k];
+    a[k] = j; P.rerender();
+    // “Salah pilih, kembali” restores the previous answer, so a mis-tap is never saved.
+    if (opt[1] === 'danger') P.openDanger(opt[2], () => { if (prev === undefined) delete a[k]; else a[k] = prev; });
   };
   P.acts.rqSave = () => { P.toast('Hasil cek pemulihan tersimpan'); P.back(); };
 
@@ -96,18 +100,19 @@
             <p class="t-sec" style="text-align:center">${b.side ? `Sisi ${b.side === 'L' ? 'kiri' : 'kanan'} · ${run ? 'berjalan' : 'dijeda'}` : 'Pilih sisi untuk mulai'}</p>
             <div class="timer" id="bf-timer" role="timer" aria-live="off">${mmss(t)}</div>
             <div class="btn-row" style="gap:12px">${[['L', 'Kiri'], ['R', 'Kanan']].map(([k, l]) => `<button type="button" class="side-btn" aria-pressed="${b.side === k && run}" data-act="bfSide" data-v="${k}">${ic(b.side === k && run ? 'pause' : 'play', 24)}<span>${l}</span><span style="font-size:13px;font-weight:600">${b.side === k && run ? 'Berjalan' : b.side === k ? 'Dijeda' : 'Mulai'}</span></button>`).join('')}</div>
-            ${btn('Selesai & simpan', { kind: 'glass', 'data-act': 'bfSave', disabled: !t })}
+
           </section>
           <section class="card"><div class="card-row"><h2 class="t-h3 grow">Hari ini</h2><span class="t-sec num" style="font-weight:700">${b.log.length} kali</span></div>
             <ul class="rows" style="list-style:none;margin:0;padding:0">${b.log.map((l) => `<li class="row static"><span class="num" style="font-weight:600;min-width:54px">${l.t}</span><span class="grow">${l.s}</span><span class="num t-sec" style="font-weight:700">${l.m} mnt</span></li>`).join('')}</ul></section>
           <section class="card"><h2 class="t-h3">Kendala yang sering dialami</h2>
             ${['Puting lecet', 'Payudara terasa penuh atau bengkak', 'Khawatir ASI kurang'].map((p) => `<details class="more"><summary>${ic('chev', 18)}${p}</summary><p class="t-sec" style="margin:4px 0 8px">Ini sering dialami. Konselor laktasi bisa membantu melihat posisi dan pelekatan.</p></details>`).join('')}</section>
+          <button type="button" class="card tight" data-go="konsul" data-arg="lak"><span class="card-row"><span class="bubble-ic">${ic('video')}</span><span class="grow"><span class="t-h3" style="display:block">Konsultasi laktasi</span><span class="t-sec">Dengan konselor laktasi</span></span>${ic('chev')}</span></button>
           <div class="card tight tinted"><div class="card-row"><span class="bubble-ic">${ic('heart')}</span><p class="grow t-body"><b>ASI eksklusif 6 bulan</b></p></div>${src('PP 33/2012')}</div>
         </div>`,
-        dock: btn('Konsultasi laktasi', { icon: 'video', 'data-go': 'konsul', 'data-arg': 'lak' })
+        dock: btn('Selesai & simpan', { icon: 'check', 'data-act': 'bfSave', disabled: !t })
       };
     },
-    after: () => { P.every(() => { const el = P.el().querySelector('#bf-timer'); if (el && P.S.bf.startedAt) el.textContent = mmss(bfSecs()); }, 500); }
+    after: () => { P.every(() => { const el = P.el().querySelector('#bf-timer'); if (el && P.S.bf.startedAt) { el.textContent = mmss(bfSecs()); const d = P.el().querySelector('.dock .btn'); if (d) d.disabled = false; } }, 500); }
   });
   P.acts.bfSide = (el) => {
     const b = P.S.bf, k = el.dataset.v;
@@ -131,7 +136,10 @@
     if (last.v < SD.lo[last.m]) return ['low', last]; if (last.v > SD.hi[last.m]) return ['high', last]; return ['ok', last];
   };
   const chart = () => {
-    const W = 316, H = 262, x0 = 30, x1 = 252, y0 = 226, y1 = 14, vmin = 44, vmax = 72;
+    const vals = P.S.growth.data.map((p) => p.v);
+    const vmin = Math.min(44, 44 - 6 * Math.ceil((44 - (Math.min(...vals) - 2)) / 6)), vmax = Math.max(72, Math.ceil(Math.max(...vals) + 2));
+    const W = 316, H = 262, x0 = 30, x1 = 252, y0 = 226, y1 = 14, ticks = [];
+    for (let v = vmin; v <= vmax; v += 6) ticks.push(v);
     const X = (m) => x0 + (m / 6) * (x1 - x0), Y = (v) => y0 - ((v - vmin) / (vmax - vmin)) * (y0 - y1);
     const line = (arr) => arr.map((v, m) => `${X(m).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
     const d = [...P.S.growth.data].sort((a, b) => a.m - b.m), last = d[d.length - 1];
@@ -139,21 +147,21 @@
     const px = X(last.m), lx = px > x1 - 70 ? px - 124 : Math.max(px - 56, x0 + 4), ly = Y(last.v) - 46 < y1 ? Y(last.v) + 14 : Y(last.v) - 46;
     return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="gc-t gc-d"><title id="gc-t">Grafik panjang badan menurut umur</title>
       <desc id="gc-d">Pengukuran terakhir ${cm(last.v)} cm di usia ${last.m} bulan. Rentang standar −2 SD sampai +2 SD di usia itu: ${cm(SD.lo[last.m])} sampai ${cm(SD.hi[last.m])} cm.</desc>
-      ${[44, 50, 56, 62, 68].map((v) => `<line x1="${x0}" x2="${x1}" y1="${Y(v)}" y2="${Y(v)}" stroke="#2A1830" stroke-opacity=".08"/><text x="${x0 - 8}" y="${Y(v) + 4}" text-anchor="end" font-size="13" fill="#5E4B62">${v}</text>`).join('')}
-      ${[0, 1, 2, 3, 4, 5, 6].map((m) => `<text x="${X(m)}" y="${y0 + 18}" text-anchor="middle" font-size="13" fill="#5E4B62">${m}</text>`).join('')}
-      <text x="${(x0 + x1) / 2}" y="${H - 1}" text-anchor="middle" font-size="13" fill="#5E4B62">Usia (bulan)</text><text x="${x0 - 8}" y="10" text-anchor="end" font-size="13" fill="#5E4B62">cm</text>
+      ${ticks.map((v) => `<line x1="${x0}" x2="${x1}" y1="${Y(v)}" y2="${Y(v)}" stroke="currentColor" stroke-opacity=".08"/><text x="${x0 - 8}" y="${Y(v) + 4}" text-anchor="end" font-size="13" style="fill:var(--muted)">${v}</text>`).join('')}
+      ${[0, 1, 2, 3, 4, 5, 6].map((m) => `<text x="${X(m)}" y="${y0 + 18}" text-anchor="middle" font-size="13" style="fill:var(--muted)">${m}</text>`).join('')}
+      <text x="${(x0 + x1) / 2}" y="${H - 1}" text-anchor="middle" font-size="13" style="fill:var(--muted)">Usia (bulan)</text><text x="${x0 - 8}" y="10" text-anchor="end" font-size="13" style="fill:var(--muted)">cm</text>
       <polygon points="${line(SD.hi)} ${SD.lo.map((v, m) => `${X(m).toFixed(1)},${Y(v).toFixed(1)}`).reverse().join(' ')}" fill="#34D6A6" fill-opacity=".18"/>
-      <polyline points="${line(SD.hi)}" fill="none" stroke="#075C45" stroke-opacity=".55" stroke-width="1.2"/>
-      <polyline points="${line(SD.lo)}" fill="none" stroke="#075C45" stroke-opacity=".55" stroke-width="1.2"/>
-      <polyline points="${line(SD.md)}" fill="none" stroke="#2A1830" stroke-opacity=".4" stroke-width="1.2" stroke-dasharray="4 4"/>
-      <text x="${x1 + 6}" y="${Y(SD.hi[6]) + 4}" font-size="13" fill="#075C45" font-weight="600">+2 SD</text>
-      <text x="${x1 + 6}" y="${Y(SD.md[6]) + 4}" font-size="13" fill="#2A1830">Median</text>
-      <text x="${x1 + 6}" y="${Y(SD.lo[6]) + 4}" font-size="13" fill="#075C45" font-weight="600">−2 SD</text>
+      <polyline points="${line(SD.hi)}" fill="none" style="stroke:var(--green-dd)" stroke-opacity=".55" stroke-width="1.2"/>
+      <polyline points="${line(SD.lo)}" fill="none" style="stroke:var(--green-dd)" stroke-opacity=".55" stroke-width="1.2"/>
+      <polyline points="${line(SD.md)}" fill="none" stroke="currentColor" stroke-opacity=".4" stroke-width="1.2" stroke-dasharray="4 4"/>
+      <text x="${x1 + 6}" y="${Y(SD.hi[6]) + 4}" font-size="13" style="fill:var(--green-dd)" font-weight="600">+2 SD</text>
+      <text x="${x1 + 6}" y="${Y(SD.md[6]) + 4}" font-size="13" style="fill:var(--ink)">Median</text>
+      <text x="${x1 + 6}" y="${Y(SD.lo[6]) + 4}" font-size="13" style="fill:var(--green-dd)" font-weight="600">−2 SD</text>
       <polyline points="${pts}" fill="none" stroke="#34D6A6" stroke-opacity=".6" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" style="filter:blur(4px)"/>
       <polyline points="${pts}" fill="none" stroke="#0B7A5C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
       ${d.map((p) => `<circle cx="${X(p.m)}" cy="${Y(p.v)}" r="${p === last ? 6 : 4}" fill="#fff" stroke="#0B7A5C" stroke-width="${p === last ? 3 : 2}"/>`).join('')}
-      <g><rect x="${lx}" y="${ly}" width="112" height="32" rx="12" fill="#fff" fill-opacity=".92" stroke="#fff"/><rect x="${lx}" y="${ly}" width="112" height="32" rx="12" fill="none" stroke="#0B7A5C" stroke-opacity=".35"/>
-        <text x="${lx + 56}" y="${ly + 21}" text-anchor="middle" font-size="13" font-weight="600" fill="#2A1830">${last.m} bln · ${cm(last.v)} cm</text></g>
+      <g><rect x="${lx}" y="${ly}" width="112" height="32" rx="12" style="fill:var(--glass-strong)"/><rect x="${lx}" y="${ly}" width="112" height="32" rx="12" fill="none" stroke="#0B7A5C" stroke-opacity=".35"/>
+        <text x="${lx + 56}" y="${ly + 21}" text-anchor="middle" font-size="13" font-weight="600" style="fill:var(--ink)">${last.m} bln · ${cm(last.v)} cm</text></g>
     </svg>`;
   };
   P.def({
@@ -270,7 +278,7 @@
   const STAGE_NAME = { plan: 'Merencanakan kehamilan', preg: 'Sedang hamil', baby: 'Sudah punya bayi', none: 'Belum dipilih' };
   P.def({
     id: 'account', sec: 'F', n: 31, name: 'Akun', tone: 'neutral',
-    notes: 'Neutral ink/plum. Emergency is listed as always free. “Kehamilan saya berakhir” is plain text with a calm icon, never red. Log-out asks once.',
+    notes: 'Neutral ink/plum. Emergency is listed as always free. Night display can be automatic (21.00–06.00), always or off. Loss support exists for both stages: “Kehamilan saya berakhir” and “Kehilangan si kecil”, plain text with a calm icon, never red. Log-out asks once.',
     states: [{ label: 'Sheet ganti tahap', sheet: 'stageSwitch' }],
     render: () => {
       const s = P.S;
@@ -287,7 +295,9 @@
           </div></section>
           <section class="card tight"><div class="rows">
             ${row('data-go="emergency"', 'phone', 'Bantuan darurat', 'Selalu gratis')}
-            ${s.stage === 'preg' || s.lossActive ? row('data-go="loss"', 'heart', 'Kehamilan saya berakhir', 'Hentikan semua hal tentang kehamilan') : ''}
+            ${row('data-sheet="nightSheet"', 'moon', 'Tampilan malam', { auto: 'Otomatis 21.00–06.00', on: 'Selalu', off: 'Mati' }[s.night])}
+            ${s.stage === 'preg' || (s.lossActive && s.lossKind === 'preg') ? row('data-go="loss" data-arg="preg"', 'heart', 'Kehamilan saya berakhir', 'Hentikan semua hal tentang kehamilan') : ''}
+            ${s.stage === 'baby' || (s.lossActive && s.lossKind === 'baby') ? row('data-go="loss" data-arg="baby"', 'heart', 'Kehilangan si kecil', 'Hentikan pengingat tentang si kecil') : ''}
             <button type="button" class="row" data-sheet="logout"><span class="bubble-ic">${ic('logout')}</span><span class="grow t">Keluar</span></button>
           </div></section>
           <p class="t-sec" style="text-align:center">Peluky · versi prototipe</p>
@@ -296,6 +306,12 @@
       };
     }
   });
+  P.sheets.nightSheet = () => ({
+    title: 'Tampilan malam',
+    body: `<p class="t-body">Layar lebih redup untuk menyusui atau mengecek di malam hari.</p>
+      <div class="stack" role="radiogroup" aria-label="Tampilan malam">${[['auto', 'Otomatis', '21.00–06.00'], ['on', 'Selalu', 'Tampilan gelap sepanjang hari'], ['off', 'Mati', 'Tampilan terang']].map(([v, t, d]) => `<button type="button" role="radio" aria-checked="${P.S.night === v}" class="card tight choice" style="min-height:64px;--c-deep:var(--deep);--c-glow:var(--glow)" data-act="nightSet" data-v="${v}"><span style="flex:1"><span class="t-h3" style="display:block">${t}</span><span class="t-sec">${d}</span></span><span class="mark">${ic('check', 16)}</span></button>`).join('')}</div>`
+  });
+  P.acts.nightSet = (el) => { P.S.night = el.dataset.v; P.rerender(); };
   let stageDraft = null;
   P.sheets.stageSwitch = () => {
     const cur = stageDraft || P.S.stage;
@@ -321,7 +337,7 @@
      ====================================================================== */
   P.def({
     id: 'partnerSetup', sec: 'F', n: 32, name: 'Atur pasangan', tone: 'neutral',
-    notes: 'Every item starts off. The partner sees nothing until she switches each one on. Copy uses the clipboard API with a fallback toast.',
+    notes: 'One consent model per audience: the “Berbagi ke pasangan” switch (the same one as in Privasi) is the permission, and each item below starts off. While the permission is off, the items are disabled and the partner sees nothing. Copy uses the clipboard API with a fallback toast.',
     render: () => {
       const p = P.S.partner;
       return {
@@ -329,13 +345,10 @@
           <section class="card glow" style="align-items:center;text-align:center"><p class="t-sec">Kode undangan</p><p class="num" style="font-size:34px;font-weight:600;letter-spacing:.06em;margin:0" id="inv-code">[KODE-6]</p>
             <div class="btn-row" style="width:100%">${btn('Salin', { kind: 'glass', cls: 'btn-sm', icon: 'copy', 'data-act': 'copyCode' })}${btn('Bagikan', { kind: 'glass', cls: 'btn-sm', icon: 'share', 'data-act': 'shareCode' })}</div>
             <p class="t-sec">Pasangan memasukkan kode ini di aplikasinya.</p></section>
-          <section class="card"><h2 class="t-h3">Yang bisa dilihat pasangan</h2><p class="t-sec" style="margin-top:-6px">Semua mati sampai kamu nyalakan.</p>
+          <section class="card"><div class="rows">${sw('pt-master', 'Berbagi ke pasangan', 'Izin dasar, sama dengan di Privasi. Mati = pasangan tidak melihat apa pun.', P.S.consent.partner, 'consent', 'partner')}</div></section>
+          <section class="card"><h2 class="t-h3">Yang bisa dilihat pasangan</h2><p class="t-sec" style="margin-top:-6px">${P.S.consent.partner ? 'Semua mati sampai kamu nyalakan.' : 'Nyalakan “Berbagi ke pasangan” dulu.'}</p>
             <div class="rows">
-              ${sw('pt-fertile', 'Masa subur', 'Perkiraan dari kalendermu', p.fertile, 'partnerSw', 'fertile')}
-              ${sw('pt-week', 'Minggu kehamilan', 'Minggu dan HPL', p.week, 'partnerSw', 'week')}
-              ${sw('pt-checkup', 'Jadwal kontrol', 'Tanggal dan tempat', p.checkup, 'partnerSw', 'checkup')}
-              ${sw('pt-tasks', 'Tugas persiapan', 'Tugas yang kamu berikan', p.tasks, 'partnerSw', 'tasks')}
-              ${sw('pt-alert', 'Alert darurat', 'Kabar saat kamu menekan Darurat', p.alert, 'partnerSw', 'alert')}
+              ${[['fertile', 'Masa subur', 'Perkiraan dari kalendermu'], ['week', 'Minggu kehamilan', 'Minggu dan HPL'], ['checkup', 'Jadwal kontrol', 'Tanggal dan tempat'], ['tasks', 'Tugas persiapan', 'Tugas yang kamu berikan'], ['alert', 'Kabar darurat', 'Kabar saat kamu menekan Darurat']].map(([k, t, d]) => sw('pt-' + k, t, d, p[k] && P.S.consent.partner, 'partnerSw', k, !P.S.consent.partner)).join('')}
             </div></section>
         </div>`,
         dock: btn('Lihat sebagai pasangan', { icon: 'eye', 'data-go': 'partnerView' })
@@ -354,8 +367,8 @@
     notes: 'What the partner sees. Empty by default. The example toggle shows the shape of a shared view (week, next check-up, tasks), clearly marked “Contoh”. Real items appear only for switches she turned on.',
     states: [{ label: 'Contoh tampilan', state: (S) => { S.partnerExample = true; } }],
     render: () => {
-      const p = P.S.partner, ex = P.S.partnerExample, any = Object.values(p).some(Boolean);
-      const show = (k) => ex || p[k];
+      const on = P.S.consent.partner, p = P.S.partner, ex = P.S.partnerExample, any = on && Object.values(p).some(Boolean);
+      const show = (k) => ex || (on && p[k]);
       const nm = P.S.name ? esc(P.S.name) : '[Nama]';
       const items = `
         ${show('week') ? `<section class="card glow"><div class="card-row"><div class="ring-wrap" style="width:72px;height:72px">${P.ring(14, 72, 6, false)}<div class="ring-c"><b class="num">14</b></div></div><div class="grow"><p class="t-sec">Minggu kehamilan</p><p class="t-h3 num">Minggu ke-14 · HPL ${P.fmt(P.addDays(P.TODAY, 182))}</p></div></div></section>` : ''}
@@ -372,17 +385,18 @@
       };
     }
   });
+  P.acts.leaveOpt = () => { P.S.leaveOptIn = !P.S.leaveOptIn; P.rerender(); };
   P.acts.pvExample = () => { P.S.partnerExample = !P.S.partnerExample; P.rerender(); };
   P.acts.noop = () => {};
 
   /* ======================================================================
      F34 · Gratis vs Premium
      ====================================================================== */
-  const FREE = ['Bantuan darurat', 'Kalender & prediksi', 'Panduan mingguan', 'Kontrol kehamilan', 'Kisaran biaya', 'Daftar & booking RS', 'Cek pemulihan', 'Menyusui', 'MPASI', 'Tumbuh kembang', 'Dukungan kehilangan', 'Chat bidan untuk keluhan kesehatan'];
-  const PREM = ['Tanya tanpa batas', 'NutriScan tanpa batas', 'Prioritas balasan bidan', 'Pengingat tabungan otomatis & anggaran bersama', 'Prioritas konsultasi'];
+  const FREE = ['Bantuan darurat', 'Kalender & prediksi', 'Panduan mingguan', 'Kontrol kehamilan', 'Kisaran biaya', 'Daftar & booking RS', 'Cek pemulihan', 'Menyusui', 'MPASI', 'Tumbuh kembang', 'Dukungan kehilangan', 'Chat bidan untuk keluhan kesehatan', 'Balasan bidan diurutkan menurut urgensi, bukan paket'];
+  const PREM = ['Tanya tanpa batas', 'NutriScan tanpa batas', 'Bidan yang sama di tiap chat', 'Pengingat tabungan otomatis & anggaran bersama', 'Simpan & ekspor riwayat chat dan catatan'];
   P.def({
     id: 'premium', sec: 'F', n: 34, name: 'Gratis vs Premium', tone: 'neutral',
-    notes: 'The free list comes first and is longer on purpose. Premium is convenience only; every safety feature is in the free list. When covered, the price is replaced by the coverage badge.',
+    notes: 'The free list comes first and is longer on purpose. Premium is convenience only: no paid priority for midwife replies or consultations, because the midwife queue is ordered by urgency. Every safety feature is in the free list. When covered, the price is replaced by the coverage badge.',
     render: () => ({
       main: hdr({ title: 'Langganan' }) + `<div class="body rise">
         ${P.S.covered ? `<div class="card tight tinted" style="--tint:rgba(52,214,166,.18)"><span class="badge cover">${ic('shieldc', 14)}Ditanggung [Nama kantor]</span><p class="t-sec">Semua fitur Premium sudah termasuk.</p></div>` : ''}
@@ -411,7 +425,7 @@
           main: hdr({ title: 'Kode kantor/asuransi' }) + `<div class="body rise">
             <section class="card glow" style="align-items:center;text-align:center;padding:26px 18px"><span class="bubble-ic" style="width:64px;height:64px;border-radius:24px;background:rgba(52,214,166,.22);color:var(--green-dd)">${ic('shieldc', 32)}</span>
               <h2 class="t-h2">Ditanggung [Nama kantor]</h2><p class="t-body">Dari rencana hamil sampai si kecil 2 tahun.</p></section>
-            <section class="card"><h2 class="t-h3">Yang ditanggung</h2><ul class="rows" style="list-style:none;margin:0;padding:0">${['Tanya Peluky tanpa batas', 'NutriScan tanpa batas', 'Prioritas balasan bidan', 'Konsultasi dokter · [kuota]', 'Pengingat tabungan & anggaran bersama'].map((t) => `<li class="row static" style="min-height:44px">${ic('check', 18)}<span class="grow">${t}</span></li>`).join('')}</ul></section>
+            <section class="card"><h2 class="t-h3">Yang ditanggung</h2><ul class="rows" style="list-style:none;margin:0;padding:0">${['Tanya Peluky tanpa batas', 'NutriScan tanpa batas', 'Bidan yang sama di tiap chat', 'Konsultasi dokter · [kuota]', 'Pengingat tabungan & anggaran bersama'].map((t) => `<li class="row static" style="min-height:44px">${ic('check', 18)}<span class="grow">${t}</span></li>`).join('')}</ul></section>
             <p class="t-sec" style="text-align:center">Kantormu tidak pernah melihat data kesehatanmu.</p></div>`,
           dock: btn('Lihat yang dilihat kantormu', { icon: 'eye', 'data-go': 'employerView' })
         };
@@ -420,7 +434,7 @@
         main: hdr({ title: 'Kode kantor/asuransi' }) + `<div class="body rise">
           <h2 class="t-hero">Punya kode dari kantor?</h2><p class="t-body" style="color:var(--muted)">Kantor atau asuransimu bisa menanggung fitur Premium.</p>
           <form class="card" data-submit="codeSubmit" id="code-form">${field({ id: 'code-in', label: 'Kode kantor/asuransi', value: c.val, ph: 'Mis. PLK-1234', input: 'codeIn', err: c.err, extra: 'autocapitalize="characters" autocomplete="off"' })}</form>
-          <p class="t-sec">Prototipe: kode apa pun berhasil, kecuali “SALAH1”.</p></div>`,
+          <p class="t-sec proto-hint">Prototipe: kode apa pun berhasil, kecuali “SALAH1”.</p></div>`,
         dock: btn('Gunakan kode', { 'data-act': 'codeSubmit' })
       };
     }
@@ -439,13 +453,15 @@
      ====================================================================== */
   P.def({
     id: 'employerView', sec: 'F', n: 36, name: 'Yang dilihat kantormu', tone: 'neutral',
-    notes: 'Shows the mother the exact shape of the employer dashboard: totals only, with the four rules stated plainly.',
+    notes: 'Shows the mother the exact shape of the employer dashboard: totals only, with the four rules stated plainly. Leave forecasting is derived from due dates, so it is a separate opt-in that starts off.',
     render: () => ({
       main: hdr({ title: 'Yang dilihat kantormu' }) + `<div class="body rise">
         <p class="t-body">Contoh tampilan untuk HR. Hanya angka total.</p>
-        <div class="tiles">${[['Anggota aktif', 'users'], ['Konsultasi terpakai', 'video'], ['Chat bidan', 'chat'], ['Perkiraan cuti kuartal ini', 'calendar']].map(([t, i]) => `<div class="card tile" style="min-height:112px"><span class="bubble-ic" style="width:36px;height:36px;flex-basis:36px">${ic(i, 20)}</span><span><span class="num" style="font-size:24px;font-weight:600;display:block">[angka]</span><span class="t-sec">${t}</span></span></div>`).join('')}</div>
+        <div class="tiles">${[['Anggota aktif', 'users'], ['Konsultasi terpakai', 'video'], ['Chat bidan', 'chat'], ['Fitur paling dipakai', 'chart']].map(([t, i]) => `<div class="card tile" style="min-height:112px"><span class="bubble-ic" style="width:36px;height:36px;flex-basis:36px">${ic(i, 20)}</span><span><span class="num" style="font-size:24px;font-weight:600;display:block">[angka]</span><span class="t-sec">${t}</span></span></div>`).join('')}</div>
         <section class="card"><h2 class="t-h3">Aturan yang kami pegang</h2>
           <ul class="rows" style="list-style:none;margin:0;padding:0">${[['user', 'Tanpa nama atau identitas'], ['users', 'Hanya untuk kelompok 10 orang atau lebih'], ['grid', 'Tanpa rincian tahap untuk kelompok kecil'], ['lock', 'Data kesehatan tidak pernah dibagikan']].map(([i, t]) => `<li class="row static">${ic(i, 20)}<span class="grow" style="font-weight:600">${t}</span></li>`).join('')}</ul></section>
+        <section class="card"><h2 class="t-h3">Perkiraan cuti (pilihanmu)</h2><p class="t-sec">Perkiraan cuti dihitung dari HPL. Kantor hanya melihat jumlah total, dan hanya dari yang mengizinkan.</p>
+          <div class="rows">${sw('leave-opt', 'Ikut hitungan perkiraan cuti', 'Anonim. Kuartal dengan kurang dari 10 orang disembunyikan.', P.S.leaveOptIn, 'leaveOpt')}</div></section>
       </div>`,
       dock: btn('Mengerti', { 'data-back': true })
     })
@@ -509,7 +525,7 @@
      ====================================================================== */
   P.def({
     id: 'portalHR', sec: 'G', n: 38, name: 'Dashboard HR', tone: 'neutral', desktop: true,
-    notes: 'Aggregate tiles only. A banner states the 10-person rule; a suppressed row shows what that rule looks like in practice. No names, no per-person rows, no stage breakdown.',
+    notes: 'Aggregate tiles only. A banner states the 10-person rule; a suppressed row shows what that rule looks like in practice. Leave planning counts only employees who opted in, per quarter. No names, no per-person rows, no stage breakdown.',
     renderDesk: () => `<div class="desk">${P.orbs('neutral')}<div class="d-shell">
       ${deskNav([['grid', 'Ringkasan'], ['shield', 'Program'], ['hash', 'Kode karyawan'], ['info', 'Bantuan']], 'Dashboard HR · [Nama kantor]')}
       <main class="d-main">
@@ -517,7 +533,7 @@
         <div class="card tight solid" style="flex-direction:row;align-items:center;gap:10px">${ic('users', 20)}<p class="t-body" style="font-weight:700">Kelompok di bawah 10 orang tidak ditampilkan.</p></div>
         <div class="d-grid">${[['Karyawan terdaftar', 'users'], ['Aktif bulan ini', 'chart'], ['Konsultasi ditanggung terpakai', 'video'], ['Chat bidan', 'chat']].map(([t, i]) => `<div class="card kpi"><span class="card-row"><span class="bubble-ic" style="width:36px;height:36px;flex-basis:36px">${ic(i, 20)}</span><span class="t-sec grow">${t}</span></span><span class="v">[angka]</span></div>`).join('')}</div>
         <div class="d-split">
-          <section class="card"><h2 class="t-h3">Perencanaan cuti melahirkan (agregat)</h2><p class="t-sec">Perkiraan jumlah karyawan yang mulai cuti, per kuartal.</p>
+          <section class="card"><h2 class="t-h3">Perencanaan cuti melahirkan (agregat)</h2><p class="t-sec">Hanya dari karyawan yang mengizinkan. Kuartal dengan kurang dari 10 orang disembunyikan.</p>
             <div class="d-table-wrap"><table class="d-table" style="min-width:420px"><thead><tr><th scope="col">Kuartal</th><th scope="col">Perkiraan mulai cuti</th></tr></thead><tbody>
               <tr><td>Q1 2027</td><td class="num">[angka]</td></tr><tr><td>Q2 2027</td><td class="num">[angka]</td></tr><tr><td>Q3 2027</td><td><span class="nshare">${ic('lock', 14)}Tidak ditampilkan · kelompok kurang dari 10</span></td></tr></tbody></table></div>
             <p class="t-sec">Cuti minimal 3 bulan, bisa ditambah hingga 3 bulan dengan surat dokter. Sumber: UU KIA No. 4/2024.</p></section>

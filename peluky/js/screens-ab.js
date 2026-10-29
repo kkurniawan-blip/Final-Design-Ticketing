@@ -91,7 +91,7 @@
         <div class="card tight solid"><div class="card-row"><span class="grow t-sec" id="${k}-cd" aria-live="polite">${s.t > 0 ? `Kirim ulang dalam <b class="num">0:${String(s.t).padStart(2, '0')}</b>` : 'Belum menerima kode?'}</span>
           ${btn('Kirim ulang', { kind: 'text', cls: 'btn-sm', 'data-act': 'authResend', 'data-v': k, id: k + '-resend', disabled: s.t > 0 })}</div>
           ${btn('Kirim lewat WhatsApp', { kind: 'glass', icon: 'msg', cls: 'btn-sm', 'data-act': 'authWa', 'data-v': k, style: 'width:100%' })}</div>
-        <p class="t-sec">Prototipe: kode apa pun berhasil, kecuali <span class="num">000000</span> (contoh kode salah).</p>
+        <p class="t-sec proto-hint">Prototipe: kode apa pun berhasil, kecuali <span class="num">000000</span> (contoh kode salah).</p>
       </div>`;
     }
     return `<div class="body rise" style="align-items:center;text-align:center;padding-top:60px;gap:18px">
@@ -118,15 +118,15 @@
     P.def({
       id: k, sec: 'A', n: k === 'signup' ? 2 : 3, name: k === 'signup' ? 'Daftar' : 'Masuk', tone: 'neutral',
       notes: k === 'signup'
-        ? 'One flow, counted “Langkah x dari 4” (contact → code → consent → stage). +62 prefix is fixed and outside the input. Code screen: 0:30 countdown, WhatsApp fallback, wrong-code state in deep coral + icon (never red). Social buttons are text buttons with generic icons, no third-party logos.'
+        ? 'One flow, counted “Langkah x dari 4”: 1 contact + code, 2 consent, 3 stage, 4 stage setup. +62 prefix is fixed and outside the input. Code screen: 0:30 countdown, WhatsApp fallback, wrong-code state in deep coral + icon (never red). Social buttons are text buttons with generic icons, no third-party logos.'
         : 'Same building blocks as sign-up, no step counter. Ends on “Selamat datang kembali” → “Buka beranda”, which opens the home of the saved stage.',
       states: k === 'signup' ? [{ label: 'Kode salah', state: (S) => { S.signup.step = 2; S.signup.code = '000000'; S.signup.codeErr = true; S.signup.t = 18; } }] : [{ label: 'Selamat datang kembali', state: (S) => { S.login.step = 3; } }],
       render: () => {
         const s = P.S[k];
         const backAct = s.step > 1 && s.step < 3 ? `<button class="ib" data-act="authBack" data-v="${k}" aria-label="Kembali">${ic('back')}</button>` : '';
         const h = backAct
-          ? `<header class="hdr">${backAct}<h1 tabindex="-1" data-focus>${k === 'signup' ? 'Daftar' : 'Masuk'}</h1>${k === 'signup' ? `<span class="step">Langkah ${s.step} dari 4</span>` : ''}</header>`
-          : hdr({ title: k === 'signup' ? 'Daftar' : 'Masuk', step: k === 'signup' ? `Langkah ${s.step} dari 4` : '', back: s.step < 3 });
+          ? `<header class="hdr">${backAct}<h1 tabindex="-1" data-focus>${k === 'signup' ? 'Daftar' : 'Masuk'}</h1>${k === 'signup' ? `<span class="step">Langkah 1 dari 4</span>` : ''}</header>`
+          : hdr({ title: k === 'signup' ? 'Daftar' : 'Masuk', step: k === 'signup' ? 'Langkah 1 dari 4' : '', back: s.step < 3 });
         return { main: h + authBody(k), dock: authDock(k) };
       },
       after: () => authTimer(k)()
@@ -142,7 +142,8 @@
   };
   P.acts.authSend = (el) => {
     const k = el.dataset.v, s = P.S[k];
-    if (s.mode === 'phone') { const d = s.phone.replace(/\D/g, '').replace(/^0/, ''); if (d.length < 9 || d.length > 13) { s.err = 'Nomor belum lengkap. Cek lagi ya.'; P.rerender(); return; } }
+    if (s.mode === 'phone') { const d = s.phone.replace(/\D/g, '').replace(/^0/, ''); if (!d) { s.err = 'Isi nomor HP dulu ya.'; P.rerender(); return; } if (d.length < 9 || d.length > 13) { s.err = 'Nomor belum lengkap. Cek lagi ya.'; P.rerender(); return; } }
+    else if (!s.email.trim()) { s.err = 'Isi email dulu ya.'; P.rerender(); return; }
     else if (!/^\S+@\S+\.\S+$/.test(s.email)) { s.err = 'Format email belum benar. Contoh: nama@email.com'; P.rerender(); return; }
     s.err = ''; s.step = 2; s.code = ''; s.t = 30; P.go(k, { replace: true });
   };
@@ -153,11 +154,11 @@
     const k = el.dataset.v, s = P.S[k];
     if (s.code.length < 6) return;
     if (s.code === '000000') { s.codeErr = true; P.rerender(); return; }
-    if (k === 'signup') { s.step = 1; P.go('consent', { arg: 'signup' }); }
+    if (k === 'signup') { s.step = 1; P._onboard = true; P.go('consent', { arg: 'signup' }); }
     else { s.step = 3; P.go('login', { replace: true }); }
   };
-  P.acts.authSocial = (el) => { if (el.dataset.v === 'signup') P.go('consent', { arg: 'signup' }); else { P.S.login.step = 3; P.go('login', { replace: true }); } };
-  P.acts.openHome = () => { P.S.login.step = 1; P.resetHistory(); P.go(P.homeOf(P.S.stage), { replace: true }); };
+  P.acts.authSocial = (el) => { if (el.dataset.v === 'signup') { P._onboard = true; P.go('consent', { arg: 'signup' }); } else { P.S.login.step = 3; P.go('login', { replace: true }); } };
+  P.acts.openHome = () => { P.S.login.step = 1; P.S.returning = true; P._onboard = false; P.resetHistory(); P.go(P.homeOf(P.S.stage), { replace: true }); };
 
   /* ======================================================================
      A4 · Privasi & persetujuan
@@ -170,13 +171,13 @@
     render: () => {
       const c = P.S.consent;
       return {
-        main: hdr({ title: 'Privasi & persetujuan', step: consentFrom === 'signup' ? 'Langkah 3 dari 4' : '' }) + `<div class="body rise">
+        main: hdr({ title: 'Privasi & persetujuan', step: consentFrom === 'signup' ? 'Langkah 2 dari 4' : '' }) + `<div class="body rise">
           <h2 class="t-hero">Datamu, pilihanmu</h2>
           <div class="card tight solid"><div class="card-row"><span class="bubble-ic">${ic('lock')}</span><div class="grow"><p class="t-h3">Kami tidak menjual datamu</p><p class="t-sec">Ubah pilihan ini kapan saja di Akun.</p></div></div></div>
           <div class="card"><div class="rows">
             ${sw('cs-health', 'Data kesehatan', 'Untuk kalender, panduan, dan pengingatmu.', c.health, 'consent', 'health')}
-            ${sw('cs-partner', 'Berbagi ke pasangan', 'Pasangan hanya melihat yang kamu nyalakan.', c.partner, 'consent', 'partner')}
-            ${sw('cs-hospital', 'Berbagi ke rumah sakit', 'Kamu tetap memilih data di tiap permintaan.', c.hospital, 'consent', 'hospital')}
+            ${sw('cs-partner', 'Berbagi ke pasangan', 'Izin dasar. Kamu tetap memilih tiap hal yang dia lihat.', c.partner, 'consent', 'partner')}
+            ${sw('cs-hospital', 'Berbagi ke rumah sakit', 'Izin dasar. Kamu tetap mencentang data di tiap permintaan.', c.hospital, 'consent', 'hospital')}
             ${sw('cs-marketing', 'Info & promosi', 'Kabar fitur dan penawaran dari Peluky.', c.marketing, 'consent', 'marketing')}
             ${sw('cs-ai', 'Bantu latih AI', 'Percakapan anonim untuk melatih Tanya Peluky.', c.ai, 'consent', 'ai')}
           </div></div>
@@ -202,7 +203,7 @@
     id: 'stage', sec: 'A', n: 5, name: 'Pilih tahap', tone: 'neutral', orbs: 'welcome',
     notes: 'Radio group of three large glass cards. The selected card gets its stage-colour luminous outline plus a filled check mark (shape + colour). The office/insurance code is a quiet link, not a step.',
     render: () => ({
-      main: hdr({ title: 'Pilih tahap', step: 'Langkah 4 dari 4' }) + `<div class="body rise">
+      main: hdr({ title: 'Pilih tahap', step: P._onboard ? 'Langkah 3 dari 4' : '' }) + `<div class="body rise">
         <h2 class="t-hero" id="stage-q">Kamu sedang di tahap mana?</h2>
         <div class="stack" role="radiogroup" aria-labelledby="stage-q" style="gap:12px">
           ${STAGES.map(([k, t, d, i, dt, tint, deep, glow]) => `<button type="button" role="radio" aria-checked="${P.S.stagePick === k}" class="card choice" data-act="pickStage" data-v="${k}" style="--c-deep:${deep};--c-glow:${glow}">
@@ -227,10 +228,10 @@
     render: () => {
       const c = P.S.cycle;
       return {
-        main: hdr({ title: 'Atur siklus' }) + `<div class="body rise">
+        main: hdr({ title: 'Atur siklus', step: P._onboard ? 'Langkah 4 dari 4' : '' }) + `<div class="body rise">
           <h2 class="t-hero">Kapan haid terakhirmu?</h2>
           <div class="card">
-            ${field({ id: 'cy-lmp', label: 'Hari pertama haid terakhir', type: 'date', value: c.unknown ? '' : c.lmp, act: 'cycleLmp', extra: `max="${P.iso(P.TODAY)}" ${c.unknown ? 'disabled' : ''}` })}
+            ${c.unknown ? '' : P.dateSel({ id: 'cy-lmp', label: 'Hari pertama haid terakhir', value: c.lmp, act: 'cycleLmp', years: [2026] })}
             <div class="chips">${chip('Tidak ingat', { pressed: c.unknown, 'data-act': 'cycleUnknown' })}</div>
             ${c.unknown ? `<p class="t-sec">${ic('info', 16, 'style="display:inline;vertical-align:-3px"')} Tidak apa-apa. Catat saat haid berikutnya datang, kalender akan menyesuaikan.</p>` : ''}
           </div>
@@ -249,7 +250,10 @@
   P.acts.cycleLmp = (el) => { if (el.value) P.S.cycle.lmp = el.value; P.rerender(); };
   P.acts.cycleUnknown = () => { P.S.cycle.unknown = !P.S.cycle.unknown; P.rerender(); };
   P.acts.cycleLen = (el) => { const c = P.S.cycle; c.len = Math.max(20, Math.min(45, c.len + +el.dataset.v)); P.rerender(); };
-  P.acts.finishSetup = (el) => { P.resetHistory(); P.go(el.dataset.v, { replace: true }); P.toast('Tersimpan. Selamat datang di Peluky!'); };
+  P.acts.finishSetup = (el) => {
+    if (P._onboard) { const s = P.S; s.returning = false; s.followup = { preg: null, baby: null }; s.ai = null; s.bidan = null; P._onboard = false; }
+    P.resetHistory(); P.go(el.dataset.v, { replace: true }); P.toast('Tersimpan. Selamat datang di Peluky!');
+  };
 
   /* ======================================================================
      A7 · Atur kehamilan
@@ -257,7 +261,7 @@
   P.ring = (w, size = 200, stroke = 10, label = true) => {
     const r = (size - stroke * 2 - 8) / 2, c = 2 * Math.PI * r, p = Math.max(0, Math.min(1, w / 40));
     return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true" style="overflow:visible">
-      <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="#2A1830" stroke-opacity=".08" stroke-width="${stroke}"/>
+      <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="currentColor" stroke-opacity=".1" stroke-width="${stroke}"/>
       <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--acc)" stroke-opacity=".55" stroke-width="${stroke + 6}" stroke-linecap="round" stroke-dasharray="${c * p} ${c}" transform="rotate(-90 ${size / 2} ${size / 2})" style="filter:blur(5px)"/>
       <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--deep)" stroke-width="${Math.max(2, stroke / 3)}" stroke-linecap="round" stroke-dasharray="${c * p} ${c}" transform="rotate(-90 ${size / 2} ${size / 2})"/>
       ${(() => { const a = p * 2 * Math.PI - Math.PI / 2; return `<circle cx="${size / 2 + Math.cos(a) * r}" cy="${size / 2 + Math.sin(a) * r}" r="${stroke / 2 + 3}" fill="#fff" stroke="var(--deep)" stroke-width="2.5"/>`; })()}
@@ -270,12 +274,12 @@
       const p = P.S.preg, r = P.pregCalc(p.usg, p.lmp);
       const bad = r && (r.w < 0 || r.w > 42);
       return {
-        main: hdr({ title: 'Atur kehamilan' }) + `<div class="body rise">
+        main: hdr({ title: 'Atur kehamilan', step: P._onboard ? 'Langkah 4 dari 4' : '' }) + `<div class="body rise">
           <h2 class="t-hero">Kapan perkiraan lahirnya?</h2>
           <div class="card">
-            ${field({ id: 'pg-usg', label: 'HPL dari USG dokter', type: 'date', value: p.usg, act: 'pregDate', hint: 'Paling akurat. Lihat di hasil USG-mu.', extra: 'data-f="usg"' })}
+            ${P.dateSel({ id: 'pg-usg', label: 'HPL dari USG dokter', value: p.usg, act: 'pregDate', f: 'usg', years: [2026, 2027], optional: true, hint: 'Paling akurat. Lihat di hasil USG-mu.' })}
             <div class="divider">atau</div>
-            ${field({ id: 'pg-lmp', label: 'Hari pertama haid terakhir (HPHT)', type: 'date', value: p.lmp, act: 'pregDate', extra: `data-f="lmp" max="${P.iso(P.TODAY)}"` })}
+            ${P.dateSel({ id: 'pg-lmp', label: 'Hari pertama haid terakhir (HPHT)', value: p.lmp, act: 'pregDate', f: 'lmp', years: [2025, 2026], optional: true })}
           </div>
           <div class="card glow" aria-live="polite">
             ${!r ? '<p class="t-sec">Isi salah satu tanggal untuk melihat minggu kehamilanmu.</p>'
@@ -301,10 +305,10 @@
     render: () => {
       const b = P.S.baby;
       return {
-        main: hdr({ title: 'Atur data bayi' }) + `<div class="body rise">
+        main: hdr({ title: 'Atur data bayi', step: P._onboard ? 'Langkah 4 dari 4' : '' }) + `<div class="body rise">
           <h2 class="t-hero">Kenalan dengan si kecil</h2>
           <div class="card">
-            ${field({ id: 'bb-dob', label: 'Tanggal lahir (wajib)', type: 'date', value: b.dob, act: 'babyF', err: b.err, extra: `data-f="dob" max="${P.iso(P.TODAY)}" required` })}
+            ${P.dateSel({ id: 'bb-dob', label: 'Tanggal lahir (wajib)', value: b.dob, act: 'babyF', f: 'dob', years: [2024, 2025, 2026], err: b.err })}
             ${field({ id: 'bb-name', label: 'Nama panggilan (opsional)', value: b.name, ph: 'Mis. Ara', input: 'babyIn', extra: 'data-f="name"' })}
             <div class="field"><span class="lbl" id="bb-sex-l">Jenis kelamin (opsional)</span><div class="chips" role="radiogroup" aria-labelledby="bb-sex-l">
               ${[['f', 'Perempuan'], ['m', 'Laki-laki'], ['', 'Nanti saja']].map(([v, t]) => chip(t, { role: 'radio', pressed: b.sex === v, 'data-act': 'babySex', 'data-v': v })).join('')}</div></div>
@@ -321,7 +325,7 @@
       };
     }
   });
-  P.acts.babyF = (el) => { P.S.baby[el.dataset.f] = el.value; P.S.baby.err = ''; P.rerender(); };
+  P.acts.babyF = (el) => { P.S.baby[el.dataset.f] = el.value; P.S.baby.err = el.value || el.dataset.f !== 'dob' ? '' : P.S.baby.err; P.rerender(); };
   P.ins.babyIn = (el) => { P.S.baby[el.dataset.f] = el.value; };
   P.acts.babySex = (el) => { P.S.baby.sex = el.dataset.v; P.rerender(); };
   P.acts.babyPrem = (el) => { P.S.baby.prem = el.dataset.v; P.rerender(); };
@@ -368,16 +372,13 @@
   };
   P.def({
     id: 'planHome', sec: 'B', n: 9, name: 'Beranda perencanaan', tone: 'plan',
-    notes: 'Calendar markers use shape + colour: filled circle = haid, dashed ring = perkiraan haid, soft band = masa subur, diamond = perkiraan ovulasi, dot = tercatat, solid outline = hari ini. Every day is a 44px button with a full spoken label; tapping opens the log sheet. Honesty lines sit right under the prediction.',
+    notes: 'Calendar markers use shape + colour: filled circle = haid, dashed ring = perkiraan haid, soft band = masa subur, diamond = perkiraan ovulasi, dot = tercatat, solid outline = hari ini. Every day is a 44px button with a full spoken label; tapping opens the log sheet. Honesty lines sit right under the prediction. The checklist shows the next two open items, the rest behind “Lihat semua”; emergency is the header button.',
     states: [{ label: 'Sheet catat hari', sheet: 'dayLog', sheetArg: '2026-10-29' }],
     render: () => {
       const s = P.S, { fert } = cycleMarks(), prep = s.prep, done = Object.values(prep).filter(Boolean).length;
       const PREP = ['Cek kesehatan ke dokter atau bidan', 'Ceritakan riwayat kesehatan keluarga', 'Tanyakan status imunisasimu', 'Tanyakan suplemen yang tepat untukmu', 'Buat rencana biaya persalinan'];
       return {
         main: P.homeHdr(`Hai${s.name ? ', ' + esc(s.name) : ''}!`, `<button class="ib" data-go="account" aria-label="Akun">${ic('user')}</button>`) + `<div class="body rise">
-          ${s.askName && !s.name ? `<form class="card tight solid" data-submit="saveName"><label class="lbl" for="nm-in">Mau dipanggil apa?</label>
-            <div class="btn-row" style="align-items:center"><input class="inp" id="nm-in" placeholder="Nama panggilanmu" autocomplete="given-name" style="flex:2">${btn('Simpan', { kind: 'primary', cls: 'btn-sm', type: 'submit', style: 'flex:0 0 auto' })}</div>
-            <button type="button" class="btn-text" style="align-self:flex-start;border:0" data-act="skipName">Lewati</button></form>` : ''}
           <section class="card glow" aria-labelledby="cyc-t">
             <div class="card-row"><div class="grow"><span class="badge stage">${ic('calendar', 15)}Merencanakan</span></div>${btn('Atur', { kind: 'text', cls: 'btn-sm', 'data-go': 'setupCycle' })}</div>
             <div><p class="t-sec" id="cyc-t">Masa subur (perkiraan)</p>
@@ -393,17 +394,20 @@
               <span><i class="lg logged"></i>Tercatat</span><span><i class="lg today"></i>Hari ini</span></div>
             <p class="t-sec" style="display:flex;gap:6px">${ic('info', 16)}<span>Bukan kontrasepsi, bukan diagnosis. Ketuk tanggal untuk mencatat.</span></p>
           </section>
-          <button type="button" class="card tight" data-go="partnerSetup"><span class="card-row"><span class="bubble-ic">${ic('users')}</span><span class="grow"><span class="t-h3" style="display:block">Mau kabari pasangan?</span><span class="t-sec">Kamu pilih apa yang bisa dia lihat.</span></span>${ic('chev')}</span></button>
+          ${P.namePrompt()}
           <section class="card" aria-labelledby="prep-t">
             <div class="card-row"><h2 class="t-h3 grow" id="prep-t">Persiapan sebelum hamil</h2><span class="num t-sec" style="font-weight:700">${done} dari 5</span></div>
             <div class="bar" role="progressbar" aria-label="Kemajuan persiapan" aria-valuemin="0" aria-valuemax="5" aria-valuenow="${done}"><i style="width:${done * 20}%"></i></div>
-            <div>${PREP.map((t, i) => P.check('prep' + i, t, prep[i], 'prepCheck', '', String(i))).join('')}</div>
+            <div>${PREP.map((t, i) => [t, i]).filter(([, i]) => !prep[i]).slice(0, 2).map(([t, i]) => P.check('prep' + i, t, prep[i], 'prepCheck', '', String(i))).join('')}</div>
+            <details class="more"><summary>${ic('chev', 18)}Lihat semua (${PREP.length})</summary><div>${PREP.map((t, i) => P.check('prepall' + i, t, prep[i], 'prepCheck', '', String(i))).join('')}</div></details>
           </section>
           <button type="button" class="card tinted money tight" data-go="cost"><span class="card-row"><span class="bubble-ic sun">${ic('coins')}</span><span class="grow"><span class="t-sec" style="display:block">Persalinan normal · RS swasta menengah</span><span class="num" style="font-size:22px;font-weight:600">Rp20–35 juta</span></span>${ic('chev')}</span>
-            ${src('Chubb Life, Jan 2026')}<span class="t-sec">Buat rencana biaya, gratis.</span></button>
-          <button type="button" class="card tight" data-go="bidan"><span class="card-row"><span class="bubble-ic">${ic('chat')}</span><span class="grow"><span class="t-h3" style="display:block">Tanya bidan</span><span class="t-sec">Keluhan kesehatan selalu dijawab.</span></span>${ic('chev')}</span></button>
+            ${src('Chubb Life, Jan 2026')}</button>
+          <section class="card tight"><div class="rows">
+            <button type="button" class="row" data-go="bidan"><span class="bubble-ic">${ic('chat')}</span><span class="grow"><span class="t">Tanya bidan</span><br><span class="t-sec">Keluhan kesehatan selalu dijawab</span></span>${ic('chev')}</button>
+            <button type="button" class="row" data-go="partnerSetup"><span class="bubble-ic">${ic('users')}</span><span class="grow"><span class="t">Kabari pasangan</span><br><span class="t-sec">Kamu pilih apa yang dia lihat</span></span>${ic('chev')}</button>
+          </div></section>
           ${btn('Saya hamil', { kind: 'glass', icon: 'heart', 'data-act': 'iAmPregnant' })}
-          ${sos()}
         </div>`,
         tab: 'plan'
       };
@@ -423,8 +427,7 @@
       title: `Catat · ${P.fmt(d)}`,
       body: `<div class="chips" role="group" aria-label="Pilih yang kamu alami">${DAYLOG.map((t) => chip(t, { pressed: list.includes(t), 'data-act': 'dayLogToggle', 'data-v': t })).join('')}</div>
         ${list.includes('Tes kehamilan positif') ? `<div class="card tight tinted"><p class="t-h3">Selamat!</p><p class="t-sec">Mau pindah ke tahap hamil? Kalender siklus akan disimpan.</p>${btn('Atur kehamilan', { kind: 'primary', cls: 'btn-sm', 'data-act': 'iAmPregnant' })}</div>` : ''}
-        <div class="stack"><p class="lbl" style="display:flex;gap:6px;align-items:center">${ic('alert', 18)}Perlu bantuan segera?</p>
-          <div class="chips">${['Nyeri perut hebat', 'Perdarahan sangat banyak'].map((t) => chip(t, { cls: 'danger', icon: 'alert', 'data-sheet': 'danger', 'data-v': t })).join('')}</div></div>
+        ${P.dangerRow('plan')}
         ${btn('Simpan', { 'data-act': 'dayLogSave' })}`
     };
   };
@@ -507,28 +510,31 @@
      B11 · Rumah sakit
      ====================================================================== */
   const HOSP = [
-    { id: 'a', name: '[RS A]', tier: 'mid', bpjs: true, nicu: true, rooms: ['k2', 'k1', 'vip'], mitra: false, d: 1 },
-    { id: 'b', name: '[RS Ibu & Anak B]', tier: 'mid', bpjs: true, nicu: true, rooms: ['k1', 'vip'], mitra: true, d: 2 },
-    { id: 'c', name: '[RSUD C]', tier: 'gov', bpjs: true, nicu: true, rooms: ['k2', 'k1'], mitra: false, d: 3 },
-    { id: 'd', name: '[RS D]', tier: 'top', bpjs: false, nicu: true, rooms: ['k1', 'vip'], mitra: true, d: 4 },
-    { id: 'e', name: '[RS E]', tier: 'gov', bpjs: true, nicu: false, rooms: ['k2'], mitra: false, d: 5 }
+    { id: 'a', name: '[RS A]', tier: 'mid', bpjs: true, nicu: true, ponek: true, rooms: ['k2', 'k1', 'vip'], mitra: false, d: 1, km: '1,8', min: 9 },
+    { id: 'b', name: '[RS Ibu & Anak B]', tier: 'mid', bpjs: true, nicu: true, ponek: true, rooms: ['k1', 'vip'], mitra: true, d: 2, km: '2,6', min: 14 },
+    { id: 'c', name: '[RSUD C]', tier: 'gov', bpjs: true, nicu: true, ponek: true, rooms: ['k2', 'k1'], mitra: false, d: 3, km: '3,9', min: 21 },
+    { id: 'd', name: '[RS D]', tier: 'top', bpjs: false, nicu: true, ponek: false, rooms: ['k1', 'vip'], mitra: true, d: 4, km: '5,2', min: 26 },
+    { id: 'e', name: '[RS E]', tier: 'gov', bpjs: true, nicu: false, ponek: false, rooms: ['k2'], mitra: false, d: 5, km: '6,7', min: 33 }
   ];
   P.HOSP = HOSP;
+  // Travel time first (Jakarta traffic), distance second. Fictional values only in test-content mode.
+  P.travel = (x) => P.S.testContent ? `${x.min} menit · ${x.km} km` : '[x menit] · [x km]';
+  const yes = (on, a, b) => on ? `${ic('check', 15, 'style="display:inline;vertical-align:-2px"')} ${a}` : `${ic('slash', 15, 'style="display:inline;vertical-align:-2px"')} ${b}`;
   const TIER_ORDER = { gov: 0, mid: 1, top: 2 };
   const hospList = () => {
     const h = P.S.hosp, f = h.f;
     // Sorting uses only her criteria. `mitra` is never read here.
-    return HOSP.filter((x) => (!f.bpjs || x.bpjs) && (!f.nicu || x.nicu) && (f.tier === 'all' || x.tier === f.tier) && (f.room === 'all' || x.rooms.includes(f.room)) && (f.dist === 'all' || (f.dist === '5' ? x.d <= 2 : x.d <= 4)))
+    return HOSP.filter((x) => (!f.bpjs || x.bpjs) && (!f.nicu || x.nicu) && (!f.ponek || x.ponek) && (f.tier === 'all' || x.tier === f.tier) && (f.room === 'all' || x.rooms.includes(f.room)) && (f.dist === 'all' || (f.dist === '5' ? x.d <= 2 : x.d <= 4)))
       .sort((a, b) => h.sort === 'cost' ? (TIER_ORDER[a.tier] - TIER_ORDER[b.tier]) || (a.d - b.d) : a.d - b.d);
   };
-  const fcount = () => { const f = P.S.hosp.f; return [f.dist !== 'all', f.tier !== 'all', f.bpjs, f.nicu, f.room !== 'all'].filter(Boolean).length; };
+  const fcount = () => { const f = P.S.hosp.f; return [f.dist !== 'all', f.tier !== 'all', f.bpjs, f.nicu, f.ponek, f.room !== 'all'].filter(Boolean).length; };
   P.def({
     id: 'hospitals', sec: 'B', n: 11, name: 'Rumah sakit', tone: 'shared',
-    notes: 'Shared screen: takes the colour of the stage she came from. Order = her criteria only (distance or cost); the sort function never reads partner status. “Mitra Peluky” badge never on the first card here and never moves a card. Max 6 facts per card; price ranges are market ranges for the hospital type, each with its source. Partners open a detail page; others expand contact info.',
+    notes: 'Shared screen: takes the colour of the stage she came from. Order = her criteria only (distance or cost); the sort function never reads partner status. “Mitra Peluky” badge never on the first card here and never moves a card. Travel time leads (Jakarta traffic), and “Layanan” shows BPJS, NICU and 24-hour obstetric ER (PONEK) with check/slash icons. A “?” beside the badge explains that Mitra means bookable through Peluky, not recommended. Max 6 facts per card; price ranges are market ranges for the hospital type, each with its source. Partners open a detail page; others expand contact info.',
     states: [{ label: 'Sheet filter', sheet: 'hospFilter' }, { label: 'Kosong', state: (S) => { S.hosp.f.bpjs = true; S.hosp.f.tier = 'top'; } }],
     render: () => {
       const h = P.S.hosp, list = hospList(), room = P.S.cost.room;
-      const crit = [h.sort === 'cost' ? 'Biaya terendah' : 'Terdekat', h.f.bpjs && 'BPJS', h.f.nicu && 'NICU', h.f.tier !== 'all' && NORMAL[h.f.tier][0], h.f.room !== 'all' && CAESAR[h.f.room][0], h.f.dist !== 'all' && `≤ ${h.f.dist} km`].filter(Boolean).join(' · ');
+      const crit = [h.sort === 'cost' ? 'Biaya terendah' : 'Terdekat', h.f.bpjs && 'BPJS', h.f.nicu && 'NICU', h.f.ponek && 'IGD kebidanan 24 jam', h.f.tier !== 'all' && NORMAL[h.f.tier][0], h.f.room !== 'all' && CAESAR[h.f.room][0], h.f.dist !== 'all' && `≤ ${h.f.dist} km`].filter(Boolean).join(' · ');
       const fc = fcount();
       return {
         main: hdr({ title: 'Rumah sakit' }) + `<div class="body rise">
@@ -538,15 +544,14 @@
             const n = NORMAL[x.tier], rk = x.rooms.includes(room) ? room : x.rooms[0], cs = CAESAR[rk], open = h.open[x.id];
             return `<article class="card" aria-labelledby="h-${x.id}">
               <div class="card-row" style="align-items:flex-start"><span class="num t-sec" style="font-weight:700;min-width:22px" aria-label="Urutan ${i + 1}">${i + 1}</span>
-                <div class="grow"><h2 class="t-h3" id="h-${x.id}">${x.name}</h2>${x.mitra ? `<span class="badge mitra" style="margin-top:6px">${ic('heart', 14)}Mitra Peluky</span>` : ''}</div></div>
+                <div class="grow"><h2 class="t-h3" id="h-${x.id}">${x.name}</h2>${x.mitra ? `<span style="display:inline-flex;align-items:center;margin-top:6px"><span class="badge mitra">${ic('link', 14)}Mitra Peluky</span><button type="button" class="mitra-q" data-sheet="mitraInfo" aria-label="Apa itu Mitra Peluky?">${ic('info', 18)}</button></span>` : ''}</div></div>
               <dl class="facts">
-                <div><dt>Jarak</dt><dd class="num">[x km]</dd></div><div><dt>Tipe</dt><dd>${n[0]}</dd></div>
-                <div><dt>BPJS</dt><dd>${x.bpjs ? `${ic('check', 15, 'style="display:inline;vertical-align:-2px"')} Ya` : `${ic('slash', 15, 'style="display:inline;vertical-align:-2px"')} Tidak`}</dd></div>
-                <div><dt>NICU</dt><dd>${x.nicu ? `${ic('check', 15, 'style="display:inline;vertical-align:-2px"')} Ada` : `${ic('slash', 15, 'style="display:inline;vertical-align:-2px"')} Tidak ada`}</dd></div>
+                <div><dt>Waktu tempuh</dt><dd class="num">${P.travel(x)}</dd></div><div><dt>Tipe</dt><dd>${n[0]}</dd></div>
+                <div class="wide"><dt>Layanan</dt><dd>${yes(x.bpjs, 'BPJS', 'BPJS')} · ${yes(x.nicu, 'NICU', 'NICU')} · ${yes(x.ponek, 'IGD kebidanan 24 jam', 'IGD kebidanan 24 jam')}</dd></div>
                 <div><dt>Normal (kisaran)</dt><dd class="num">${P.rng(n)}</dd></div><div><dt>Caesar · ${cs[0]}</dt><dd class="num">${P.rng(cs)}</dd></div>
               </dl>
               <p class="t-sec">Kisaran pasar untuk tipe RS ini · ${P.SRC_N} · ${P.SRC_C}</p>
-              ${x.mitra ? btn('Lihat detail & booking', { kind: 'glass', cls: 'btn-sm', iconR: 'chev', 'data-go': 'hospitalDetail', 'data-arg': x.id, style: 'width:100%' })
+              ${x.mitra ? btn('Booking lewat Peluky', { kind: 'glass', cls: 'btn-sm', iconR: 'chev', 'data-go': 'hospitalDetail', 'data-arg': x.id, style: 'width:100%' })
                 : `${btn(open ? 'Tutup kontak' : 'Lihat kontak', { kind: 'glass', cls: 'btn-sm', 'data-act': 'hospOpen', 'data-v': x.id, 'aria-expanded': open ? 'true' : 'false', style: 'width:100%' })}
                   ${open ? `<dl class="kv"><dt>Telepon</dt><dd class="num">[nomor telepon]</dd><dt>Alamat</dt><dd>[alamat]</dd></dl>${btn('Petunjuk arah', { kind: 'text', icon: 'nav', cls: 'btn-sm', 'data-act': 'directions' })}` : ''}`}
             </article>`;
@@ -558,7 +563,12 @@
   });
   P.acts.hospSort = (el) => { P.S.hosp.sort = el.dataset.v; P.rerender(); };
   P.acts.hospOpen = (el) => { const o = P.S.hosp.open; o[el.dataset.v] = !o[el.dataset.v]; P.rerender(); };
-  P.acts.hospReset = () => { P.S.hosp.f = { dist: 'all', tier: 'all', bpjs: false, nicu: false, room: 'all' }; P.rerender(); };
+  P.acts.hospReset = () => { P.S.hosp.f = { dist: 'all', tier: 'all', bpjs: false, nicu: false, ponek: false, room: 'all' }; P.rerender(); };
+  P.sheets.mitraInfo = () => ({
+    title: 'Apa itu Mitra Peluky?',
+    body: `<p class="t-body">RS mitra bisa kamu booking langsung lewat Peluky. Untuk RS lain, kamu dapat kontak dan petunjuk arah.</p>
+      <p class="t-body"><b>Bukan rekomendasi.</b> Mitra membayar biaya langganan tetap dan tidak memengaruhi urutan.</p>${btn('Mengerti', { kind: 'glass', 'data-close': true })}`
+  });
   P.acts.directions = () => P.toast('Prototipe: membuka petunjuk arah', { icon: 'nav' });
   P.sheets.hospFilter = () => {
     const f = P.S.hosp.f;
@@ -568,7 +578,7 @@
       body: `${group('Jarak', 'dist', [['5', '≤ 5 km'], ['10', '≤ 10 km'], ['all', 'Semua']])}
         ${group('Anggaran (tipe RS)', 'tier', [['all', 'Semua'], ...Object.entries(NORMAL).map(([k, v]) => [k, v[0]])])}
         ${group('Kelas kamar', 'room', [['all', 'Semua'], ...Object.entries(CAESAR).map(([k, v]) => [k, v[0]])])}
-        <div class="rows">${sw('hf-bpjs', 'Menerima BPJS', '', f.bpjs, 'hospFb', 'bpjs')}${sw('hf-nicu', 'Ada NICU', '', f.nicu, 'hospFb', 'nicu')}</div>
+        <div class="rows">${sw('hf-bpjs', 'Menerima BPJS', '', f.bpjs, 'hospFb', 'bpjs')}${sw('hf-nicu', 'Ada NICU', '', f.nicu, 'hospFb', 'nicu')}${sw('hf-ponek', 'IGD kebidanan 24 jam (PONEK)', 'Bisa menangani darurat persalinan', f.ponek, 'hospFb', 'ponek')}</div>
         <p class="t-sec">Status mitra tidak bisa dipakai untuk mengurutkan.</p>
         ${btn('Terapkan', { 'data-act': 'hospApply' })}`
     };
@@ -582,33 +592,37 @@
      ====================================================================== */
   P.def({
     id: 'hospitalDetail', sec: 'B', n: 12, name: 'Detail RS & booking', tone: 'shared',
-    enter: (arg) => { if (arg) P.S.booking.hosp = arg; },
-    notes: 'Per-request data sharing: name and phone ticked (needed to reply), HPL and everything else unticked. If the global hospital-sharing consent is off, a line explains these ticks apply to this request only. Package prices are the hospital’s own, with a verified date.',
+    enter: (arg) => { if (arg && arg !== P.S.booking.hosp) { P.S.booking.hosp = arg; P.S.booking.pay = null; } P.S.booking.payErr = false; },
+    notes: 'Per-request data sharing: name and phone ticked (needed to reply), HPL and everything else unticked; the dock repeats exactly what will be sent, with a link to change it. One consent model: the “Berbagi ke rumah sakit” switch is the permission, the ticks choose the fields. If the switch is off, sending asks once to turn it on. Payment has no default; BPJS appears only where accepted, with a referral note. Package prices are the hospital’s own, with a verified date.',
     render: () => {
       const b = P.S.booking, x = HOSP.find((h) => h.id === b.hosp) || HOSP[1];
       const days = [1, 2, 3, 4, 5].map((i) => P.addDays(P.TODAY, i));
-      const pays = [['bpjs', 'BPJS'], ['asuransi', 'Asuransi'], ['sendiri', 'Bayar sendiri']].concat(P.S.covered ? [['cover', 'Ditanggung kantor']] : []);
+      const pays = (x.bpjs ? [['bpjs', 'BPJS']] : []).concat([['asuransi', 'Asuransi'], ['sendiri', 'Bayar sendiri']], P.S.covered ? [['cover', 'Ditanggung kantor']] : []);
+      const LAB = [['name', 'Nama'], ['phone', 'Nomor HP'], ['week', 'Minggu kehamilan'], ['hpl', 'HPL (hari perkiraan lahir)'], ['notes', 'Ringkasan catatan kontrol']];
+      const sending = LAB.filter(([k]) => b.share[k]).map(([, t]) => t.replace(/ \(.*\)/, ''));
       return {
         main: hdr({ title: x.name, sub: x.mitra ? 'Mitra Peluky' : NORMAL[x.tier][0] }) + `<div class="body rise">
           <div class="ph-img" style="height:150px">[Foto RS]</div>
-          <dl class="card tight facts"><div><dt>Jarak</dt><dd class="num">[x km]</dd></div><div><dt>BPJS</dt><dd>${x.bpjs ? 'Ya' : 'Tidak'}</dd></div><div><dt>NICU</dt><dd>${x.nicu ? 'Ada' : 'Tidak ada'}</dd></div><div><dt>Kelas kamar</dt><dd>${x.rooms.map((r) => CAESAR[r][0]).join(', ')}</dd></div></dl>
+          <dl class="card tight facts"><div><dt>Waktu tempuh</dt><dd class="num">${P.travel(x)}</dd></div><div><dt>BPJS</dt><dd>${x.bpjs ? 'Ya' : 'Tidak'}</dd></div><div><dt>NICU</dt><dd>${x.nicu ? 'Ada' : 'Tidak ada'}</dd></div><div><dt>IGD kebidanan 24 jam</dt><dd>${x.ponek ? 'Ada' : 'Tidak ada'}</dd></div><div class="wide"><dt>Kelas kamar</dt><dd>${x.rooms.map((r) => CAESAR[r][0]).join(', ')}</dd></div></dl>
           <div class="card">
             <div class="field"><span class="lbl">Jenis permintaan</span>${seg('Jenis permintaan', [['konsul', 'Konsultasi'], ['paket', 'Paket persalinan'], ['tur', 'Tur RS']], b.type, 'bkType')}</div>
             <div class="field"><span class="lbl" id="bk-d">Tanggal</span><div class="hscroll" role="radiogroup" aria-labelledby="bk-d">${days.map((d, i) => chip(`${P.DOW[d.getDay()]} <span class="num">${d.getDate()}</span>`, { role: 'radio', pressed: b.day === i + 1, 'data-act': 'bkDay', 'data-v': i + 1, 'aria-label': P.fmtShort(d) })).join('')}</div></div>
             <div class="field"><span class="lbl" id="bk-t">Jam</span><div class="chips" role="radiogroup" aria-labelledby="bk-t">${['09.00', '11.00', '14.00', '16.00'].map((t) => chip(`<span class="num">${t}</span>`, { role: 'radio', pressed: b.time === t, 'data-act': 'bkTime', 'data-v': t, 'aria-label': t })).join('')}</div></div>
-            <div class="field"><label for="bk-doc">Dokter (opsional)</label><select class="inp" id="bk-doc" data-ch="bkDoc"><option value="">Tanpa preferensi</option>${['[dr. Nama, Sp.OG] · Senin & Kamis', '[dr. Nama, Sp.OG] · Selasa & Jumat'].map((o) => `<option ${b.doctor === o ? 'selected' : ''}>${o}</option>`).join('')}</select></div>
-            <div class="field"><span class="lbl" id="bk-p">Pembayaran</span><div class="chips" role="radiogroup" aria-labelledby="bk-p">${pays.map(([v, t]) => chip(t, { role: 'radio', pressed: b.pay === v, 'data-act': 'bkPay', 'data-v': v })).join('')}</div></div>
+            <div class="field"><label for="bk-doc">Dokter (opsional)</label><select class="inp" id="bk-doc" data-ch="bkDoc"><option value="">Tanpa preferensi</option>${['[dr. Nama, Sp.OG] · perempuan · Senin & Kamis', '[dr. Nama, Sp.OG] · laki-laki · Selasa & Jumat'].map((o) => `<option ${b.doctor === o ? 'selected' : ''}>${o}</option>`).join('')}</select></div>
+            <div class="field ${b.payErr ? 'err' : ''}"><span class="lbl" id="bk-p">Pembayaran</span><div class="chips" role="radiogroup" aria-labelledby="bk-p">${pays.map(([v, t]) => chip(t, { role: 'radio', pressed: b.pay === v, 'data-act': 'bkPay', 'data-v': v })).join('')}</div>
+              ${b.pay === 'bpjs' ? `<span class="hint" style="display:flex;gap:6px">${ic('info', 16)}<span>BPJS biasanya perlu rujukan dari faskes tingkat 1. [Konfirmasi ke RS · perlu sumber]</span></span>` : ''}
+              ${b.payErr ? `<span class="errmsg">${ic('alertc', 18)}Pilih cara bayar dulu ya.</span>` : ''}</div>
           </div>
-          <div class="card">
+          <div class="card" id="bk-share">
             <h2 class="t-h3">Data yang dikirim ke RS</h2><p class="t-sec" style="margin-top:-8px">RS hanya menerima yang kamu centang.</p>
-            <div>${[['name', 'Nama'], ['phone', 'Nomor HP'], ['week', 'Minggu kehamilan'], ['hpl', 'HPL (hari perkiraan lahir)'], ['notes', 'Ringkasan catatan kontrol']].map(([k, t]) => P.tick('bk-s-' + k, t, b.share[k], 'bkShare', k)).join('')}</div>
-            ${!P.S.consent.hospital ? `<p class="t-sec" style="display:flex;gap:6px">${ic('lock', 16)}<span>Izin umum berbagi ke RS sedang mati. Centang di atas hanya berlaku untuk permintaan ini.</span></p>` : ''}
+            <div>${LAB.map(([k, t]) => P.tick('bk-s-' + k, t, b.share[k], 'bkShare', k)).join('')}</div>
             <div class="field"><label for="bk-note">Catatan untuk RS (opsional)</label><textarea class="inp" id="bk-note" data-in="bkNote" placeholder="Mis. ingin bertanya soal kamar rawat gabung">${esc(b.note)}</textarea></div>
           </div>
           <div class="card tinted money"><div class="card-row"><span class="bubble-ic sun">${ic('bag')}</span><div class="grow"><h2 class="t-h3">Paket persalinan</h2><p class="t-sec">Harga paket dari RS · diverifikasi [tanggal]</p></div></div>
             ${btn('Lihat isi paket', { kind: 'glass', cls: 'btn-sm', 'data-sheet': 'package', style: 'width:100%' })}</div>
         </div>`,
-        dock: `${btn('Kirim permintaan', { 'data-act': 'bkSend', icon: 'send' })}<p class="t-sec">Biasanya dibalas dalam [x jam]</p>`
+        dock: `<p class="t-sec" style="text-align:left;display:flex;gap:6px;align-items:center;justify-content:space-between"><span>Dikirim ke RS: <b style="color:var(--ink)">${sending.join(', ') || 'tidak ada data'}</b></span><button type="button" class="btn-text" style="border:0;background:none;min-height:44px;font-weight:700;cursor:pointer" data-act="bkJump">Ubah</button></p>
+          ${btn('Kirim permintaan', { 'data-act': 'bkSend', icon: 'send' })}`
       };
     }
   });
@@ -616,10 +630,23 @@
   P.acts.bkDay = (el) => { P.S.booking.day = +el.dataset.v; P.rerender(); };
   P.acts.bkTime = (el) => { P.S.booking.time = el.dataset.v; P.rerender(); };
   P.acts.bkDoc = (el) => { P.S.booking.doctor = el.value; };
-  P.acts.bkPay = (el) => { P.S.booking.pay = el.dataset.v; P.rerender(); };
-  P.acts.bkShare = (el) => { P.S.booking.share[el.dataset.v] = el.checked; };
+  P.acts.bkPay = (el) => { P.S.booking.pay = el.dataset.v; P.S.booking.payErr = false; P.rerender(); };
+  P.acts.bkShare = (el) => { P.S.booking.share[el.dataset.v] = el.checked; P.rerender(); };
+  P.acts.bkJump = () => { const n = P.el().querySelector('#bk-share'); if (n) n.scrollIntoView({ block: 'start', behavior: P.S.reduce ? 'auto' : 'smooth' }); };
   P.ins.bkNote = (el) => { P.S.booking.note = el.value; };
-  P.acts.bkSend = () => { P.S.request = { status: 'sent', sharing: true, cancelled: false, added: false }; P.go('requestSent'); };
+  P.acts.bkSend = () => {
+    const b = P.S.booking;
+    if (!b.pay) { b.payErr = true; P.rerender(); const n = P.el().querySelector('#bk-p'); if (n) n.scrollIntoView({ block: 'center' }); return; }
+    if (!P.S.consent.hospital) { P.openSheet('hospConsent'); return; }
+    P.S.request = { status: 'sent', sharing: true, cancelled: false, added: false }; P.go('requestSent');
+  };
+  P.sheets.hospConsent = () => ({
+    title: 'Izinkan berbagi ke rumah sakit?',
+    body: `<p class="t-body">Pengaturan “Berbagi ke rumah sakit” sedang mati. Nyalakan agar permintaan ini bisa dikirim.</p>
+      <p class="t-sec">RS tetap hanya menerima data yang kamu centang. Bisa dimatikan lagi di Akun.</p>
+      ${btn('Nyalakan & kirim', { 'data-act': 'hospConsentOk' })}${btn('Batal', { kind: 'glass', 'data-close': true })}`
+  });
+  P.acts.hospConsentOk = () => { P.S.consent.hospital = true; P.closeSheet(true, true); P.acts.bkSend(); };
   P.sheets.package = () => ({
     title: 'Isi paket persalinan',
     body: `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th scope="col">Isi paket</th><th scope="col" class="num">Normal</th><th scope="col" class="num">Caesar</th></tr></thead><tbody>
@@ -646,7 +673,7 @@
             ${r.cancelled ? '<p class="t-sec">Permintaan ini sudah dibatalkan. RS diberi tahu.</p>' : `<ol class="steps" aria-label="Status permintaan">
               <li><span class="st-ic done">${ic('check', 16)}</span><div><b>Terkirim</b><p class="t-sec">Hari ini</p></div></li>
               <li><span class="st-ic now">${ic('clock', 16)}</span><div><b>Dikonfirmasi</b><p class="t-sec">Menunggu RS · biasanya [x jam]</p></div></li>
-              <li><span class="st-ic next">${ic('bell', 16)}</span><div><b>Pengingat H-1</b><p class="t-sec num">${P.fmtShort(P.addDays(d, -1))}</p></div></li></ol>`}
+              <li><span class="st-ic next">${ic('bell', 16)}</span><div><b>Pengingat H-1</b><p class="t-sec num">${b.day <= 1 ? 'Hari ini (jadwalnya besok)' : P.fmtShort(P.addDays(d, -1))}</p></div></li></ol>`}
           </div>
           <div class="card"><h2 class="t-h3">Yang kamu kirim</h2>
             ${r.sharing ? `<ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px">${sent.map((k) => `<li style="display:flex;gap:8px;align-items:center">${ic('check', 18)}${LAB[k]}</li>`).join('')}</ul>` : `<p class="t-body" style="display:flex;gap:8px">${ic('lock', 18)}Berbagi dihentikan. RS tidak bisa melihat datamu lagi.</p>`}
