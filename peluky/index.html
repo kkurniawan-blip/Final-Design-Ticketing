@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Peluky App Design</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Peluky mobile app: Soft Glass design system, 38-screen clickable prototype and contrast/placeholder note.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600&display=swap">
+<link rel="stylesheet" href="css/peluky.css">
+<link rel="stylesheet" href="css/viewer.css">
+</head>
+<body>
+<header class="vw-top"><div class="vw-top-in">
+  <a class="vw-brand" href="#welcome" aria-label="Peluky, buka layar pertama"><span id="vw-logo"></span><small>Prototype · Soft Glass</small></a>
+  <nav class="vw-tabs" aria-label="Bagian">
+    <a href="#welcome" id="vw-proto-tab" data-view="proto">Prototype</a>
+    <a href="#all" data-view="all">All screens</a>
+    <a href="#system" data-view="system">Design system</a>
+    <a href="#notes" data-view="notes">Contrast &amp; placeholders</a>
+  </nav>
+</div></header>
+
+<main>
+  <section id="view-proto" class="vw-proto" aria-label="Clickable prototype">
+    <nav class="vw-list" id="vw-list" aria-label="Screens A–G"></nav>
+    <div class="vw-stagewrap">
+      <div class="vw-mobilebar">
+        <button type="button" id="vw-prev" aria-label="Previous screen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <label class="sr-only" for="vw-select" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Screen</label>
+        <select id="vw-select"></select>
+        <button type="button" id="vw-next" aria-label="Next screen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+      <div class="vw-stage" id="vw-stage">
+        <div class="vw-phone" id="vw-phone"><div class="vw-bezel" id="vw-bezel"><div id="app"></div></div></div>
+        <div class="vw-desk" id="vw-desk" hidden></div>
+      </div>
+    </div>
+    <aside class="vw-notes" id="vw-notes" aria-label="Design notes"></aside>
+  </section>
+  <section id="view-all" hidden></section>
+  <section id="view-system" hidden></section>
+  <section id="view-notes" hidden></section>
+</main>
+
+<script src="js/core.js"></script>
+<script src="js/screens-ab.js"></script>
+<script src="js/screens-cd.js"></script>
+<script src="js/screens-efg.js"></script>
+<script src="js/docs.js"></script>
+<script>document.getElementById('vw-logo').innerHTML = P.logo(30, true, 22);</script>
+<script src="js/viewer.js"></script>
+</body>
+</html>
