@@ -187,9 +187,10 @@
   const wipe = $('#gate-wipe');
   const root = document.documentElement;
   const GATE_NO = { Lobby: '00', Experience: '01', Projects: '02', Awards: '03', Contact: '04' };
+  const PAGE_LABEL = { index: 'Lobby', experience: 'Experience', projects: 'Projects', awards: 'Awards', contact: 'Contact' };
   function board(colorName, label) {
     wipe.style.setProperty('--wipe', `var(--grad-${colorName})`);
-    $('.gw-gate', wipe).textContent = `Gate ${GATE_NO[label] || '—'}`;
+    $('.gw-gate', wipe).textContent = GATE_NO[label] ? `Gate ${GATE_NO[label]}` : '';
     const flaps = $('.gw-flaps', wipe);
     flaps.textContent = '';
     flaps.setAttribute('aria-label', label);
@@ -218,6 +219,7 @@
       if (a.target === '_blank' || a.hasAttribute('download')) return;
       const url = new URL(a.getAttribute('href'), location.href);
       if (url.origin !== location.origin || !/\.html$/.test(url.pathname)) return;
+      if (url.pathname === location.pathname && url.hash) return;
       e.preventDefault();
       if (a.classList.contains('ticket')) {
         a.classList.add('torn');
@@ -231,7 +233,8 @@
       }
       const r = a.getBoundingClientRect();
       const x = e.clientX || r.left + r.width / 2, y = e.clientY || r.top + r.height / 2;
-      go(url.href, a.dataset.color || 'blend', a.dataset.label || a.textContent.trim(), x, y);
+      const page = url.pathname.split('/').pop().replace('.html', '');
+      go(url.href, a.dataset.color || 'blend', a.dataset.label || PAGE_LABEL[page] || 'Lobby', x, y);
     });
     let arrive = null;
     try { arrive = JSON.parse(store.get('kk-arrive')); } catch { arrive = null; }
