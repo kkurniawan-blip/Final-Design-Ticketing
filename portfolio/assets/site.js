@@ -610,6 +610,65 @@
 
   /* Journeys: connect the stop pins with a winding route that draws as you scroll, with a plane on it. */
   const PLANE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>';
+  /* The suitcase that ends a journey: closed, it wears stickers from every stop; open, it shows every skill packed. */
+  const STICKER_SPOTS = [['left', 5, 12], ['right', 5, 9], ['left', 6, 70], ['right', 6, 72]];
+  function suitcase(j, n, packed) {
+    const bag = document.createElement('div');
+    bag.className = 'j-suitcase';
+    const id = 'case-' + n;
+    const title = j.dataset.suitcase || 'Everything picked up on this route';
+    bag.innerHTML = `
+      <div class="case">
+        <button type="button" class="case-lid" aria-expanded="false" aria-controls="${id}">
+          <span class="lid-front">
+            <span class="case-strap"></span><span class="case-strap"></span>
+            <span class="case-latch"></span><span class="case-latch"></span>
+            <span class="case-stickers" aria-hidden="true"></span>
+            <span class="case-label"><span class="tag-head">${packed.length} skills packed</span><span class="case-title"></span><span class="case-cta">Tap to open</span></span>
+          </span>
+          <span class="lid-back"><small>Packed along the way</small><span class="case-title"></span><small>Tap the lid to close</small></span>
+        </button>
+        <div class="case-inside" id="${id}" aria-hidden="true">
+          <p class="tag-head">${packed.length} skills, unpacked</p>
+          <div class="chips"></div>
+          <button type="button" class="btn btn-ghost btn-sm case-close">Close the suitcase</button>
+        </div>
+      </div>`;
+    $$('.case-title', bag).forEach(t => { t.textContent = title; });
+    const chips = $('.chips', bag);
+    packed.forEach((p, i) => {
+      const t = document.createElement('span');
+      t.className = 'tag';
+      t.textContent = p;
+      t.style.setProperty('--i', i);
+      chips.append(t);
+    });
+    const narrow = matchMedia('(max-width: 600px)').matches;
+    const places = [...new Set($$('.tag-foot > span:first-child', j).map(t => (narrow ? t.textContent.split('·')[0] : t.textContent).trim()))];
+    places.slice(0, STICKER_SPOTS.length).forEach((p, i) => {
+      const [side, x, y] = STICKER_SPOTS[i];
+      const st = document.createElement('span');
+      st.textContent = p;
+      st.style[side] = x + '%';
+      st.style.top = y + '%';
+      st.style.setProperty('--r', ((i * 37) % 22 - 11) + 'deg');
+      $('.case-stickers', bag).append(st);
+    });
+    const lid = $('.case-lid', bag), inside = $('.case-inside', bag);
+    inside.inert = true;
+    const toggle = open => {
+      bag.classList.toggle('open', open);
+      lid.setAttribute('aria-expanded', String(open));
+      lid.setAttribute('aria-label', open ? `Close the suitcase: ${title}` : `Open the suitcase: ${packed.length} skills packed, ${title}`);
+      inside.setAttribute('aria-hidden', String(!open));
+      inside.inert = !open;
+    };
+    toggle(false);
+    lid.addEventListener('click', () => toggle(!bag.classList.contains('open')));
+    $('.case-close', bag).addEventListener('click', () => { toggle(false); lid.focus({ preventScroll: true }); });
+    return bag;
+  }
+
   function journeys() {
     $$('[data-journey]').forEach((j, n) => {
       const NS = 'http://www.w3.org/2000/svg';
@@ -626,14 +685,7 @@
       j.append(plane);
       const anchors = $$('.j-dot, .stop-pin', j);
       const packed = [...new Set($$('.stop-tag .tag', j).map(t => t.textContent.trim()))];
-      if (packed.length) {
-        const bag = document.createElement('div');
-        bag.className = 'j-suitcase';
-        bag.innerHTML = `<p class="tag-head">Packed along the way · ${packed.length} skills</p><h3></h3><div class="chips"></div>`;
-        $('h3', bag).textContent = j.dataset.suitcase || 'Everything picked up on this route';
-        packed.forEach(p => { const t = document.createElement('span'); t.className = 'tag'; t.textContent = p; $('.chips', bag).append(t); });
-        j.append(bag);
-      }
+      if (packed.length) j.append(suitcase(j, n, packed));
       let len = 0, samples = [], pinsY = [], queued = false, active = false;
 
       const build = () => {
