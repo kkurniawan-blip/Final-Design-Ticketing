@@ -409,58 +409,25 @@
     awards: ['awards.html', 'pink', { en: 'Open the trophy case', id: 'Buka lemari piala' }],
     contact: ['contact.html', 'dusk', { en: 'Go to contact', id: 'Ke halaman kontak' }],
   };
-  const INTENTS = [
-    { id: 'lang-id', words: ['bahasa', 'indonesia', 'indo'] },
-    { id: 'lang-en', words: ['english', 'inggris'] },
-    { id: 'chatbot', words: ['chatbot', 'chatbots', 'bot', 'mobichat', 'prompt', 'persona', 'ai'], link: 'projects' },
-    { id: 'ticketing', words: ['ticket', 'ticketing', 'tiket'], link: 'projects' },
-    { id: 'win', words: ['award', 'awards', 'win', 'won', 'champion', 'asean', 'juara', 'prestasi', 'penghargaan', 'trophy', 'biggest', 'hackathon', 'tropicrew'], link: 'awards' },
-    { id: 'project', words: ['project', 'projects', 'nutrisense', 'nexus', 'stunting', 'harvard', 'hsil', 'proyek'], link: 'projects' },
-    { id: 'contact', words: ['contact', 'email', 'hire', 'reach', 'linkedin', 'phone', 'whatsapp', 'kontak', 'hubungi', 'menghubungi', 'wa'], link: 'contact' },
-    { id: 'now', words: ['now', 'current', 'currently', 'job', 'work', 'working', 'waresix', 'mobitech', 'role', 'kerja', 'sekarang', 'pekerjaan', 'erp'], link: 'experience' },
-    { id: 'study', words: ['study', 'studies', 'school', 'university', 'binus', 'gpa', 'ipk', 'kuliah', 'kampus', 'education', 'student', 'teaching'], link: 'experience' },
-    { id: 'skills', words: ['skill', 'skills', 'stack', 'tools', 'language', 'languages', 'python', 'sap', 'laravel', 'flutter', 'keahlian', 'certification', 'sertifikasi'], link: 'projects' },
-    { id: 'hello', words: ['hi', 'hello', 'hey', 'halo', 'hai', 'pagi', 'siang', 'malam', 'yo'] },
-  ];
-  const REPLY = {
-    en: {
-      hello: "Hi! I'm KenBot, a small demo of the kind of chatbot Kenneth builds at MobiChat. Ask me about his work, projects, awards or how to reach him.",
-      now: 'Since February 2026 Kenneth has two roles at Waresix (Mobitech): Product & AI Chatbot Specialist for MobiChat, and Project & Product Manager for ERP projects.',
-      chatbot: 'He designs chatbots for retail and fashion brands: knowledge bases, system prompts and brand personas that reply in natural Bahasa Indonesia. When a question gets too complex, the bot hands the customer over to a human.',
-      ticketing: "He helped out on a ticketing system for Waresix's existing platform, which keeps issues and requests logged, assigned and tracked to resolution in one place.",
-      win: 'Two highlights. ASEAN Data Science Explorers 2025: National Champion, then Most Favorite Team at the Regional Finals in Kuala Lumpur. Harvard HSIL Hackathon 2026 with team TropiCrew: 3rd place at the national stage (Bandung hub), then a Top 50 team at the international stage.',
-      project: 'NutriSense & N.E.X.U.S. is an AI-powered health-tech solution against child stunting in Indonesia: a mobile app plus a smart logistics network. It was also developed within the Harvard HSIL initiative.',
-      study: 'He studies Business Information Systems at BINUS University International (Sep 2023 to Jan 2027) with a 3.95 cumulative GPA, and was a teaching assistant for Programming for Business.',
-      skills: 'Python, Java, PHP, SQL and HTML/CSS; Laravel, Bootstrap and Flutter; AI chatbot design, prompt engineering, knowledge bases, ticketing systems and ERP implementation. Plus SAP S/4HANA and Google Cloud certifications.',
-      contact: 'Email kenneth.kurniawan12@gmail.com or find him on LinkedIn. The contact page has both, with copy buttons.',
-      fallback: "That's outside my knowledge base, so I'm handing you over to the real Kenneth: kenneth.kurniawan12@gmail.com. A clean handover to a human is part of every bot he designs.",
-      'lang-id': 'Oke, kita lanjut pakai Bahasa Indonesia ya!',
-      'lang-en': "Switched to English. What would you like to know?",
-      sub: 'Demo bot · scripted answers',
-      placeholder: 'Ask about Kenneth…',
-      quick: [["What's he doing now?", 'now'], ['Biggest win?', 'win'], ['Tell me about NutriSense', 'project'], ['How do I reach him?', 'contact'], ['Bahasa Indonesia, please', 'lang-id']],
-    },
-    id: {
-      hello: 'Halo! Aku KenBot, demo kecil dari chatbot yang biasa Kenneth bangun di MobiChat. Tanya saja soal pekerjaan, proyek, prestasi, atau cara menghubunginya.',
-      now: 'Sejak Februari 2026 Kenneth memegang dua peran di Waresix (Mobitech): Product & AI Chatbot Specialist untuk MobiChat, serta Project & Product Manager untuk proyek ERP.',
-      chatbot: 'Dia merancang chatbot untuk brand retail dan fashion: knowledge base, system prompt, dan persona brand yang membalas dengan Bahasa Indonesia yang natural. Kalau pertanyaannya terlalu rumit, bot meneruskan pelanggan ke tim manusia.',
-      ticketing: 'Dia ikut membantu proyek sistem ticketing untuk platform Waresix, supaya setiap kendala dan permintaan tercatat, ditugaskan, dan dipantau sampai selesai di satu tempat.',
-      win: 'Dua sorotan. ASEAN Data Science Explorers 2025: Juara Nasional, lalu Most Favorite Team di Regional Finals Kuala Lumpur. Harvard HSIL Hackathon 2026 bersama tim TropiCrew: juara 3 di tahap nasional (Bandung hub), lalu masuk Top 50 tim di tahap internasional.',
-      project: 'NutriSense & N.E.X.U.S. adalah solusi health-tech berbasis AI untuk melawan stunting pada anak di Indonesia: aplikasi mobile plus jaringan logistik pintar. Proyek ini juga dikembangkan dalam inisiatif Harvard HSIL.',
-      study: 'Kenneth kuliah Business Information Systems di BINUS University International (Sep 2023 sampai Jan 2027) dengan IPK kumulatif 3,95, dan pernah jadi asisten dosen Programming for Business.',
-      skills: 'Python, Java, PHP, SQL, dan HTML/CSS; Laravel, Bootstrap, dan Flutter; desain chatbot AI, prompt engineering, knowledge base, sistem ticketing, dan implementasi ERP. Ditambah sertifikasi SAP S/4HANA dan Google Cloud.',
-      contact: 'Email ke kenneth.kurniawan12@gmail.com atau cari dia di LinkedIn. Halaman kontak punya keduanya, lengkap dengan tombol salin.',
-      fallback: 'Itu di luar knowledge base-ku, jadi aku teruskan ke Kenneth langsung: kenneth.kurniawan12@gmail.com. Handover yang rapi ke manusia memang bagian dari setiap bot yang dia rancang.',
-      'lang-id': 'Kita sudah pakai Bahasa Indonesia kok. Mau tanya apa?',
-      'lang-en': 'Switched to English. What would you like to know?',
-      sub: 'Bot demo · jawaban terskrip',
-      placeholder: 'Tanya soal Kenneth…',
-      quick: [['Sekarang kerja di mana?', 'now'], ['Prestasi terbesar?', 'win'], ['Ceritakan NutriSense', 'project'], ['Cara menghubungi?', 'contact'], ['English, please', 'lang-en']],
-    },
+  /* Answers live in assets/kenbot-faq.js (window.KENBOT). Every entry is scored against the whole
+     question: a matching phrase is worth 3, a matching word (or its plural/-ing form) 2; ties go to
+     the entry listed first. Below 2 points, KenBot hands over to Kenneth. */
+  const KB = window.KENBOT;
+  const norm = t => ' ' + t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() + ' ';
+  const stem = w => (w.length > 4 ? w.replace(/(ing|s)$/, '') : w);
+  const scoreEntry = (text, words, e) => {
+    const used = new Set();
+    return e.match.reduce((sum, k) => {
+      if (k.includes(' ')) return sum + (text.includes(' ' + k + ' ') ? 3 : 0);
+      const w = words.find(x => !used.has(x) && (x === k || (k.length > 4 && stem(x) === stem(k))));
+      if (!w) return sum;
+      used.add(w);
+      return sum + 2;
+    }, 0);
   };
-  const ID_HINTS = ['apa', 'siapa', 'gimana', 'bagaimana', 'dong', 'kak', 'yang', 'saya', 'aku', 'kamu', 'bisa', 'di', 'mana', 'ceritakan', 'tolong', 'dia'];
 
   function kennybot() {
+    if (!KB) return;
     let lang = 'en', opened = false;
     const launch = document.createElement('button');
     launch.type = 'button';
@@ -492,7 +459,7 @@
     const log = $('.kb-log', panel), quick = $('.kb-quick', panel), input = $('#kb-input', panel);
 
     const paint = () => {
-      const R = REPLY[lang];
+      const R = KB.meta[lang];
       $('.kb-sub', panel).textContent = R.sub;
       $('.kb-lang', panel).textContent = lang === 'en' ? 'ID' : 'EN';
       $('.kb-lang', panel).setAttribute('aria-label', lang === 'en' ? 'Ganti ke Bahasa Indonesia' : 'Switch to English');
@@ -527,10 +494,15 @@
       return m;
     };
     const detect = text => {
-      const words = text.toLowerCase().match(/[a-z0-9]+/g) || [];
-      if (lang === 'en' && words.filter(w => ID_HINTS.includes(w)).length >= 2) lang = 'id';
-      const hit = INTENTS.find(it => it.words.some(w => words.includes(w)));
-      return hit ? hit.id : 'fallback';
+      const t = norm(text), words = t.trim().split(' ');
+      const hits = words.filter(w => KB.hints.includes(w)).length;
+      if (lang === 'en' && (hits >= 2 || (hits && hits / words.length >= 0.5))) lang = 'id';
+      let best = null, top = 0;
+      KB.faq.forEach(e => {
+        const sc = scoreEntry(t, words, e);
+        if (sc > top) { top = sc; best = e; }
+      });
+      return top >= 2 ? best.key : 'fallback';
     };
     const reply = intent => {
       if (intent === 'lang-id') lang = 'id';
@@ -542,10 +514,10 @@
       typing.innerHTML = '<i></i><i></i><i></i>';
       log.append(typing);
       log.scrollTop = log.scrollHeight;
-      const it = INTENTS.find(x => x.id === intent);
+      const e = KB.faq.find(x => x.key === intent);
       setTimeout(() => {
         typing.remove();
-        bubble('bot', REPLY[lang][intent] || REPLY[lang].fallback, it && it.link);
+        bubble('bot', e ? e[lang] : KB.meta[lang].fallback, e ? e.link : 'contact');
       }, reduce ? 150 : 650 + Math.random() * 450);
     };
     const ask = (text, intent) => {
@@ -555,7 +527,7 @@
     const open = (question) => {
       panel.hidden = false;
       launch.setAttribute('aria-expanded', 'true');
-      if (!opened) { opened = true; paint(); bubble('bot', REPLY[lang].hello); }
+      if (!opened) { opened = true; paint(); bubble('bot', KB.meta[lang].hello); }
       if (question) ask(question);
       input.focus({ preventScroll: true });
     };
