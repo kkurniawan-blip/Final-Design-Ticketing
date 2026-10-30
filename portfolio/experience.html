@@ -31,10 +31,21 @@
 
 <main id="main">
   <section class="page-hero">
-    <div class="wrap">
-      <p class="eyebrow">Gate 01 · Experience</p>
-      <h1 data-split>From campus to Waresix, <span class="hl">one stop at a time.</span></h1>
-      <p class="lede">Every role I've held, in the order I boarded. Scroll and the route draws itself; each stop is filed like a ticket, with an ID, a status and what got resolved.</p>
+    <div class="wrap hero-split">
+      <div>
+        <p class="eyebrow">Gate 01 · Experience</p>
+        <h1 data-split>From campus to Waresix, <span class="hl">one stop at a time.</span></h1>
+        <p class="lede">Every role I've held, in the order I boarded. Scroll and the route draws itself; each stop is filed like a ticket, with an ID, a status and what got resolved.</p>
+      </div>
+      <a class="ticket" href="#journey" data-color="blue" aria-label="Jump to the start of the route">
+        <span class="t-main">
+          <span class="t-top"><span>Route · 8 stops</span><span>Jan 2023 → now</span></span>
+          <span class="t-title">JKT → Waresix</span>
+          <span class="t-desc">Campus jobs, a world cup and a degree, landing in two product roles at Waresix.</span>
+          <span class="t-meta"><span>2 cities</span><span>7 roles + degree</span></span>
+        </span>
+        <span class="t-stub" aria-hidden="true"><span class="t-admit">Scroll to board</span><span class="t-arrow"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></span></span>
+      </a>
     </div>
   </section>
 
@@ -50,11 +61,16 @@
         <button class="btn btn-ghost btn-sm" type="button" data-expand="#journey">Expand all</button>
       </div>
 
-      <div class="journey" id="journey" data-journey>
+      <div class="journey" id="journey" data-journey data-suitcase="From campus to Waresix">
         <div class="j-cap"><span class="j-dot"></span><span class="j-label"><b>Departure</b> Jakarta · Jan 2023</span></div>
         <ol class="j-stops">
         <li class="stop" data-side="left" data-tags="campus">
           <span class="stop-pin" aria-hidden="true"><b>JAN</b><span>23</span></span>
+          <aside class="stop-tag" aria-label="Skills from this stop">
+            <span class="tag-head">Packed here</span>
+            <div class="chips"><span class="tag">Teamwork</span><span class="tag">Communication</span><span class="tag">Creative marketing</span></div>
+            <span class="tag-foot"><span>JKT · BINUS Intl</span><span>3 years</span></span>
+          </aside>
           <article class="log stop-card" style="--c: var(--blue-deep)" data-reveal>
             <div class="log-head"><span class="log-id">KK-2023-01 · BINUS</span><span class="status status--done">Resolved</span></div>
             <h3>BINUS International Promotion Team</h3>
@@ -72,6 +88,11 @@
         </li>
         <li class="stop" data-side="right" data-tags="campus">
           <span class="stop-pin" aria-hidden="true"><b>MAY</b><span>23</span></span>
+          <aside class="stop-tag" aria-label="Skills from this stop">
+            <span class="tag-head">Packed here</span>
+            <div class="chips"><span class="tag">Public speaking</span><span class="tag">Leadership</span><span class="tag">Communication</span></div>
+            <span class="tag-foot"><span>BDG · Bandung</span><span>May 2023</span></span>
+          </aside>
           <article class="log stop-card" style="--c: var(--blue-deep)" data-reveal>
             <div class="log-head"><span class="log-id">KK-2023-02 · BINUS</span><span class="status status--done">Resolved</span></div>
             <h3>BINUS Bandung Ambassador 2023</h3>
@@ -89,6 +110,11 @@
         </li>
         <li class="stop" data-side="left" data-tags="events">
           <span class="stop-pin" aria-hidden="true"><b>SEP</b><span>23</span></span>
+          <aside class="stop-tag" aria-label="Skills from this stop">
+            <span class="tag-head">Packed here</span>
+            <div class="chips"><span class="tag">Communication</span><span class="tag">Problem-solving</span><span class="tag">Organization</span></div>
+            <span class="tag-foot"><span>JKT · FIBA World Cup</span><span>Sep 2023</span></span>
+          </aside>
           <article class="log stop-card" style="--c: var(--pink-deep)" data-reveal>
             <div class="log-head"><span class="log-id">KK-2023-03 · FIBA</span><span class="status status--done">Resolved</span></div>
             <h3>VIP Sales &amp; Guest Coordinator</h3>
@@ -106,6 +132,11 @@
         </li>
         <li class="stop" data-side="right" data-tags="campus">
           <span class="stop-pin" aria-hidden="true"><b>SEP</b><span>23</span></span>
+          <aside class="stop-tag" aria-label="Skills from this stop">
+            <span class="tag-head">Packed here</span>
+            <div class="chips"><span class="tag">UI/UX research & design</span><span class="tag">Knowledge management</span><span class="tag">Business app development</span></div>
+            <span class="tag-foot"><span>JKT · BINUS Intl</span><span>3.95 GPA</span></span>
+          </aside>
           <article class="pinned stop-card" data-reveal>
             <div>
               <p class="eyebrow">Education · Sep 2023 – Jan 2027</p>
@@ -119,6 +150,11 @@
         </li>
         <li class="stop" data-side="left" data-tags="campus">
           <span class="stop-pin" aria-hidden="true"><b>MAR</b><span>24</span></span>
+          <aside class="stop-tag" aria-label="Skills from this stop">
+            <span class="tag-head">Packed here</span>
+            <div class="chips"><span class="tag">Leadership</span><span class="tag">Mentoring</span><span class="tag">Communication</span></div>
+            <span class="tag-foot"><span>JKT · BINUS Intl</span><span>12 months</span></span>
+          </aside>
           <article class="log stop-card" style="--c: var(--blue-deep)" data-reveal>
             <div class="log-head"><span class="log-id">KK-2024-01 · BINUS</span><span class="status status--done">Resolved</span></div>
             <h3>First Year Program Leader, FYP 2028</h3>
@@ -136,6 +172,11 @@
         </li>
         <li class="stop" data-side="right" data-tags="campus">
           <span class="stop-pin" aria-hidden="true"><b>SEP</b><span>25</span></span>
+          <aside class="stop-tag" aria-label="Skills from this stop">
+            <span class="tag-head">Packed here</span>
+            <div class="chips"><span class="tag">Python</span><span class="tag">Debugging & testing</span><span class="tag">Data analysis</span></div>
+            <span class="tag-foot"><span>JKT · BINUS Intl</span><span>5 months</span></span>
+          </aside>
           <article class="log stop-card" style="--c: var(--blue-deep)" data-reveal>
             <div class="log-head"><span class="log-id">KK-2025-01 · BINUS</span><span class="status status--done">Resolved</span></div>
             <h3>Teaching Assistant, Programming for Business</h3>
@@ -153,6 +194,11 @@
         </li>
         <li class="stop" data-side="left" data-tags="work">
           <span class="stop-pin" aria-hidden="true"><b>FEB</b><span>26</span></span>
+          <aside class="stop-tag" aria-label="Skills from this stop">
+            <span class="tag-head">Packed here</span>
+            <div class="chips"><span class="tag">Stakeholder management</span><span class="tag">ERP delivery</span><span class="tag">System integration</span></div>
+            <span class="tag-foot"><span>JKT · Waresix</span><span>Ongoing</span></span>
+          </aside>
           <article class="log stop-card" style="--c: var(--blue-deep)" data-reveal>
             <div class="log-head"><span class="log-id">KK-2026-01 · Waresix</span><span class="status status--open">In progress</span></div>
             <h3>Project &amp; Product Manager <span class="stamp">PIC</span></h3>
@@ -172,6 +218,11 @@
         </li>
         <li class="stop" data-side="right" data-tags="work">
           <span class="stop-pin" aria-hidden="true"><b>FEB</b><span>26</span></span>
+          <aside class="stop-tag" aria-label="Skills from this stop">
+            <span class="tag-head">Packed here</span>
+            <div class="chips"><span class="tag">Prompt engineering</span><span class="tag">Knowledge base design</span><span class="tag">Conversational design</span></div>
+            <span class="tag-foot"><span>JKT · Waresix</span><span>Ongoing</span></span>
+          </aside>
           <article class="log stop-card" style="--c: var(--blue-deep)" data-reveal>
             <div class="log-head"><span class="log-id">KK-2026-02 · Waresix</span><span class="status status--open">In progress</span></div>
             <h3>Product &amp; AI Chatbot Specialist</h3>

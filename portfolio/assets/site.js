@@ -625,6 +625,15 @@
       plane.innerHTML = PLANE;
       j.append(plane);
       const anchors = $$('.j-dot, .stop-pin', j);
+      const packed = [...new Set($$('.stop-tag .tag', j).map(t => t.textContent.trim()))];
+      if (packed.length) {
+        const bag = document.createElement('div');
+        bag.className = 'j-suitcase';
+        bag.innerHTML = `<p class="tag-head">Packed along the way · ${packed.length} skills</p><h3></h3><div class="chips"></div>`;
+        $('h3', bag).textContent = j.dataset.suitcase || 'Everything picked up on this route';
+        packed.forEach(p => { const t = document.createElement('span'); t.className = 'tag'; t.textContent = p; $('.chips', bag).append(t); });
+        j.append(bag);
+      }
       let len = 0, samples = [], pinsY = [], queued = false, active = false;
 
       const build = () => {
@@ -668,7 +677,13 @@
         const ang = Math.atan2(b[2] - a[2], b[1] - a[1]) * 180 / Math.PI;
         plane.style.transform = `translate(${s[1]}px, ${s[2]}px) rotate(${ang + 90}deg)`;
         anchors.forEach((a, i) => {
-          if (pinsY[i] !== null) a.closest('.stop').classList.toggle('reached', pinsY[i] <= target + 1);
+          if (pinsY[i] === null) return;
+          const stop = a.closest('.stop'), now = pinsY[i] <= target + 1;
+          if (now && !stop.classList.contains('reached') && !reduce && samples.length) {
+            stop.classList.add('swing');
+            setTimeout(() => stop.classList.remove('swing'), 1200);
+          }
+          stop.classList.toggle('reached', now);
         });
       };
       const schedule = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
