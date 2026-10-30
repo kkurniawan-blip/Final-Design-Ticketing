@@ -16,7 +16,6 @@
     const n = parseInt(h.length === 3 ? h.replace(/./g, c => c + c) : h, 16);
     return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`;
   };
-  const NEON = ['magenta', 'sun', 'lime', 'cyan', 'violet'];
 
   /* Aurora field: a tiny canvas stretched full screen, so the blur is free. */
   function aurora() {
@@ -25,9 +24,8 @@
     c.setAttribute('aria-hidden', 'true');
     document.body.prepend(c);
     const ctx = c.getContext('2d');
-    const ink = token('ink');
-    const page = token('page');
-    const cols = [page, token('magenta'), token('cyan'), token('violet'), page, token('sun')];
+    const base = token('bg');
+    const cols = [token('blue'), token('pink'), token('blue'), token('pink'), token('blue-soft'), token('pink')];
     const blobs = cols.map((col, i) => ({
       col, x: (i * 0.37 + 0.1) % 1, y: (i * 0.53 + 0.2) % 1, r: 0.32 + (i % 3) * 0.1, ph: i * 1.7,
     }));
@@ -38,15 +36,14 @@
     };
     const draw = t => {
       ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = ink;
+      ctx.fillStyle = base;
       ctx.fillRect(0, 0, w, h);
-      ctx.globalCompositeOperation = 'lighter';
       blobs.forEach((b, i) => {
         const x = (b.x + Math.sin(t * 0.00011 * (i + 1) + b.ph) * 0.2 + (mx - 0.5) * 0.08 * (i % 2 ? 1 : -1)) * w;
         const y = (b.y + Math.cos(t * 0.00008 * (i + 2) + b.ph) * 0.18 + (my - 0.5) * 0.08) * h;
         const r = b.r * Math.max(w, h);
         const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-        g.addColorStop(0, rgba(b.col, 0.42));
+        g.addColorStop(0, rgba(b.col, 0.26));
         g.addColorStop(1, rgba(b.col, 0));
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, w, h);
@@ -119,7 +116,6 @@
                 s.className = 'ch';
                 s.textContent = ch;
                 s.style.setProperty('--i', i);
-                s.style.setProperty('--c', `var(--${NEON[i % NEON.length]})`);
                 i++;
                 word.append(s);
               });
@@ -132,6 +128,15 @@
         });
       };
       walk(el);
+      const groups = $$('.hl', el);
+      (groups.length ? groups : [el]).forEach(g => {
+        const chars = $$('.ch', g);
+        chars.forEach((c, k) => {
+          const p = chars.length > 1 ? Math.round(k / (chars.length - 1) * 100) : 0;
+          c.style.setProperty('--c', `color-mix(in oklab, var(--pink-deep) ${p}%, var(--blue-deep))`);
+        });
+      });
+      $$('.ch', el).forEach(c => { if (!c.style.getPropertyValue('--c')) c.style.setProperty('--c', 'var(--pink-deep)'); });
       if (!reduce) el.classList.add('split-ready');
     });
   }
@@ -234,7 +239,7 @@
   const wipe = $('#gate-wipe');
   function go(href, colorName, label, x, y) {
     if (reduce || !wipe) { location.href = href; return; }
-    wipe.style.setProperty('--wipe', `var(--${colorName})`);
+    wipe.style.setProperty('--wipe', `var(--grad-${colorName})`);
     wipe.style.setProperty('--x', x + 'px');
     wipe.style.setProperty('--y', y + 'px');
     $('strong', wipe).textContent = label;
@@ -255,11 +260,11 @@
       if (a.classList.contains('ticket')) a.classList.add('torn');
       const r = a.getBoundingClientRect();
       const x = e.clientX || r.left + r.width / 2, y = e.clientY || r.top + r.height / 2;
-      go(url.href, a.dataset.color || 'violet', a.dataset.label || a.textContent.trim(), x, y);
+      go(url.href, a.dataset.color || 'blend', a.dataset.label || a.textContent.trim(), x, y);
     });
     const arrive = store.get('kk-arrive');
     if (arrive && wipe && !reduce) {
-      wipe.style.setProperty('--wipe', `var(--${arrive})`);
+      wipe.style.setProperty('--wipe', `var(--grad-${arrive})`);
       wipe.classList.add('in');
     }
     store.del('kk-arrive');
@@ -279,7 +284,7 @@
     const ctx = c.getContext('2d');
     let seed = [...'Kenneth Kurniawan'].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
     const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
-    ctx.fillStyle = token('on-neon');
+    ctx.fillStyle = token('ink');
     const finder = (fx, fy) => {
       ctx.fillRect(fx * S, fy * S, 7 * S, 7 * S);
       ctx.clearRect((fx + 1) * S, (fy + 1) * S, 5 * S, 5 * S);
@@ -388,7 +393,7 @@
     c.height = innerHeight * dpr;
     const ctx = c.getContext('2d');
     ctx.scale(dpr, dpr);
-    const cols = NEON.map(token);
+    const cols = ['blue', 'blue-deep', 'pink', 'pink-deep', 'blue-soft', 'pink-soft'].map(token);
     const parts = Array.from({ length: 160 }, () => {
       const a = Math.random() * Math.PI * 2, v = 4 + Math.random() * 9;
       return { x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 6, s: 5 + Math.random() * 7, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4, c: cols[Math.floor(Math.random() * cols.length)] };
@@ -452,10 +457,10 @@
     arrow: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
   };
   const LINK = {
-    experience: ['experience.html', 'cyan', { en: 'See the experience log', id: 'Lihat pengalaman' }],
-    projects: ['projects.html', 'magenta', { en: 'See the projects', id: 'Lihat proyek' }],
-    awards: ['awards.html', 'sun', { en: 'Open the trophy case', id: 'Buka lemari piala' }],
-    contact: ['contact.html', 'lime', { en: 'Go to contact', id: 'Ke halaman kontak' }],
+    experience: ['experience.html', 'blue', { en: 'See the experience log', id: 'Lihat pengalaman' }],
+    projects: ['projects.html', 'blend', { en: 'See the projects', id: 'Lihat proyek' }],
+    awards: ['awards.html', 'pink', { en: 'Open the trophy case', id: 'Buka lemari piala' }],
+    contact: ['contact.html', 'dusk', { en: 'Go to contact', id: 'Ke halaman kontak' }],
   };
   const INTENTS = [
     { id: 'lang-id', words: ['bahasa', 'indonesia', 'indo'] },
@@ -566,7 +571,6 @@
         a.href = href;
         a.dataset.color = color;
         a.dataset.label = linkKey[0].toUpperCase() + linkKey.slice(1);
-        a.style.setProperty('--c', `var(--${color})`);
         a.innerHTML = `<span></span>${ICON.arrow}`;
         a.firstChild.textContent = label[lang];
         m.append(document.createElement('br'), a);
