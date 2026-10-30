@@ -791,46 +791,6 @@
     });
   }
 
-  /* Contact page: compose a ticket locally; nothing is sent from the page. */
-  function ticketDesk() {
-    const form = $('#ticket-form');
-    if (!form) return;
-    const out = $('#issued');
-    const empty = $('#empty-desk');
-    const check = (el, msg) => {
-      const err = $('#' + el.id + '-err');
-      const bad = !el.value.trim();
-      el.setAttribute('aria-invalid', String(bad));
-      err.hidden = !bad;
-      err.textContent = bad ? msg : '';
-      return !bad;
-    };
-    const name = $('#t-name'), topic = $('#t-topic'), msg = $('#t-msg');
-    [name, msg].forEach(el => el.addEventListener('input', () => {
-      if (el.getAttribute('aria-invalid') === 'true' && el.value.trim()) check(el, '');
-    }));
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      const ok = [check(name, 'Add your name so Kenneth knows who to reply to.'), check(msg, 'Write a short message, even one line is fine.')];
-      if (ok.includes(false)) { (ok[0] ? msg : name).focus(); return; }
-      const d = new Date();
-      const id = `KK-${String(d.getFullYear()).slice(2)}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}-${Math.floor(100 + Math.random() * 900)}`;
-      const subject = `[${id}] ${topic.value} from ${name.value.trim()}`;
-      const body = `${msg.value.trim()}\n\n${name.value.trim()}`;
-      $('#iss-id', out).textContent = id;
-      $('#iss-topic', out).textContent = topic.value;
-      $('#iss-from', out).textContent = name.value.trim();
-      $('#iss-msg', out).textContent = msg.value.trim();
-      $('#iss-copy', out).dataset.copy = `To: kenneth.kurniawan12@gmail.com\nSubject: ${subject}\n\n${body}`;
-      $('#iss-mail', out).href = `mailto:kenneth.kurniawan12@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      empty.hidden = true;
-      out.hidden = false;
-      const r = $('.ticket', out).getBoundingClientRect();
-      confetti(r.left + r.width / 2, r.top + 40);
-      $('#iss-heading', out).focus();
-    });
-  }
-
   if (reduce) $$('svg').forEach(s => s.pauseAnimations && s.pauseAnimations());
   window.KK = { go, token, reduce, fine };
   aurora();
@@ -850,7 +810,6 @@
   copies();
   kennybot();
   magnetic();
-  ticketDesk();
   cube();
   journeys();
 })();
