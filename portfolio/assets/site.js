@@ -636,6 +636,81 @@
     }).observe(stage);
   }
 
+  /* Journeys: connect the stop pins with a winding route that draws as you scroll, with a plane on it. */
+  const PLANE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>';
+  function journeys() {
+    $$('[data-journey]').forEach((j, n) => {
+      const NS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('class', 'j-path');
+      svg.setAttribute('aria-hidden', 'true');
+      const gid = 'jg' + n;
+      svg.innerHTML = `<defs><linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="1000"><stop class="j-stop-a" offset="0"/><stop class="j-stop-b" offset="1"/></linearGradient></defs><path class="j-track"/><path class="j-line" stroke="url(#${gid})"/>`;
+      j.prepend(svg);
+      const track = $('.j-track', svg), line = $('.j-line', svg);
+      const plane = document.createElement('div');
+      plane.className = 'j-plane';
+      plane.innerHTML = PLANE;
+      j.append(plane);
+      const anchors = $$('.j-dot, .stop-pin', j);
+      let len = 0, samples = [], pinsY = [], queued = false, active = false;
+
+      const build = () => {
+        const jr = j.getBoundingClientRect();
+        const pts = anchors.map(a => {
+          const r = a.getBoundingClientRect();
+          return [r.left + r.width / 2 - jr.left, r.top + r.height / 2 - jr.top];
+        });
+        if (pts.length < 2 || !jr.width) return;
+        svg.setAttribute('width', jr.width);
+        svg.setAttribute('height', jr.height);
+        svg.setAttribute('viewBox', `0 0 ${jr.width} ${jr.height}`);
+        $('linearGradient', svg).setAttribute('y2', jr.height);
+        let d = `M ${pts[0][0]} ${pts[0][1]}`;
+        for (let i = 1; i < pts.length; i++) {
+          const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], dy = (y1 - y0) * 0.55;
+          d += ` C ${x0} ${y0 + dy}, ${x1} ${y1 - dy}, ${x1} ${y1}`;
+        }
+        track.setAttribute('d', d);
+        line.setAttribute('d', d);
+        len = line.getTotalLength();
+        line.style.strokeDasharray = `${len} ${len}`;
+        const N = Math.max(80, Math.round(len / 10));
+        samples = [];
+        for (let i = 0; i <= N; i++) {
+          const p = line.getPointAtLength(len * i / N);
+          samples.push([len * i / N, p.x, p.y]);
+        }
+        pinsY = anchors.map((a, i) => (a.classList.contains('stop-pin') ? pts[i][1] : null));
+        update();
+      };
+      const update = () => {
+        queued = false;
+        if (!samples.length) return;
+        const target = reduce ? Infinity : innerHeight * 0.6 - j.getBoundingClientRect().top;
+        let k = samples.findIndex(s => s[2] >= target);
+        if (k === -1) k = samples.length - 1;
+        const L = target <= samples[0][2] ? 0 : samples[k][0];
+        line.style.strokeDashoffset = len - L;
+        const s = samples[k], a = samples[Math.max(0, k - 2)], b = samples[Math.min(samples.length - 1, k + 2)];
+        const ang = Math.atan2(b[2] - a[2], b[1] - a[1]) * 180 / Math.PI;
+        plane.style.transform = `translate(${s[1]}px, ${s[2]}px) rotate(${ang + 90}deg)`;
+        anchors.forEach((a, i) => {
+          if (pinsY[i] !== null) a.closest('.stop').classList.toggle('reached', pinsY[i] <= target + 1);
+        });
+      };
+      const schedule = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+      addEventListener('scroll', () => { if (active) schedule(); }, { passive: true });
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(([e]) => { active = e.isIntersecting; if (active) schedule(); }, { rootMargin: '200px 0px' }).observe(j);
+      } else active = true;
+      if ('ResizeObserver' in window) new ResizeObserver(() => requestAnimationFrame(build)).observe(j);
+      else addEventListener('resize', build);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(build);
+      build();
+    });
+  }
+
   /* Contact page: compose a ticket locally; nothing is sent from the page. */
   function ticketDesk() {
     const form = $('#ticket-form');
@@ -697,4 +772,5 @@
   magnetic();
   ticketDesk();
   cube();
+  journeys();
 })();

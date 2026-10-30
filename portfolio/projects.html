@@ -33,158 +33,157 @@
   <section class="page-hero">
     <div class="wrap">
       <p class="eyebrow">Gate 02 · Projects</p>
-      <h1 data-split>Things I've <span class="hl">shipped and pitched.</span></h1>
-      <p class="lede">From a health-tech solution that took Indonesia to the ASEAN finals to the chatbots and ticketing tools I build at Waresix. Flip any card to see what I did.</p>
+      <h1 data-split>Five builds, <span class="hl">one flight path.</span></h1>
+      <p class="lede">From a national-champion health-tech project to the tools I ship at Waresix. Scroll the route, and flip any card to see what I did.</p>
     </div>
   </section>
 
-  <section class="section" style="padding-top: 24px" aria-labelledby="feature-title">
+  <section class="section" style="padding-top: 24px" aria-label="Project journey">
     <div class="wrap">
-      <article class="feature" data-reveal>
-        <div>
-          <p class="eyebrow">Featured · Apr 2025 – May 2026</p>
-          <h2 id="feature-title">NutriSense &amp; N.E.X.U.S.</h2>
-          <p>An AI-powered health-tech solution to combat child stunting in Indonesia, pairing a mobile app with a smart logistics network. I co-developed it and led the team to the ASEAN Data Science Explorers 2025 National Championship.</p>
-          <div class="tags"><span class="tag">Python</span><span class="tag">Google Colab</span><span class="tag">SAP</span><span class="tag">Health tech</span></div>
-          <div class="hero-cta">
-            <a class="btn btn-page btn-sm magnetic" href="awards.html" data-color="pink" data-label="Awards">See the awards
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </a>
-          </div>
+      <div class="toolbar">
+        <div class="chips" role="group" aria-label="Highlight projects by skill" data-filter-group="#journey" data-mode="dim">
+          <button class="chip" type="button" data-filter="all" aria-pressed="true">Everything</button>
+          <button class="chip" type="button" data-filter="data" aria-pressed="false">Python &amp; data</button>
+          <button class="chip" type="button" data-filter="ai" aria-pressed="false">AI chatbot design</button>
+          <button class="chip" type="button" data-filter="ticketing" aria-pressed="false">Ticketing systems</button>
+          <button class="chip" type="button" data-filter="wms" aria-pressed="false">WMS / ERP</button>
+          <button class="chip" type="button" data-filter="stakeholders" aria-pressed="false">Stakeholder management</button>
         </div>
-        <div>
-          <div class="tabs" role="tablist" aria-label="Project parts">
-            <button class="tab" type="button" role="tab" id="tab-app" aria-controls="panel-app" aria-selected="true">The app</button>
-            <button class="tab" type="button" role="tab" id="tab-nexus" aria-controls="panel-nexus" aria-selected="false" tabindex="-1">The network</button>
+      </div>
+
+      <div class="journey" id="journey" data-journey>
+        <div class="j-cap"><span class="j-dot"></span><span class="j-label"><b>Departure</b> Apr 2025 · NutriSense kicks off</span></div>
+        <ol class="j-stops">
+        <li class="stop" data-side="left" data-tags="data">
+          <span class="stop-pin" aria-hidden="true"><b>NSX</b><span>25</span></span>
+          <article class="feature-card stop-card" data-reveal>
+            <span class="when-line">Apr 2025 – May 2026 · Featured</span>
+            <h3>NutriSense &amp; N.E.X.U.S.</h3>
+            <p>An AI-powered health-tech solution to combat child stunting in Indonesia, pairing a mobile app with a smart logistics network. I co-developed it and led the team to the ASEAN Data Science Explorers 2025 National Championship.</p>
+            <div class="tags"><span class="tag">Python</span><span class="tag">Google Colab</span><span class="tag">SAP</span><span class="tag">Health tech</span></div>
+            <div class="tabs" role="tablist" aria-label="Project parts">
+              <button class="tab" type="button" role="tab" id="tab-app" aria-controls="panel-app" aria-selected="true">The app</button>
+              <button class="tab" type="button" role="tab" id="tab-nexus" aria-controls="panel-nexus" aria-selected="false" tabindex="-1">The network</button>
+            </div>
+            <div class="tab-panel" role="tabpanel" id="panel-app" aria-labelledby="tab-app">
+              <p>NutriSense is the mobile app at the centre of the solution, built to help combat child stunting in Indonesia.</p>
+              <ul>
+                <li>Developed and presented as part of the Harvard HSIL (Health Systems Innovation Lab) initiative.</li>
+                <li>Refined through global health frameworks, mentorship and real-world validation.</li>
+              </ul>
+            </div>
+            <div class="tab-panel" role="tabpanel" id="panel-nexus" aria-labelledby="tab-nexus" hidden>
+              <p>N.E.X.U.S. is the smart logistics network that works alongside the app.</p>
+              <ul>
+                <li>Built with Python and Google Colab, with SAP in the stack.</li>
+                <li>Designed with scalability and policy-level relevance in mind.</li>
+              </ul>
+            </div>
+            <div class="hero-cta" style="margin-top: 4px">
+              <a class="btn btn-page btn-sm magnetic" href="awards.html" data-color="pink" data-label="Awards">See the awards
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+            </div>
+          </article>
+        </li>
+        <li class="stop" data-side="right" data-tags="ai prompt">
+          <span class="stop-pin" aria-hidden="true"><b>MBC</b><span>26</span></span>
+          <div class="flip stop-card" style="--c: var(--pink-deep)" data-reveal>
+            <div class="flip-inner">
+              <div class="face front">
+                <span class="face-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 13h.01M15 13h.01M9 17h6"/></svg></span>
+                <span class="when-line">Waresix · Feb 2026 – now</span>
+                <h3>MobiChat AI chatbots</h3>
+                <p>Retail and fashion brands needed customer chats answered fast, in a voice that sounds like them, without losing the human touch.</p>
+                <div class="tags"><span class="tag">AI chatbot design</span><span class="tag">Prompt engineering</span><span class="tag">Knowledge bases</span></div>
+                <button class="flip-btn" type="button" aria-expanded="false">See what I did</button>
+              </div>
+              <div class="face back">
+                <h3>What I did</h3>
+                <ul>
+                  <li>Built knowledge bases, system prompts and brand personas that reply in natural Bahasa Indonesia.</li>
+                  <li>Designed a smart fallback-to-human handover for complex cases.</li>
+                  <li>Replaced repetitive manual replies with automation, freeing client teams for high-value conversations.</li>
+                </ul>
+                <button class="flip-btn" type="button" aria-expanded="true">Flip back</button>
+              </div>
+            </div>
           </div>
-          <div class="tab-panel" role="tabpanel" id="panel-app" aria-labelledby="tab-app">
-            <h3>The mobile app</h3>
-            <p>NutriSense is the mobile app at the centre of the solution, built to help combat child stunting in Indonesia.</p>
-            <ul>
-              <li>Developed and presented as part of the Harvard HSIL (Health Systems Innovation Lab) initiative.</li>
-              <li>Refined through global health frameworks, mentorship and real-world validation.</li>
-            </ul>
+        </li>
+        <li class="stop" data-side="left" data-tags="ticketing stakeholders">
+          <span class="stop-pin" aria-hidden="true"><b>TKT</b><span>26</span></span>
+          <div class="flip stop-card" style="--c: var(--blue-deep)" data-reveal>
+            <div class="flip-inner">
+              <div class="face front">
+                <span class="face-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg></span>
+                <span class="when-line">Waresix · 2026</span>
+                <h3>Ticketing system</h3>
+                <p>Issues and requests on the platform needed one place to be logged, assigned and followed through.</p>
+                <div class="tags"><span class="tag">Ticketing systems</span><span class="tag">Product</span></div>
+                <button class="flip-btn" type="button" aria-expanded="false">See what I did</button>
+              </div>
+              <div class="face back">
+                <h3>What I did</h3>
+                <ul>
+                  <li>Developed a ticketing system for Waresix's existing platform.</li>
+                  <li>Centralized how issues and requests are logged, assigned and tracked to resolution.</li>
+                  <li>Gave teams and clients clear visibility and faster turnaround.</li>
+                </ul>
+                <button class="flip-btn" type="button" aria-expanded="true">Flip back</button>
+              </div>
+            </div>
           </div>
-          <div class="tab-panel" role="tabpanel" id="panel-nexus" aria-labelledby="tab-nexus" hidden>
-            <h3>The smart logistics network</h3>
-            <p>N.E.X.U.S. is the smart logistics network that works alongside the app.</p>
-            <ul>
-              <li>Built with Python and Google Colab, with SAP in the stack.</li>
-              <li>Designed with scalability and policy-level relevance in mind.</li>
-            </ul>
+        </li>
+        <li class="stop" data-side="right" data-tags="wms stakeholders">
+          <span class="stop-pin" aria-hidden="true"><b>WMS</b><span>26</span></span>
+          <div class="flip stop-card" style="--c: var(--blue-deep)" data-reveal>
+            <div class="flip-inner">
+              <div class="face front">
+                <span class="face-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/></svg></span>
+                <span class="when-line">Waresix · 2026</span>
+                <h3>WMS &amp; ERP delivery, incl. Fukumi</h3>
+                <p>Warehouse and ERP rollouts with many moving parts: clients, engineering, operations and integrations.</p>
+                <div class="tags"><span class="tag">WMS / ERP</span><span class="tag">Stakeholder management</span></div>
+                <button class="flip-btn" type="button" aria-expanded="false">See what I did</button>
+              </div>
+              <div class="face back">
+                <h3>What I did</h3>
+                <ul>
+                  <li>Led end-to-end delivery: timelines, stakeholders and system integration.</li>
+                  <li>Cut manual processing through optimized workflows and automation.</li>
+                  <li>Owned requirements, scope and progress updates for clients such as Fukumi.</li>
+                </ul>
+                <button class="flip-btn" type="button" aria-expanded="true">Flip back</button>
+              </div>
+            </div>
           </div>
-        </div>
-        <ol class="milestones" style="grid-column: 1 / -1" aria-label="Project milestones">
-          <li><span class="when">Apr 2025</span><b>Project kicks off</b></li>
-          <li><span class="when">Apr – Aug 2025</span><b>National Champion, ASEAN Data Science Explorers</b></li>
-          <li><span class="when">Aug – Oct 2025</span><b>Regional Finals, Kuala Lumpur: Most Favorite Team</b></li>
-          <li><span class="when">Harvard HSIL</span><b>Refined with global health mentors</b></li>
-          <li><span class="when">May 2026</span><b>Project wraps</b></li>
+        </li>
+        <li class="stop" data-side="left" data-tags="ai stakeholders">
+          <span class="stop-pin" aria-hidden="true"><b>ONB</b><span>26</span></span>
+          <div class="flip stop-card" style="--c: var(--pink-deep)" data-reveal>
+            <div class="flip-inner">
+              <div class="face front">
+                <span class="face-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5V21h16"/></svg></span>
+                <span class="when-line">Waresix · 2026</span>
+                <h3>Self-serve onboarding &amp; demos</h3>
+                <p>Clients wanted to build and tune their own chatbots, and the setup was technical.</p>
+                <div class="tags"><span class="tag">AI chatbot design</span><span class="tag">Product demos</span></div>
+                <button class="flip-btn" type="button" aria-expanded="false">See what I did</button>
+              </div>
+              <div class="face back">
+                <h3>What I did</h3>
+                <ul>
+                  <li>Created client-facing onboarding guides and product demos.</li>
+                  <li>Taught businesses to build and tune their own chatbot.</li>
+                  <li>Turned a technical setup into a simple, self-serve experience.</li>
+                </ul>
+                <button class="flip-btn" type="button" aria-expanded="true">Flip back</button>
+              </div>
+            </div>
+          </div>
+        </li>
         </ol>
-      </article>
-    </div>
-  </section>
-
-  <section class="section" style="padding-top: 0" aria-labelledby="builds-title">
-    <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">At Waresix</p>
-        <h2 id="builds-title">Built on the job</h2>
-        <p>Pick a skill to light up the projects that use it. Click a card to flip it.</p>
-      </div>
-      <div class="chips" role="group" aria-label="Highlight projects by skill" data-filter-group="#builds" data-mode="dim" style="margin-bottom: 26px">
-        <button class="chip" type="button" data-filter="all" aria-pressed="true">Everything</button>
-        <button class="chip" type="button" data-filter="ai" aria-pressed="false">AI chatbot design</button>
-        <button class="chip" type="button" data-filter="prompt" aria-pressed="false">Prompt engineering</button>
-        <button class="chip" type="button" data-filter="ticketing" aria-pressed="false">Ticketing systems</button>
-        <button class="chip" type="button" data-filter="wms" aria-pressed="false">WMS / ERP</button>
-        <button class="chip" type="button" data-filter="stakeholders" aria-pressed="false">Stakeholder management</button>
-      </div>
-
-      <div class="builds" id="builds">
-        <div class="flip" data-tags="ai prompt" style="--c: var(--pink-deep)" data-reveal>
-          <div class="flip-inner">
-            <div class="face front">
-              <span class="face-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 13h.01M15 13h.01M9 17h6"/></svg></span>
-              <h3>MobiChat AI chatbots</h3>
-              <p>Retail and fashion brands needed customer chats answered fast, in a voice that sounds like them, without losing the human touch.</p>
-              <div class="tags"><span class="tag">AI chatbot design</span><span class="tag">Prompt engineering</span><span class="tag">Knowledge bases</span></div>
-              <button class="flip-btn" type="button" aria-expanded="false">See what I did</button>
-            </div>
-            <div class="face back">
-              <h3>What I did</h3>
-              <ul>
-                <li>Built knowledge bases, system prompts and brand personas that reply in natural Bahasa Indonesia.</li>
-                <li>Designed a smart fallback-to-human handover for complex cases.</li>
-                <li>Replaced repetitive manual replies with automation, freeing client teams for high-value conversations.</li>
-              </ul>
-              <button class="flip-btn" type="button" aria-expanded="true">Flip back</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="flip" data-tags="ticketing stakeholders" style="--c: var(--blue-deep)" data-reveal>
-          <div class="flip-inner">
-            <div class="face front">
-              <span class="face-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg></span>
-              <h3>Ticketing system</h3>
-              <p>Issues and requests on the platform needed one place to be logged, assigned and followed through.</p>
-              <div class="tags"><span class="tag">Ticketing systems</span><span class="tag">Product</span></div>
-              <button class="flip-btn" type="button" aria-expanded="false">See what I did</button>
-            </div>
-            <div class="face back">
-              <h3>What I did</h3>
-              <ul>
-                <li>Developed a ticketing system for Waresix's existing platform.</li>
-                <li>Centralized how issues and requests are logged, assigned and tracked to resolution.</li>
-                <li>Gave teams and clients clear visibility and faster turnaround.</li>
-              </ul>
-              <button class="flip-btn" type="button" aria-expanded="true">Flip back</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="flip" data-tags="wms stakeholders" style="--c: var(--blue-deep)" data-reveal>
-          <div class="flip-inner">
-            <div class="face front">
-              <span class="face-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/></svg></span>
-              <h3>WMS &amp; ERP delivery, incl. Fukumi</h3>
-              <p>Warehouse and ERP rollouts with many moving parts: clients, engineering, operations and integrations.</p>
-              <div class="tags"><span class="tag">WMS / ERP</span><span class="tag">Stakeholder management</span></div>
-              <button class="flip-btn" type="button" aria-expanded="false">See what I did</button>
-            </div>
-            <div class="face back">
-              <h3>What I did</h3>
-              <ul>
-                <li>Led end-to-end delivery: timelines, stakeholders and system integration.</li>
-                <li>Cut manual processing through optimized workflows and automation.</li>
-                <li>Owned requirements, scope and progress updates for clients such as Fukumi.</li>
-              </ul>
-              <button class="flip-btn" type="button" aria-expanded="true">Flip back</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="flip" data-tags="ai stakeholders" style="--c: var(--pink-deep)" data-reveal>
-          <div class="flip-inner">
-            <div class="face front">
-              <span class="face-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5V21h16"/></svg></span>
-              <h3>Self-serve onboarding &amp; demos</h3>
-              <p>Clients wanted to build and tune their own chatbots, and the setup was technical.</p>
-              <div class="tags"><span class="tag">AI chatbot design</span><span class="tag">Product demos</span></div>
-              <button class="flip-btn" type="button" aria-expanded="false">See what I did</button>
-            </div>
-            <div class="face back">
-              <h3>What I did</h3>
-              <ul>
-                <li>Created client-facing onboarding guides and product demos.</li>
-                <li>Taught businesses to build and tune their own chatbot.</li>
-                <li>Turned a technical setup into a simple, self-serve experience.</li>
-              </ul>
-              <button class="flip-btn" type="button" aria-expanded="true">Flip back</button>
-            </div>
-          </div>
-        </div>
+        <div class="j-cap"><span class="j-dot"></span><span class="j-label"><b>Next stop</b> Your project</span></div>
       </div>
     </div>
   </section>
