@@ -213,8 +213,8 @@
   /* 3D tilt + light that follows the pointer, for tickets and the boarding pass. */
   function tilt() {
     if (!fine || reduce) return;
-    $$('.ticket:not(.static), .pass').forEach(el => {
-      const max = el.classList.contains('pass') ? 10 : 12;
+    $$('.ticket:not(.static), .pass, [data-tilt]').forEach(el => {
+      const max = el.classList.contains('ticket') ? 12 : 9;
       el.addEventListener('pointermove', e => {
         const r = el.getBoundingClientRect();
         const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
@@ -409,6 +409,11 @@
   function celebrate() {
     $$('[data-confetti]').forEach(btn => btn.addEventListener('click', e => {
       const r = btn.getBoundingClientRect();
+      if (btn.classList.contains('coin') && !reduce) {
+        btn.classList.remove('burst');
+        void btn.offsetWidth;
+        btn.classList.add('burst');
+      }
       confetti(e.clientX || r.left + r.width / 2, e.clientY || r.top + r.height / 2);
     }));
   }
@@ -622,6 +627,64 @@
     $$('[data-open-chat]').forEach(b => b.addEventListener('click', () => open(b.dataset.ask)));
   }
 
+  /* Projects page: a draggable 3D cube with one skill group per side. */
+  function cube() {
+    const stage = $('#cube-stage');
+    if (!stage) return;
+    const el = $('.cube', stage);
+    const btns = $$('[data-face]');
+    const FACES = [[-12, 0], [-12, -90], [-12, -180], [-12, 90], [-90, 0], [90, 0]];
+    let rx = -18, ry = -32, vx = 0, vy = 0, target = null, dragging = false, auto = !reduce, last = null, running = false;
+    const apply = () => { el.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`; };
+    const press = i => btns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === i)));
+    const tick = () => {
+      if (!running) return;
+      requestAnimationFrame(tick);
+      if (target) {
+        rx += (target[0] - rx) * 0.12;
+        ry += (target[1] - ry) * 0.12;
+        if (Math.abs(target[0] - rx) < 0.05 && Math.abs(target[1] - ry) < 0.05) { [rx, ry] = target; target = null; }
+      } else if (!dragging) {
+        rx += vx; ry += vy; vx *= 0.94; vy *= 0.94;
+        if (auto) ry += 0.2;
+      }
+      apply();
+    };
+    const show = i => {
+      auto = false;
+      const [fx, fy] = FACES[i];
+      const ty = fy + 360 * Math.round((ry - fy) / 360);
+      target = [fx, ty];
+      press(i);
+      if (reduce) { [rx, ry] = target; target = null; apply(); }
+    };
+    btns.forEach(b => b.addEventListener('click', () => show(+b.dataset.face)));
+    stage.addEventListener('pointerdown', e => {
+      dragging = true; auto = false; target = null; last = [e.clientX, e.clientY];
+      stage.setPointerCapture(e.pointerId);
+      stage.classList.add('dragging');
+    });
+    stage.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      const dx = e.clientX - last[0], dy = e.clientY - last[1];
+      last = [e.clientX, e.clientY];
+      vy = dx * 0.35; vx = -dy * 0.35;
+      ry += vy; rx = Math.max(-90, Math.min(90, rx + vx));
+      press(-1);
+      if (reduce) apply();
+    });
+    const end = () => { dragging = false; stage.classList.remove('dragging'); if (reduce) { vx = vy = 0; } };
+    stage.addEventListener('pointerup', end);
+    stage.addEventListener('pointercancel', end);
+    apply();
+    if (reduce) return;
+    new IntersectionObserver(([e]) => {
+      const was = running;
+      running = e.isIntersecting;
+      if (running && !was) tick();
+    }).observe(stage);
+  }
+
   /* Contact page: compose a ticket locally; nothing is sent from the page. */
   function ticketDesk() {
     const form = $('#ticket-form');
@@ -663,6 +726,7 @@
   }
 
   if (reduce) $$('svg').forEach(s => s.pauseAnimations && s.pauseAnimations());
+  window.KK = { go, token, reduce, fine };
   aurora();
   cursorGlow();
   progress();
@@ -682,4 +746,5 @@
   kennybot();
   magnetic();
   ticketDesk();
+  cube();
 })();
