@@ -182,19 +182,34 @@
     });
   }
 
-  /* Gate navigation: tear the stub, wipe the screen in the destination's colour, then go. */
+  /* Gate navigation: stamp the ticket, close the gate doors on a split-flap departure board, then go.
+     The next page starts with the doors shut on the same board (see the inline script in <head>) and opens them. */
   const wipe = $('#gate-wipe');
+  const root = document.documentElement;
+  const GATE_NO = { Lobby: '00', Experience: '01', Projects: '02', Awards: '03', Contact: '04' };
+  function board(colorName, label) {
+    wipe.style.setProperty('--wipe', `var(--grad-${colorName})`);
+    $('.gw-gate', wipe).textContent = `Gate ${GATE_NO[label] || '—'}`;
+    const flaps = $('.gw-flaps', wipe);
+    flaps.textContent = '';
+    flaps.setAttribute('aria-label', label);
+    [...label.toUpperCase()].forEach((ch, i) => {
+      const f = document.createElement('span');
+      f.className = 'flap' + (ch === ' ' ? ' space' : '');
+      f.textContent = ch === ' ' ? '' : ch;
+      f.style.setProperty('--i', i);
+      flaps.append(f);
+    });
+  }
   function go(href, colorName, label, x, y) {
     if (reduce || !wipe) { location.href = href; return; }
-    wipe.style.setProperty('--wipe', `var(--grad-${colorName})`);
-    wipe.style.setProperty('--x', x + 'px');
-    wipe.style.setProperty('--y', y + 'px');
-    $('strong', wipe).textContent = label;
-    wipe.classList.remove('in');
+    board(colorName, label);
+    root.classList.remove('arriving', 'arrived');
+    wipe.classList.remove('opening', 'closed');
     void wipe.offsetWidth;
-    wipe.classList.add('out');
-    store.set('kk-arrive', colorName);
-    setTimeout(() => { location.href = href; }, 400);
+    wipe.classList.add('closing');
+    store.set('kk-arrive', JSON.stringify({ c: colorName, l: label }));
+    setTimeout(() => { location.href = href; }, 760);
   }
   function gates() {
     document.addEventListener('click', e => {
@@ -204,21 +219,44 @@
       const url = new URL(a.getAttribute('href'), location.href);
       if (url.origin !== location.origin || !/\.html$/.test(url.pathname)) return;
       e.preventDefault();
-      if (a.classList.contains('ticket')) a.classList.add('torn');
+      if (a.classList.contains('ticket')) {
+        a.classList.add('torn');
+        const main = $('.t-main', a);
+        if (main && !$('.boarded-stamp', main)) {
+          const st = document.createElement('span');
+          st.className = 'boarded-stamp';
+          st.textContent = 'Boarded';
+          main.append(st);
+        }
+      }
       const r = a.getBoundingClientRect();
       const x = e.clientX || r.left + r.width / 2, y = e.clientY || r.top + r.height / 2;
       go(url.href, a.dataset.color || 'blend', a.dataset.label || a.textContent.trim(), x, y);
     });
-    const arrive = store.get('kk-arrive');
-    if (arrive && wipe && !reduce) {
-      wipe.style.setProperty('--wipe', `var(--grad-${arrive})`);
-      wipe.classList.add('in');
-    }
+    let arrive = null;
+    try { arrive = JSON.parse(store.get('kk-arrive')); } catch { arrive = null; }
     store.del('kk-arrive');
+    if (arrive && wipe && root.classList.contains('arriving')) {
+      board(arrive.c, arrive.l);
+      wipe.classList.add('closed');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        root.classList.remove('arriving');
+        root.classList.add('arrived');
+        wipe.classList.add('opening');
+        setTimeout(() => {
+          wipe.classList.remove('closed', 'opening');
+          root.classList.remove('arrived');
+        }, 1000);
+      }));
+    } else {
+      root.classList.remove('arriving');
+    }
     addEventListener('pageshow', e => {
       if (!e.persisted) return;
-      wipe && wipe.classList.remove('out', 'in');
+      wipe && wipe.classList.remove('closing', 'closed', 'opening');
+      root.classList.remove('arriving', 'arrived');
       $$('.ticket.torn').forEach(t => t.classList.remove('torn'));
+      $$('.boarded-stamp').forEach(t => t.remove());
     });
   }
 
