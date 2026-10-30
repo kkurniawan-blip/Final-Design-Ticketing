@@ -11,88 +11,26 @@
     set(k, v) { try { sessionStorage.setItem(k, v); } catch { /* storage blocked */ } },
     del(k) { try { sessionStorage.removeItem(k); } catch { /* storage blocked */ } },
   };
-  const rgba = (hex, a) => {
-    const h = hex.replace('#', '');
-    const n = parseInt(h.length === 3 ? h.replace(/./g, c => c + c) : h, 16);
-    return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`;
-  };
 
-  /* Aurora field: a tiny canvas stretched full screen, so the blur is free. */
+  /* Soft blue/pink aurora: three blurred blobs that drift on the compositor, no per-frame drawing. */
   function aurora() {
-    const c = document.createElement('canvas');
-    c.id = 'aurora';
-    c.setAttribute('aria-hidden', 'true');
-    document.body.prepend(c);
-    const ctx = c.getContext('2d');
-    const base = token('bg');
-    const cols = [token('blue'), token('pink'), token('blue'), token('pink'), token('blue-soft'), token('pink')];
-    const blobs = cols.map((col, i) => ({
-      col, x: (i * 0.37 + 0.1) % 1, y: (i * 0.53 + 0.2) % 1, r: 0.32 + (i % 3) * 0.1, ph: i * 1.7,
-    }));
-    let w, h, mx = 0.5, my = 0.5, last = 0, raf;
-    const size = () => {
-      w = c.width = Math.max(48, Math.round(innerWidth / 9));
-      h = c.height = Math.max(48, Math.round(innerHeight / 9));
-    };
-    const draw = t => {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = base;
-      ctx.fillRect(0, 0, w, h);
-      blobs.forEach((b, i) => {
-        const x = (b.x + Math.sin(t * 0.00011 * (i + 1) + b.ph) * 0.2 + (mx - 0.5) * 0.08 * (i % 2 ? 1 : -1)) * w;
-        const y = (b.y + Math.cos(t * 0.00008 * (i + 2) + b.ph) * 0.18 + (my - 0.5) * 0.08) * h;
-        const r = b.r * Math.max(w, h);
-        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-        g.addColorStop(0, rgba(b.col, 0.26));
-        g.addColorStop(1, rgba(b.col, 0));
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, w, h);
-      });
-    };
-    const loop = t => {
-      raf = requestAnimationFrame(loop);
-      if (t - last < 33) return;
-      last = t;
-      draw(t);
-    };
-    size();
-    draw(0);
-    addEventListener('resize', () => { size(); draw(performance.now()); });
-    if (reduce) return;
-    addEventListener('pointermove', e => { mx = e.clientX / innerWidth; my = e.clientY / innerHeight; }, { passive: true });
-    document.addEventListener('visibilitychange', () => {
-      cancelAnimationFrame(raf);
-      if (!document.hidden) raf = requestAnimationFrame(loop);
-    });
-    raf = requestAnimationFrame(loop);
-  }
-
-  function cursorGlow() {
-    if (!fine || reduce) return;
-    const g = document.createElement('div');
-    g.className = 'glow';
-    g.setAttribute('aria-hidden', 'true');
-    document.body.prepend(g);
-    let x = -2000, y = -2000, tx = x, ty = y;
-    addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; if (x < -1000) { x = tx; y = ty; } }, { passive: true });
-    const tick = () => {
-      x += (tx - x) * 0.14;
-      y += (ty - y) * 0.14;
-      g.style.setProperty('--gx', x + 'px');
-      g.style.setProperty('--gy', y + 'px');
-      requestAnimationFrame(tick);
-    };
-    tick();
+    const a = document.createElement('div');
+    a.className = 'aurora';
+    a.setAttribute('aria-hidden', 'true');
+    a.innerHTML = '<span class="a1"></span><span class="a2"></span><span class="a3"></span>';
+    document.body.prepend(a);
   }
 
   function progress() {
     const bar = $('#progress');
     if (!bar) return;
+    let queued = false;
     const set = () => {
+      queued = false;
       const max = document.documentElement.scrollHeight - innerHeight;
       bar.style.setProperty('--p', max > 0 ? Math.min(1, scrollY / max) : 0);
     };
-    addEventListener('scroll', set, { passive: true });
+    addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(set); } }, { passive: true });
     set();
   }
 
@@ -220,16 +158,25 @@
     if (!fine || reduce) return;
     $$('.ticket:not(.static), .pass, [data-tilt]').forEach(el => {
       const max = el.classList.contains('ticket') ? 12 : 9;
-      el.addEventListener('pointermove', e => {
-        const r = el.getBoundingClientRect();
-        const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+      let ev = null, queued = false, rect = null;
+      const apply = () => {
+        queued = false;
+        if (!ev) return;
+        const px = (ev.clientX - rect.left) / rect.width, py = (ev.clientY - rect.top) / rect.height;
         el.style.setProperty('--ry', (px - 0.5) * max + 'deg');
         el.style.setProperty('--rx', (0.5 - py) * max + 'deg');
         el.style.setProperty('--mx', px * 100 + '%');
         el.style.setProperty('--my', py * 100 + '%');
         el.style.setProperty('--hx', px * 100 + '%');
+      };
+      el.addEventListener('pointerenter', () => { rect = el.getBoundingClientRect(); });
+      el.addEventListener('pointermove', e => {
+        if (!rect) rect = el.getBoundingClientRect();
+        ev = e;
+        if (!queued) { queued = true; requestAnimationFrame(apply); }
       });
       el.addEventListener('pointerleave', () => {
+        ev = null; rect = null;
         ['--rx', '--ry'].forEach(p => el.style.setProperty(p, '0deg'));
       });
     });
@@ -247,7 +194,7 @@
     void wipe.offsetWidth;
     wipe.classList.add('out');
     store.set('kk-arrive', colorName);
-    setTimeout(() => { location.href = href; }, 620);
+    setTimeout(() => { location.href = href; }, 400);
   }
   function gates() {
     document.addEventListener('click', e => {
@@ -732,7 +679,6 @@
   if (reduce) $$('svg').forEach(s => s.pauseAnimations && s.pauseAnimations());
   window.KK = { go, token, reduce, fine };
   aurora();
-  cursorGlow();
   progress();
   split();
   rotator();

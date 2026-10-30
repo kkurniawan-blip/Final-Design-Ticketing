@@ -17,7 +17,7 @@
   const canvas = renderer.domElement;
   canvas.setAttribute('aria-hidden', 'true');
   stage.prepend(canvas);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.setClearColor(0x000000, 0);
 
   const scene = new T.Scene();
@@ -318,10 +318,14 @@
     renderer.render(scene, camera);
   }
 
-  let running = false, onScreen = true;
+  /* 30fps is plenty for a slow drift; skip frames while the page is scrolling so scroll stays smooth. */
+  let running = false, onScreen = true, lastFrame = 0, scrollingUntil = 0;
+  window.addEventListener('scroll', () => { scrollingUntil = performance.now() + 160; }, { passive: true });
   const loop = now => {
     if (!running) return;
     requestAnimationFrame(loop);
+    if (now - lastFrame < 32 || (now < scrollingUntil && !dragging)) return;
+    lastFrame = now;
     render(now);
   };
   const setRunning = () => {
