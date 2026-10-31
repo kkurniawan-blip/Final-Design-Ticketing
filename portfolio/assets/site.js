@@ -12,15 +12,6 @@
     del(k) { try { sessionStorage.removeItem(k); } catch { /* storage blocked */ } },
   };
 
-  /* Soft blue/pink aurora: three blurred blobs that drift on the compositor, no per-frame drawing. */
-  function aurora() {
-    const a = document.createElement('div');
-    a.className = 'aurora';
-    a.setAttribute('aria-hidden', 'true');
-    a.innerHTML = '<span class="a1"></span><span class="a2"></span><span class="a3"></span>';
-    document.body.prepend(a);
-  }
-
   function progress() {
     const bar = $('#progress');
     if (!bar) return;
@@ -32,82 +23,6 @@
     };
     addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(set); } }, { passive: true });
     set();
-  }
-
-  /* Split text nodes into letters, keeping inline markup like .hl intact. */
-  function split() {
-    let i = 0;
-    $$('[data-split]').forEach(el => {
-      el.setAttribute('aria-label', el.textContent.replace(/\s+/g, ' ').trim());
-      const walk = node => {
-        [...node.childNodes].forEach(child => {
-          if (child.nodeType === 3) {
-            const frag = document.createDocumentFragment();
-            child.textContent.split(/(\s+)/).forEach(part => {
-              if (!part) return;
-              if (/^\s+$/.test(part)) { frag.append(' '); return; }
-              const word = document.createElement('span');
-              word.className = 'word';
-              word.setAttribute('aria-hidden', 'true');
-              [...part].forEach(ch => {
-                const s = document.createElement('span');
-                s.className = 'ch';
-                s.textContent = ch;
-                s.style.setProperty('--i', i);
-                i++;
-                word.append(s);
-              });
-              frag.append(word);
-            });
-            child.replaceWith(frag);
-          } else if (child.nodeType === 1) {
-            walk(child);
-          }
-        });
-      };
-      walk(el);
-      const groups = $$('.hl', el);
-      (groups.length ? groups : [el]).forEach(g => {
-        const chars = $$('.ch', g);
-        chars.forEach((c, k) => {
-          const p = chars.length > 1 ? Math.round(k / (chars.length - 1) * 100) : 0;
-          c.style.setProperty('--c', `color-mix(in oklab, var(--pink-deep) ${p}%, var(--blue-deep))`);
-        });
-      });
-      $$('.ch', el).forEach(c => { if (!c.style.getPropertyValue('--c')) c.style.setProperty('--c', 'var(--pink-deep)'); });
-      if (!reduce) el.classList.add('split-ready');
-    });
-  }
-
-  function rotator() {
-    $$('[data-rotate]').forEach(el => {
-      const words = el.dataset.rotate.split('|');
-      const sr = document.createElement('span');
-      sr.className = 'sr-only';
-      sr.textContent = words.join(', ');
-      el.after(sr);
-      el.setAttribute('aria-hidden', 'true');
-      if (reduce) {
-        let k = 0;
-        setInterval(() => { k = (k + 1) % words.length; el.textContent = words[k]; }, 3200);
-        return;
-      }
-      let k = 0, n = words[0].length, deleting = false;
-      const step = () => {
-        const word = words[k];
-        if (!deleting) {
-          n++;
-          el.textContent = word.slice(0, n);
-          if (n >= word.length) { deleting = true; return setTimeout(step, 2200); }
-          return setTimeout(step, 45 + Math.random() * 40);
-        }
-        n--;
-        el.textContent = word.slice(0, n);
-        if (n <= 0) { deleting = false; k = (k + 1) % words.length; return setTimeout(step, 300); }
-        setTimeout(step, 22);
-      };
-      setTimeout(() => { deleting = true; step(); }, 2600);
-    });
   }
 
   function reveal() {
@@ -139,18 +54,6 @@
       requestAnimationFrame(run);
     }), { threshold: 0.6 });
     $$('[data-count]').forEach(el => io.observe(el));
-  }
-
-  function magnetic() {
-    if (!fine || reduce) return;
-    $$('.magnetic').forEach(el => {
-      el.addEventListener('pointermove', e => {
-        const r = el.getBoundingClientRect();
-        el.style.setProperty('--tx', (e.clientX - r.left - r.width / 2) * 0.22 + 'px');
-        el.style.setProperty('--ty', (e.clientY - r.top - r.height / 2) * 0.3 + 'px');
-      });
-      el.addEventListener('pointerleave', () => { el.style.setProperty('--tx', '0px'); el.style.setProperty('--ty', '0px'); });
-    });
   }
 
   /* 3D tilt + light that follows the pointer, for tickets and the boarding pass. */
@@ -189,7 +92,7 @@
   const GATE_NO = { Lobby: '00', Experience: '01', Projects: '02', Awards: '03', Contact: '04' };
   const PAGE_LABEL = { index: 'Lobby', experience: 'Experience', projects: 'Projects', awards: 'Awards', contact: 'Contact' };
   function board(colorName, label) {
-    wipe.style.setProperty('--wipe', `var(--grad-${colorName})`);
+    wipe.style.setProperty('--wipe', `var(--fill-${colorName})`);
     $('.gw-gate', wipe).textContent = GATE_NO[label] ? `Gate ${GATE_NO[label]}` : '';
     const flaps = $('.gw-flaps', wipe);
     flaps.textContent = '';
@@ -261,28 +164,6 @@
       $$('.ticket.torn').forEach(t => t.classList.remove('torn'));
       $$('.boarded-stamp').forEach(t => t.remove());
     });
-  }
-
-  /* Decorative QR-style code for the boarding pass. */
-  function passCode() {
-    const c = $('#pass-code');
-    if (!c) return;
-    const N = 21, S = 6;
-    c.width = c.height = N * S;
-    const ctx = c.getContext('2d');
-    let seed = [...'Kenneth Kurniawan'].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
-    const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
-    ctx.fillStyle = token('ink');
-    const finder = (fx, fy) => {
-      ctx.fillRect(fx * S, fy * S, 7 * S, 7 * S);
-      ctx.clearRect((fx + 1) * S, (fy + 1) * S, 5 * S, 5 * S);
-      ctx.fillRect((fx + 2) * S, (fy + 2) * S, 3 * S, 3 * S);
-    };
-    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
-      const inFinder = (x < 8 && y < 8) || (x > 12 && y < 8) || (x < 8 && y > 12);
-      if (!inFinder && rnd() > 0.52) ctx.fillRect(x * S, y * S, S, S);
-    }
-    finder(0, 0); finder(14, 0); finder(0, 14);
   }
 
   function filters() {
@@ -472,7 +353,7 @@
     let lang = 'en', opened = false;
     const launch = document.createElement('button');
     launch.type = 'button';
-    launch.className = 'kb-launch magnetic';
+    launch.className = 'kb-launch';
     launch.setAttribute('aria-expanded', 'false');
     launch.setAttribute('aria-controls', 'kb-panel');
     launch.innerHTML = `<span class="kb-avatar">${ICON.bot}</span><span class="kb-label">Ask KenBot</span>`;
@@ -598,7 +479,7 @@
     const el = $('.cube', stage);
     const btns = $$('[data-face]');
     const FACES = [[-12, 0], [-12, -90], [-12, -180], [-12, 90], [-90, 0], [90, 0]];
-    let rx = -18, ry = -32, vx = 0, vy = 0, target = null, dragging = false, auto = !reduce, last = null, running = false;
+    let rx = -18, ry = -32, vx = 0, vy = 0, target = null, dragging = false, auto = false, last = null, running = false;
     const apply = () => { el.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`; };
     const press = i => btns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === i)));
     const tick = () => {
@@ -685,7 +566,7 @@
       chips.append(t);
     });
     const narrow = matchMedia('(max-width: 600px)').matches;
-    const places = [...new Set($$('.tag-foot > span:first-child', j).map(t => (narrow ? t.textContent.split('·')[0] : t.textContent).trim()))];
+    const places = [...new Set($$('.tag-foot > span:first-child', j).map(t => (narrow ? t.textContent.split(',')[0] : t.textContent).trim()))];
     places.slice(0, STICKER_SPOTS.length).forEach((p, i) => {
       const [side, x, y] = STICKER_SPOTS[i];
       const st = document.createElement('span');
@@ -793,15 +674,11 @@
 
   if (reduce) $$('svg').forEach(s => s.pauseAnimations && s.pauseAnimations());
   window.KK = { go, token, reduce, fine };
-  aurora();
   progress();
-  split();
-  rotator();
   reveal();
   countUp();
   tilt();
   gates();
-  passCode();
   filters();
   expandAll();
   flips();
@@ -809,7 +686,6 @@
   celebrate();
   copies();
   kennybot();
-  magnetic();
   cube();
   journeys();
 })();

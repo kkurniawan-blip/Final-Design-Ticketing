@@ -39,19 +39,6 @@
   world.add(globe);
   const R = 2;
 
-  /* Glow behind the globe */
-  const glowCanvas = document.createElement('canvas');
-  glowCanvas.width = glowCanvas.height = 256;
-  const gctx = glowCanvas.getContext('2d');
-  const grad = gctx.createRadialGradient(128, 128, 40, 128, 128, 128);
-  grad.addColorStop(0, 'rgba(74,116,255,0.32)');
-  grad.addColorStop(0.55, 'rgba(255,111,168,0.14)');
-  grad.addColorStop(1, 'rgba(0,0,0,0)');
-  gctx.fillStyle = grad;
-  gctx.fillRect(0, 0, 256, 256);
-  const glow = new T.Sprite(new T.SpriteMaterial({ map: new T.CanvasTexture(glowCanvas), depthWrite: false }));
-  glow.scale.set(R * 3.6, R * 3.6, 1);
-  world.add(glow);
 
   /* Occluding core, so the back of the globe and anything orbiting behind it is hidden */
   const core = new T.Mesh(new T.SphereGeometry(R * 0.985, 48, 32), new T.MeshBasicMaterial({ color: new T.Color(token('surface')).lerp(new T.Color(token('blue-soft')), 0.85) }));
@@ -61,7 +48,7 @@
   /* Fibonacci dot sphere */
   const N = 2400;
   const pos = new Float32Array(N * 3), cols = new Float32Array(N * 3);
-  const cA = color('pink-deep'), cB = color('blue-deep');
+  const cA = color('blue'), cB = color('blue-deep');
   for (let i = 0; i < N; i++) {
     const y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(1 - y * y), th = i * 2.399963;
     pos.set([Math.cos(th) * r * R, y * R, Math.sin(th) * r * R], i * 3);
@@ -141,9 +128,7 @@
     const k = cw / W, sx = (NX + W / 2) * k, nr = NR * k, cr = CR * k;
     ctx.clearRect(0, 0, cw, ch);
     ctx.save();
-    const sg = ctx.createLinearGradient(sx, 0, cw, ch);
-    sg.addColorStop(0, c1); sg.addColorStop(1, c2);
-    ctx.fillStyle = sg;
+    ctx.fillStyle = c1;
     ctx.beginPath();
     ctx.moveTo(sx, 0); ctx.lineTo(cw - cr, 0); ctx.quadraticCurveTo(cw, 0, cw, cr);
     ctx.lineTo(cw, ch - cr); ctx.quadraticCurveTo(cw, ch, cw - cr, ch); ctx.lineTo(sx, ch); ctx.closePath();
@@ -157,10 +142,7 @@
     ctx.fillText('GATE ' + num, 46, 76);
     let size = 96;
     do { ctx.font = `900 ${size}px Unbounded, "Arial Black", sans-serif`; size -= 4; } while (ctx.measureText(title).width > sx - 80 && size > 40);
-    const tw = ctx.measureText(title).width;
-    const tg = ctx.createLinearGradient(42, 0, 42 + tw, 0);
-    tg.addColorStop(0, c1); tg.addColorStop(1, c2);
-    ctx.fillStyle = tg;
+    ctx.fillStyle = c1;
     ctx.fillText(title, 42, 220);
     ctx.fillStyle = muted;
     ctx.font = '600 26px "JetBrains Mono", ui-monospace, monospace';
@@ -280,13 +262,31 @@
   };
   canvas.addEventListener('pointerup', release);
   canvas.addEventListener('pointercancel', () => { dragging = false; });
-  canvas.addEventListener('pointerleave', () => { if (!dragging) { ndc.set(-9, -9); hovered = null; px = py = 0; } });
+  canvas.addEventListener('pointerleave', () => { held = false; if (!dragging) { ndc.set(-9, -9); hovered = null; px = py = 0; } });
+  canvas.addEventListener('pointerenter', () => { held = true; });
+
+  /* The orbit holds still under the pointer and stops for good with the pause button. */
+  let held = false, paused = false;
+  const pause = document.createElement('button');
+  pause.type = 'button';
+  pause.className = 'globe-pause';
+  pause.setAttribute('aria-pressed', 'false');
+  pause.textContent = 'Pause motion';
+  pause.addEventListener('click', () => {
+    paused = !paused;
+    pause.setAttribute('aria-pressed', String(paused));
+    pause.textContent = paused ? 'Play motion' : 'Pause motion';
+  });
+  if (!reduce) stage.append(pause);
 
   /* Frame */
-  const t0 = performance.now();
+  let clock = 0, lastNow = performance.now();
   const camPos = new T.Vector3();
   function render(now) {
-    const t = reduce ? 2.2 : (now - t0) / 1000;
+    const dt = Math.min(0.1, Math.max(0, (now - lastNow) / 1000));
+    lastNow = now;
+    if (!paused && !held) clock += dt;
+    const t = reduce ? 2.2 : clock;
     if (!dragging) {
       offY += velY; velY *= 0.94;
       offY *= 0.985; offX *= 0.96;
