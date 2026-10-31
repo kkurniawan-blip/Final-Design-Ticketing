@@ -182,6 +182,30 @@
     });
   }
 
+  /* Runway under the hero: the plane rolls down the strip, then lifts off, as the strip scrolls up the screen. */
+  function runway() {
+    const strip = $('#runway');
+    if (!strip) return;
+    const plane = $('.rwy-plane', strip);
+    let queued = false;
+    const set = () => {
+      queued = false;
+      const r = strip.getBoundingClientRect();
+      const t = reduce ? 0.35 : Math.min(1, Math.max(0, (innerHeight - r.top) / (innerHeight * 0.9)));
+      const run = Math.min(1, t / 0.7), lift = Math.max(0, (t - 0.55) / 0.45);
+      const x = 120 + run * (r.width - 300) + lift * 140;
+      plane.style.setProperty('--px', x + 'px');
+      plane.style.setProperty('--py', -lift * 70 + 'px');
+      plane.style.setProperty('--ps', 1 + lift * 0.6);
+      plane.style.setProperty('--sx', lift * 60 + 'px');
+      plane.style.setProperty('--ss', 1 - lift * 0.5);
+      plane.style.setProperty('--so', 0.6 - lift * 0.5);
+    };
+    addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(set); } }, { passive: true });
+    addEventListener('resize', set);
+    set();
+  }
+
   /* Gate navigation: stamp the ticket, close the gate doors on a split-flap departure board, then go.
      The next page starts with the doors shut on the same board (see the inline script in <head>) and opens them. */
   const wipe = $('#gate-wipe');
@@ -801,6 +825,7 @@
   countUp();
   tilt();
   gates();
+  runway();
   passCode();
   filters();
   expandAll();
