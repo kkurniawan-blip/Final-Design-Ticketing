@@ -58,50 +58,110 @@
   core.renderOrder = -1;
   globe.add(core);
 
-  /* Fibonacci dot sphere */
-  const N = 2400;
-  const pos = new Float32Array(N * 3), cols = new Float32Array(N * 3);
-  const cA = color('pink-deep'), cB = color('blue-deep');
-  for (let i = 0; i < N; i++) {
-    const y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(1 - y * y), th = i * 2.399963;
-    pos.set([Math.cos(th) * r * R, y * R, Math.sin(th) * r * R], i * 3);
-    const c = cA.clone().lerp(cB, (y + 1) / 2);
-    cols.set([c.r, c.g, c.b], i * 3);
-  }
-  const dotGeo = new T.BufferGeometry();
-  dotGeo.setAttribute('position', new T.BufferAttribute(pos, 3));
-  dotGeo.setAttribute('color', new T.BufferAttribute(cols, 3));
-  globe.add(new T.Points(dotGeo, new T.PointsMaterial({ size: 0.055, vertexColors: true, transparent: true, opacity: 0.95, depthWrite: false })));
-
-  /* Equator and a meridian ring */
-  const ringMat = new T.MeshBasicMaterial({ color: color('blue'), transparent: true, opacity: 0.4 });
-  const equator = new T.Mesh(new T.TorusGeometry(R * 1.002, 0.006, 6, 120), ringMat);
-  equator.rotation.x = Math.PI / 2;
-  globe.add(equator);
-
-  /* Jakarta → Kuala Lumpur */
   const ll = (lat, lon, r = R) => {
     const phi = (90 - lat) * Math.PI / 180, th = (lon + 180) * Math.PI / 180;
     return new T.Vector3(-r * Math.sin(phi) * Math.cos(th), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(th));
   };
-  const jkt = ll(-6.2, 106.8), kul = ll(3.14, 101.69);
+
+  /* The Earth in dots: land from the Natural Earth grid in globe-land.js, Indonesia and Malaysia in pink,
+     the sea as a faint stipple. Without the grid every dot reads as land. */
+  const LAND = window.KK_LAND;
+  let grid = null;
+  if (LAND) {
+    grid = new Uint8Array(LAND.w * LAND.h);
+    let o = 0;
+    LAND.rle.split('|').forEach(row => row.split('.').forEach(run => {
+      const n = parseInt(run.slice(1), 36);
+      grid.fill(+run[0], o, o + n);
+      o += n;
+    }));
+  }
+  const cellAt = (lat, lon) => {
+    if (!grid) return 1;
+    const j = Math.min(LAND.h - 1, Math.max(0, Math.floor(90 - lat)));
+    const i = ((Math.floor(lon + 180) % 360) + 360) % 360;
+    return grid[j * LAND.w + i];
+  };
+  const N = 16000, buckets = [[], [], []];
+  for (let i = 0; i < N; i++) {
+    const y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(1 - y * y), th = i * 2.399963;
+    const x = Math.cos(th) * r, z = Math.sin(th) * r;
+    const lat = 90 - Math.acos(y) * 180 / Math.PI;
+    const lon = ((Math.atan2(z, -x) * 180 / Math.PI) + 360) % 360 - 180;
+    const v = cellAt(lat, lon);
+    if (v === 0 && i % 4) continue;
+    buckets[v].push(x * R, y * R, z * R);
+  }
+  [['blue', 0.03, 0.28], ['blue-deep', 0.044, 0.92], ['pink-deep', 0.056, 1]].forEach(([name, size, opacity], v) => {
+    const g = new T.BufferGeometry();
+    g.setAttribute('position', new T.Float32BufferAttribute(buckets[v], 3));
+    globe.add(new T.Points(g, new T.PointsMaterial({ color: color(name), size, transparent: true, opacity, depthWrite: false })));
+  });
+
+  /* Faint graticule: parallels every 30 degrees and meridians every 30 degrees */
+  const gratMat = new T.LineBasicMaterial({ color: color('blue'), transparent: true, opacity: 0.16 });
+  for (let lat = -60; lat <= 60; lat += 30) {
+    const pts = [];
+    for (let lon = -180; lon <= 180; lon += 4) pts.push(ll(lat, lon, R * 1.001));
+    globe.add(new T.Line(new T.BufferGeometry().setFromPoints(pts), gratMat));
+  }
+  for (let lon = -180; lon < 180; lon += 30) {
+    const pts = [];
+    for (let lat = -90; lat <= 90; lat += 4) pts.push(ll(lat, lon, R * 1.001));
+    globe.add(new T.Line(new T.BufferGeometry().setFromPoints(pts), gratMat));
+  }
+
+  /* Places on Kenneth's route: Jakarta, Bandung (Harvard HSIL hub) and Kuala Lumpur (ASEAN Regional Finals) */
   const sun = color('pink-deep');
+  const CITIES = { JKT: ll(-6.2, 106.8), BDG: ll(-6.91, 107.61), KUL: ll(3.14, 101.69) };
+  const jkt = CITIES.JKT, kul = CITIES.KUL, bdg = CITIES.BDG;
   const pulses = [];
-  [jkt, kul].forEach(p => {
-    const dot = new T.Mesh(new T.SphereGeometry(0.055, 16, 12), new T.MeshBasicMaterial({ color: sun }));
+  Object.values(CITIES).forEach(p => {
+    const dot = new T.Mesh(new T.SphereGeometry(0.05, 16, 12), new T.MeshBasicMaterial({ color: sun }));
     dot.position.copy(p);
     globe.add(dot);
-    const ring = new T.Mesh(new T.RingGeometry(0.07, 0.095, 32), new T.MeshBasicMaterial({ color: sun, transparent: true, side: T.DoubleSide, depthWrite: false }));
+    const ring = new T.Mesh(new T.RingGeometry(0.065, 0.088, 32), new T.MeshBasicMaterial({ color: sun, transparent: true, side: T.DoubleSide, depthWrite: false }));
     ring.position.copy(p.clone().multiplyScalar(1.003));
     ring.lookAt(p.clone().multiplyScalar(2));
     globe.add(ring);
     pulses.push(ring);
   });
-  const mid = jkt.clone().add(kul).multiplyScalar(0.5).normalize().multiplyScalar(R * 1.32);
-  const arc = new T.QuadraticBezierCurve3(jkt, mid, kul);
-  globe.add(new T.Mesh(new T.TubeGeometry(arc, 48, 0.014, 6), new T.MeshBasicMaterial({ color: sun })));
-  const traveler = new T.Mesh(new T.SphereGeometry(0.05, 12, 10), new T.MeshBasicMaterial({ color: color('blue-deep') }));
-  globe.add(traveler);
+  const cityLabels = [];
+  const drawCity = (cv, text) => {
+    const c = cv.getContext('2d');
+    c.clearRect(0, 0, cv.width, cv.height);
+    c.fillStyle = token('surface');
+    c.beginPath();
+    if (c.roundRect) c.roundRect(4, 4, cv.width - 8, cv.height - 8, 22); else c.rect(4, 4, cv.width - 8, cv.height - 8);
+    c.fill();
+    c.fillStyle = token('pink-deep');
+    c.font = '800 30px Unbounded, "Arial Black", sans-serif';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText(text, cv.width / 2, cv.height / 2 + 2);
+  };
+  [['JKT', 1.08, 1.25], ['BDG', -0.08, 1.25], ['KUL', 0.5, -0.45]].forEach(([text, cx, cy]) => {
+    const cv = document.createElement('canvas');
+    cv.width = 140; cv.height = 60;
+    drawCity(cv, text);
+    const tex = new T.CanvasTexture(cv);
+    const sp = new T.Sprite(new T.SpriteMaterial({ map: tex, depthWrite: false }));
+    sp.scale.set(0.42, 0.18, 1);
+    sp.center.set(cx, cy);
+    sp.position.copy(CITIES[text].clone().multiplyScalar(1.05));
+    globe.add(sp);
+    cityLabels.push([cv, text, tex]);
+  });
+  const flight = (a, b, lift) => {
+    const m = a.clone().add(b).multiplyScalar(0.5).normalize().multiplyScalar(R * lift);
+    const curve = new T.QuadraticBezierCurve3(a, m, b);
+    globe.add(new T.Mesh(new T.TubeGeometry(curve, 48, 0.012, 6), new T.MeshBasicMaterial({ color: sun })));
+    const plane = new T.Mesh(new T.SphereGeometry(0.045, 12, 10), new T.MeshBasicMaterial({ color: color('blue-deep') }));
+    globe.add(plane);
+    return { curve, plane };
+  };
+  const flights = [flight(jkt, kul, 1.32), flight(jkt, bdg, 1.12)];
+  const mid = jkt.clone().add(kul).multiplyScalar(0.5);
   const baseY = -Math.atan2(mid.x, mid.z);
 
   /* Ticket gates */
@@ -208,11 +268,18 @@
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => {
       labels.forEach(([cv, num, title, c1, c2, tex]) => { drawLabel(cv, num, title, c1, c2); tex.needsUpdate = true; });
+      cityLabels.forEach(([cv, text, tex]) => { drawCity(cv, text); tex.needsUpdate = true; });
       if (reduce) render(performance.now());
     });
   }
   const ringTilt = new T.Euler(0.42, 0, 0.38);
   const ORBIT = 2.8;
+  /* The route the gate tickets fly, drawn as a dashed orbit */
+  const orbitPts = [];
+  for (let a = 0; a <= Math.PI * 2 + 0.001; a += Math.PI / 90) orbitPts.push(new T.Vector3(Math.cos(a) * ORBIT, 0, Math.sin(a) * ORBIT).applyEuler(ringTilt));
+  const orbit = new T.Line(new T.BufferGeometry().setFromPoints(orbitPts), new T.LineDashedMaterial({ color: color('blue'), dashSize: 0.09, gapSize: 0.08, transparent: true, opacity: 0.5 }));
+  orbit.computeLineDistances();
+  world.add(orbit);
 
   /* Layout */
   let scale = 1;
@@ -296,8 +363,7 @@
     world.rotation.y += ((reduce ? 0 : px * 0.18) - world.rotation.y) * 0.06;
     world.rotation.x += ((reduce ? 0 : -py * 0.12) - world.rotation.x) * 0.06;
 
-    const k = (t * 0.45) % 1;
-    traveler.position.copy(arc.getPoint(k));
+    flights.forEach((f, i) => f.plane.position.copy(f.curve.getPoint((t * (0.45 - i * 0.12) + i * 0.5) % 1)));
     pulses.forEach((p, i) => {
       const f = (t * 0.7 + i * 0.5) % 1;
       p.scale.setScalar(1 + f * 2.2);
