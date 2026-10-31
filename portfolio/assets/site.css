@@ -194,6 +194,8 @@ p { margin: 0; }
 .split-ready .ch { animation: letter-rise .9s var(--ease-out); animation-delay: calc(var(--i) * 32ms); animation-fill-mode: backwards; }
 @keyframes letter-rise { from { transform: translateY(.55em) rotate(10deg); } }
 
+.meta-line { font-weight: 700; margin-bottom: 8px; }
+
 /* Sections ---------------------------------------------------------------- */
 .section { position: relative; padding-block: clamp(56px, 8vw, 112px); }
 .section-head { display: grid; gap: 14px; max-width: 62ch; margin-bottom: clamp(28px, 4vw, 48px); }
