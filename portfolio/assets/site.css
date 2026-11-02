@@ -137,26 +137,32 @@ main { position: relative; z-index: 2; display: block; }
   overflow-x: auto; scrollbar-width: none;
 }
 .nav::-webkit-scrollbar { display: none; }
+/* Plain text links; the page you are on carries a solid underline, the others draw a thin one on hover */
 .nav a {
-  --c: var(--blue-deep);
-  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px;
-  border-radius: 999px; text-decoration: none; white-space: nowrap;
-  font-weight: 700; font-size: .92rem; color: var(--muted);
-  transition: color .2s, background-color .2s;
+  position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px;
+  text-decoration: none; white-space: nowrap;
+  font-weight: 600; font-size: .95rem; color: var(--muted);
+  transition: color .2s;
 }
-.nav a::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
-.nav a:hover { color: var(--ink); background: var(--blue-soft); }
-.nav a[aria-current="page"] { background: var(--grad-blend); color: var(--on-accent); }
-.nav a[aria-current="page"]::before { background: var(--on-accent); }
+.nav a::after {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: 8px; height: 2px;
+  background: var(--ink); opacity: .35;
+  transform: scaleX(0); transform-origin: left; transition: transform .25s var(--ease-out);
+}
+.nav a:hover { color: var(--ink); }
+.nav a:hover::after { transform: scaleX(1); }
+.nav a[aria-current="page"] { color: var(--ink); font-weight: 800; }
+.nav a[aria-current="page"]::after { transform: scaleX(1); background: var(--blue-deep); opacity: 1; height: 3px; }
 @media (max-width: 760px) {
   .brand-name { display: none; }
-  .nav a { padding: 0 11px; font-size: .84rem; }
-  .nav a::before { display: none; }
+  .nav a { padding: 0 11px; font-size: .86rem; }
+  .nav a::after { left: 11px; right: 11px; }
 }
 @media (max-width: 440px) {
   .head-row { gap: 6px; }
   .brand-mark { width: 40px; height: 40px; }
-  .site-head .nav a { padding: 0 8px; font-size: .78rem; }
+  .site-head .nav a { padding: 0 8px; font-size: .8rem; }
+  .site-head .nav a::after { left: 8px; right: 8px; }
 }
 #progress {
   position: absolute; left: 0; right: 0; bottom: -1px; height: 3px;
