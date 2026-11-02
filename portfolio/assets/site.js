@@ -234,7 +234,11 @@
     void wipe.offsetWidth;
     wipe.classList.add('closing');
     store.set('kk-arrive', JSON.stringify({ c: colorName, l: label }));
-    setTimeout(() => { location.href = href; }, 760);
+    /* The gate colour also rides in the address, so the next page can close its doors even where
+       sessionStorage is not shared between pages (files opened from disk, some hosts and embeds). */
+    const target = new URL(href, location.href);
+    target.hash = 'kk-' + colorName;
+    setTimeout(() => { location.href = target.href; }, 760);
   }
   function gates() {
     document.addEventListener('click', e => {
@@ -261,10 +265,14 @@
       go(url.href, a.dataset.color || 'blend', a.dataset.label || PAGE_LABEL[page] || 'Lobby', x, y);
     });
     let arrive = null;
-    try { arrive = JSON.parse(store.get('kk-arrive')); } catch { arrive = null; }
+    const passed = location.hash.match(/^#kk-(blue|blend|pink|dusk)$/);
+    if (passed) arrive = { c: passed[1] };
+    else { try { arrive = JSON.parse(store.get('kk-arrive')); } catch { arrive = null; } }
     store.del('kk-arrive');
+    if (passed) { try { history.replaceState(null, '', location.pathname + location.search); } catch { /* address stays as is */ } }
+    const here = location.pathname.split('/').pop().replace(/\.html$/, '') || 'index';
     if (arrive && wipe && root.classList.contains('arriving')) {
-      board(arrive.c, arrive.l);
+      board(arrive.c, arrive.l || PAGE_LABEL[here] || 'Lobby');
       wipe.classList.add('closed');
       requestAnimationFrame(() => requestAnimationFrame(() => {
         root.classList.remove('arriving');

@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800;900&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="assets/site.css">
-<script>try{var kk=sessionStorage.getItem("kk-arrive");if(kk&&!matchMedia("(prefers-reduced-motion: reduce)").matches){kk=JSON.parse(kk);document.documentElement.classList.add("arriving");document.documentElement.style.setProperty("--wipe","var(--grad-"+kk.c+")")}}catch(e){}</script>
+<script>try{var kk=null,m=location.hash.match(/^#kk-(blue|blend|pink|dusk)$/);if(m)kk={c:m[1]};else{var s=sessionStorage.getItem("kk-arrive");if(s)kk=JSON.parse(s)}if(kk&&!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.classList.add("arriving");document.documentElement.style.setProperty("--wipe","var(--grad-"+kk.c+")")}}catch(e){}</script>
 </head>
 <body data-page="experience">
 <a class="skip" href="#main">Skip to content</a>
